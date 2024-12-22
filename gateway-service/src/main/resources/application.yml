@@ -1,0 +1,56 @@
+server:
+  port: 8181
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          "[/**]": # 모든 경로에 대한 CORS 설정
+            allowed-origins:
+              - "http://localhost:3000"
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowed-headers:
+              - "Content-Type"
+              - "Authorization"
+              - "X-Requested-With"
+            allow-credentials: true
+      default-filters:
+        - name: GlobalFilter
+          args:
+            baseMessage: Traplan Cloud Gateway Global Filter
+            preLogger: true
+            postLogger: true
+        - name: DedupeResponseHeader
+          args:
+            name: Access-Control-Allow-Credentials Access-Control-Allow-Origin
+            strategy: RETAIN_FIRST
+      routes:
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+jwt:
+  expiration: 60
+  secretKey: ICzihf230K36+z90UWHfOEJZCf/CYB2CJaeKvX06/2QxI//izqT7pIs5Yr5KrIetZcQmt2JF6AlxU5zAcc38KQ==
+
+# 액츄에이터 등록 (beans: 컨테이너에 등록된 빈 보여줌, health: 서버 살아 있는지 알려줌)
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: refresh, health, busrefresh, beans, httpexchanges
+
+
+
