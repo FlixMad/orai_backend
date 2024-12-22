@@ -3,11 +3,26 @@ server:
 spring:
   application:
     name: user-service
+  cloud:
+    client:
+      hostname: localhost
 eureka:
+  instance:
+    prefer-ip-address: true
   client:
     register-with-eureka: true
     fetch-registry: true
     service-url:
       defaultZone: http://127.0.0.1:8761/eureka/
-  instance:
-    instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+    instance:
+      instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+
+springdoc:
+  api-docs:
+    version: openapi_3_1
+    enabled: true
+    #path: /api/mail/v3/api-docs
+    # 게이트웨이 라우팅에서 prefix를 제거하지 않았다면 해당 설정을 추가
+  enable-spring-security: true
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
