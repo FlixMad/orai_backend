@@ -64,7 +64,7 @@ spring:
         - id: calendar-service
           uri: lb://CALENDAR-SERVICE
           predicates:
-            - Path=/calendar-service
+            - Path=/calendar-service/**
           filters:
             - RewritePath=/calendar-service/(?<path>.*), /$\{path}
 springdoc:
@@ -72,13 +72,13 @@ springdoc:
     use-root-path: true
     urls[0]:
       name: 회원 서비스
-      url: http://localhost:8181/user-service/api/user/v3/api-docs
+      url: http://localhost:8181/user-service/v3/api-docs
     urls[1]:
       name: 채팅 서비스
-      url: http://localhost:8181/chat-service/api/chat/v3/api-docs
+      url: http://localhost:8181/chat-service/v3/api-docs
     urls[2]:
       name: 캘린더 서비스
-      url: http://localhost:8181/calendar-service/api/calendar/v3/api-docs
+      url: http://localhost:8181/calendar-service/v3/api-docs
 eureka:
   client:
     register-with-eureka: true
