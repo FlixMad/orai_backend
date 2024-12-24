@@ -14,10 +14,11 @@ import java.time.LocalDateTime;
 public class Attitude {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "attitude_id")
     private Long attitudeId; // 근태 아이디
 
     @Column(nullable = false)
-    private LocalDateTime createdAt; // 근태 생성일자
+    private LocalDateTime createdAt; // 생성일자
 
     @Column(nullable = false)
     private LocalDateTime checkInTime; // 출근 시간
@@ -25,6 +26,8 @@ public class Attitude {
     @Column(nullable = false)
     private LocalDateTime checkOutTime; // 퇴근 시간
 
-    @Column(nullable = false)
-    private Long userId; // 사용자 아이디 (외래키)
+    // User와의 관계 (N:1)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 }
