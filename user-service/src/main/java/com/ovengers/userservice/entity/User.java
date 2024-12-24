@@ -40,12 +40,12 @@ public class User extends BaseTimeEntity{
 //    }
 
     @Entity
-    @Table(name = "vacation")
+    @Table(name = "tbl_vacations")
     @Getter
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
-    @Builder
+
     public class Vacation {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
