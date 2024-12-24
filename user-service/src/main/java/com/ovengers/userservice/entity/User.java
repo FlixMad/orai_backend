@@ -15,7 +15,7 @@ public class User extends BaseTimeEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "user_id")
-    private String  userId;
+    private String userId;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -29,13 +29,13 @@ public class User extends BaseTimeEntity{
     @Column(nullable = false, name = "profile_image")
     private String profileImage;
 
-    //이게 직책 컬럼이 필요한가?, 난 잘 모르겠당 일딴 보류
-//    @Column(nullable = false)
-//    private Position position;
-//
-//    public enum Position {
-//
-//    }
+//    이게 직책 컬럼이 필요한가?, 난 잘 모르겠당 일딴 보류
+    @Column(nullable = false)
+    private Position position;
+
+    public enum Position {
+        EMPLOYEE, TEAM_LEADER, MANAGER, CEO;
+    }
     @Column(nullable = false)
     private String phoneNum;
 
@@ -46,6 +46,7 @@ public class User extends BaseTimeEntity{
     private UserState state;
 
     @JoinColumn(nullable = false, name = "aff_id")
+    //소속 아이디
     private String affId;
 
 
