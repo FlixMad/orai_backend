@@ -26,7 +26,7 @@ public class SwaggerConfig {
                 .info(apiInfo())
                 .addSecurityItem(securityRequirement)
                 .components(components)
-                .addServersItem(new Server().url("/"));
+                .addServersItem(new Server().url("/user-service"));
     }
     private Info apiInfo() {
         return new Info()
