@@ -14,10 +14,11 @@ import java.time.LocalDateTime;
 public class Vacation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "vacation_id")
     private Long vacationId; // 연차 아이디
 
     @Column(nullable = false)
-    private String type; // 연차 유형 (ex: 연차, 반차 등)
+    private String type; // 연차 유형 (예: 연차, 반차 등)
 
     @Column(nullable = false)
     private LocalDateTime startDate; // 연차 시작일
@@ -26,13 +27,15 @@ public class Vacation {
     private LocalDateTime endDate; // 연차 종료일
 
     @Column(nullable = false)
-    private LocalDateTime createdAt; // 연차 생성일자
+    private LocalDateTime createdAt; // 생성일자
 
-    private LocalDateTime updatedAt; // 연차 수정일자
-
-    @Column(nullable = false)
-    private Boolean vacationPermission; // 연차 허가 여부 (true: 허가, false: 미허가)
+    private LocalDateTime updatedAt; // 수정일자
 
     @Column(nullable = false)
-    private Long userId; // 사용자 아이디 (외래키)
+    private Boolean vacationPermission; // 연차 승인 여부
+
+    // User와의 관계 (N:1)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 }
