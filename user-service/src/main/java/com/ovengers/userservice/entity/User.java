@@ -11,7 +11,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class User extends BaseTimeEntity{
-    //이거는 뭐더라 그 uuid 전략 쓰기로 하지 않았나?
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "user_id")
@@ -29,13 +28,10 @@ public class User extends BaseTimeEntity{
     @Column(nullable = false, name = "profile_image")
     private String profileImage;
 
-//    이게 직책 컬럼이 필요한가?, 난 잘 모르겠당 일딴 보류
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Position position;
 
-    public enum Position {
-        EMPLOYEE, TEAM_LEADER, MANAGER, CEO;
-    }
     @Column(nullable = false)
     private String phoneNum;
 
@@ -43,6 +39,7 @@ public class User extends BaseTimeEntity{
     private boolean accountActive;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private UserState state;
 
     @JoinColumn(nullable = false, name = "aff_id")

@@ -2,7 +2,7 @@ package com.ovengers.userservice.dto;
 
 import com.ovengers.userservice.entity.Position;
 import com.ovengers.userservice.entity.User;
-import com.ovengers.userservice.entity.UserState;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -10,42 +10,41 @@ import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
 
+import static com.ovengers.userservice.entity.UserState.IDLE;
+
 @Setter
 @Getter
 @ToString
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "회원가입 요청 DTO")
 public class SignUpRequestDto {
 
-    @NotBlank
-    @Email
+    @Schema(description = "이메일", example = "example@example.com", required = true)
+    @NotBlank @Email
     private String email;
 
+    @Schema(description = "비밀번호", example = "abcd1234", required = true)
     @NotBlank
     private String password;
 
-    @NotBlank
-    @Size(min = 2, max = 20)
+    @Schema(description = "이름", example = "John Doe", required = true)
+    @NotBlank @Size(min = 2, max = 20)
     private String name;
 
-    private MultipartFile profileImage;
+    @Schema(description = "전화번호", example = "010-1234-5678")
+    private String phoneNum;
 
+    @Schema(description = "소속 ID", example = "AFF123")
+    private String affId;
+
+    @Schema(description = "직급", example = "MANAGER")
     private Position position;
 
-    private String phoneNum;
+    @Schema(description = "프로필 이미지")
+    private MultipartFile profileImage;
 
-
-
-    //이게 직책 컬럼이 필요한가?, 난 잘 모르겠당 일딴 보류
-//    private Position position;
-//    public enum Position {
-//    }
-
-    private String phoneNum;
-    private boolean accountActive;
-    private UserState state;
-    private String affId;
 
     public User toEntity(PasswordEncoder encoder, String uniqueFileName) {
         return User.builder()
@@ -53,6 +52,11 @@ public class SignUpRequestDto {
                 .password(encoder.encode(password))
                 .name(name)
                 .profileImage(uniqueFileName)
+                .accountActive(true)
+                .phoneNum(phoneNum)
+                .position(position)
+                .state(IDLE)
+                .affId(affId)
                 .build();
     }
 }
