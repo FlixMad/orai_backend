@@ -1,4 +1,4 @@
-package com.ovengers.userservice.configs;
+package com.ovengers.userservice.common.configs;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -26,7 +26,7 @@ public class SwaggerConfig {
                 .info(apiInfo())
                 .addSecurityItem(securityRequirement)
                 .components(components)
-                .addServersItem(new Server().url("/"));
+                .addServersItem(new Server().url("/user-service"));
     }
     private Info apiInfo() {
         return new Info()
