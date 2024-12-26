@@ -1,4 +1,4 @@
-package com.ovengers.chatservice.configs;
+package com.ovengers.chatservice.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ovengers.chatservice.dtos.ChatMessageDto;
@@ -30,9 +30,11 @@ import java.util.Set;
 public class WebSocketChatHandler extends TextWebSocketHandler {
     private final ObjectMapper mapper;
 
-    // 현재 연결된 세션들
+    // 소켓 세션을 저장할 Set
+    // 현재 연결된 소켓 세션들
     private final Set<WebSocketSession> sessions = new HashSet<>();
 
+    // 채팅방 id와 소켓 세션을 저장할 Map
     // chatRoomId: {session1, session2}
     private final Map<Long,Set<WebSocketSession>> chatRoomSessionMap = new HashMap<>();
 
@@ -41,6 +43,7 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         log.info("{} 연결됨", session.getId());
         sessions.add(session);
+        session.sendMessage(new TextMessage("WebSocket 연결 완료"));
     }
 
     // 소켓 통신 시 메세지의 전송을 다루는 부분
@@ -49,28 +52,28 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
         String payload = message.getPayload();
         log.info("payload {}", payload);
 
-        // 페이로드 -> chatMessageDto로 변환
+        // 페이로드(클라이언트로부터 받은 메시지) -> chatMessageDto로 변환
         ChatMessageDto chatMessageDto = mapper.readValue(payload, ChatMessageDto.class);
         log.info("session {}", chatMessageDto.toString());
 
-        Long chatRoomId = chatMessageDto.getChatRoomId();
-        // 메모리 상에 채팅방에 대한 세션 없으면 만들어줌
-        if(!chatRoomSessionMap.containsKey(chatRoomId)){
-            chatRoomSessionMap.put(chatRoomId,new HashSet<>());
+        // 메세지 타입에 따라 분기
+        if(chatMessageDto.getMessageType().equals(ChatMessageDto.MessageType.JOIN)){
+            // 채팅방이 존재하면 세션 추가, 존재하지 않으면 새로운 세션 생성
+            chatRoomSessionMap.computeIfAbsent(chatMessageDto.getChatRoomId(), s -> new HashSet<>()).add(session);
+            // 입장 메세지
+            chatMessageDto.setMessage("님이 입장하셨습니다.");
         }
-        Set<WebSocketSession> chatRoomSession = chatRoomSessionMap.get(chatRoomId);
+        else if(chatMessageDto.getMessageType().equals(ChatMessageDto.MessageType.LEAVE)){
+            // 채팅방에서 세션 삭제
+            chatRoomSessionMap.get(chatMessageDto.getChatRoomId()).remove(session);
+            // 퇴장 메세지
+            chatMessageDto.setMessage("님이 퇴장하셨습니다.");
+        }
 
-        // message 에 담긴 타입을 확인한다.
-        // 이때 message 에서 getType 으로 가져온 내용이
-        // ChatDTO 의 열거형인 MessageType 안에 있는 ENTER 과 동일한 값이라면
-        if (chatMessageDto.getMessageType().equals(ChatMessageDto.MessageType.ENTER)) {
-            // sessions 에 넘어온 session 을 담고,
-            chatRoomSession.add(session);
+        // 채팅방에 속한 세션들에게만 채팅 메세지 전송
+        for(WebSocketSession webSocketSession : chatRoomSessionMap.get(chatMessageDto.getChatRoomId())){
+            webSocketSession.sendMessage(new TextMessage(mapper.writeValueAsString(chatMessageDto)));
         }
-        if (chatRoomSession.size()>=3) {
-            removeClosedSession(chatRoomSession);
-        }
-        sendMessageToChatRoom(chatMessageDto, chatRoomSession);
 
     }
 
@@ -79,6 +82,7 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         log.info("{} 연결 끊김", session.getId());
         sessions.remove(session);
+        session.sendMessage(new TextMessage("WebSocket 연결 종료"));
     }
 
     // ====== 채팅 관련 메소드 ======
