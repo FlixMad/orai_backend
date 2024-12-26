@@ -1,4 +1,4 @@
-package com.ovengers.chatservice.configs;
+package com.ovengers.chatservice.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -26,7 +26,7 @@ public class SwaggerConfig {
                 .info(apiInfo())
                 .addSecurityItem(securityRequirement)
                 .components(components)
-                .addServersItem(new Server().url("/"));
+                .addServersItem(new Server().url("/chat-service"));
     }
     private Info apiInfo() {
         return new Info()
