@@ -6,9 +6,9 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserResponseDTO {
+public class UserResponseDto {
     private String id;
     private String email;
     private String name;
-    private String role;
+    private String affid;
 }
