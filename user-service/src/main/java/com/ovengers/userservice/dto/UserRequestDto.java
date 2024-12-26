@@ -1,10 +1,13 @@
 package com.ovengers.userservice.dto;
 
 import com.ovengers.userservice.entity.User;
-import lombok.Getter;
+import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-@Getter
+@Getter @Setter
+@ToString
+@Builder
+@AllArgsConstructor
 public class UserRequestDto {
     private String email;
     private String password;
