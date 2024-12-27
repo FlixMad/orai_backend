@@ -24,6 +24,7 @@ public class ChatController {
     private final SimpMessageSendingOperations template;
     private final ChatRoomService chatRoomService;
 
+    // 채팅방 리스트 조회
     @GetMapping("/chatRoomList")
     public List<ChatRoomDto> getChatRoomList() {
         return chatRoomService.chatRoomDtoList();
