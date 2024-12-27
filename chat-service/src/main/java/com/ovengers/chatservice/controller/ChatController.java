@@ -1,11 +1,13 @@
 package com.ovengers.chatservice.controller;
 
+import com.ovengers.chatservice.common.dto.CommonResDto;
 import com.ovengers.chatservice.dto.ChatMessageDto;
 import com.ovengers.chatservice.dto.ChatRoomDto;
 import com.ovengers.chatservice.entity.ChatRoom;
 import com.ovengers.chatservice.service.ChatRoomService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -26,8 +28,10 @@ public class ChatController {
 
     // 채팅방 리스트 조회
     @GetMapping("/chatRoomList")
-    public List<ChatRoomDto> getChatRoomList() {
-        return chatRoomService.chatRoomDtoList();
+    public ResponseEntity<List<ChatRoomDto>> getChatRoomList() {
+        List<ChatRoomDto> list = chatRoomService.chatRoomDtoList();
+        CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "채팅방 리스트 조회 완료", list);
+        return new ResponseEntity(commonResDto, HttpStatus.OK);
     }
 
     // 채팅 리스트 반환
