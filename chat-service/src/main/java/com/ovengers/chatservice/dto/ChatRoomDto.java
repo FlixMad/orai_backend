@@ -1,5 +1,6 @@
 package com.ovengers.chatservice.dto;
 
+import com.ovengers.chatservice.entity.ChatRoom;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -10,6 +11,17 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class ChatRoomDto {
+    private Long chatRoomId;
     private String name;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    public static ChatRoomDto fromEntity(ChatRoom chatRoom) {
+        return ChatRoomDto.builder()
+                .chatRoomId(chatRoom.getChatRoomId())
+                .name(chatRoom.getName())
+                .createdAt(chatRoom.getCreatedAt())
+                .updatedAt(chatRoom.getUpdatedAt())
+                .build();
+    }
 }

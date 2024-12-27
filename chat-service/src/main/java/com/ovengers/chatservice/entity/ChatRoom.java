@@ -9,12 +9,13 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @ToString
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "chat_room")
+@Table(name = "tbl_chat_room")
 public class ChatRoom {
 
     @Id

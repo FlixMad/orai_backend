@@ -3,6 +3,8 @@ package com.ovengers.chatservice.controller;
 import com.ovengers.chatservice.common.dto.CommonResDto;
 import com.ovengers.chatservice.dto.ChatMessageDto;
 import com.ovengers.chatservice.dto.ChatRoomDto;
+import com.ovengers.chatservice.dto.ChatRoomRequestDto;
+import com.ovengers.chatservice.entity.ChatRoom;
 import com.ovengers.chatservice.service.ChatRoomService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -10,10 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,8 +27,32 @@ public class ChatController {
     // 채팅방 리스트 조회
     @GetMapping("/chatRoomList")
     public ResponseEntity<List<ChatRoomDto>> getChatRoomList() {
-        List<ChatRoomDto> list = chatRoomService.chatRoomDtoList();
+        List<ChatRoomDto> list = chatRoomService.getAllChatRooms();
         CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "채팅방 리스트 조회 완료", list);
+        return new ResponseEntity(commonResDto, HttpStatus.OK);
+    }
+
+    // 새로운 채팅방 생성
+    @PostMapping("/creatChatRoom")
+    public ResponseEntity<ChatRoomDto> createChatRoom(@RequestBody ChatRoomRequestDto requestDTO) {
+        ChatRoomDto newChatRoom = chatRoomService.createChatRoom(requestDTO.getName());
+        CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "새로운 채팅방 생성 완료", newChatRoom);
+        return new ResponseEntity(commonResDto, HttpStatus.OK);
+    }
+
+    // 채팅방 이름 수정
+    @PutMapping("/{chatRoomId}/update")
+    public ResponseEntity<ChatRoomDto> updateChatRoom(@PathVariable Long chatRoomId, @RequestBody ChatRoomRequestDto requestDTO) {
+        ChatRoomDto updatedChatRoom = chatRoomService.updateChatRoom(chatRoomId, requestDTO.getName());
+        CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "채팅방 이름 수정 완료", updatedChatRoom);
+        return new ResponseEntity(commonResDto, HttpStatus.OK);
+    }
+
+    // 채팅방 삭제
+    @DeleteMapping("/{chatRoomId}/delete")
+    public ResponseEntity<Void> deleteChatRoom(@PathVariable Long chatRoomId) {
+        chatRoomService.deleteChatRoom(chatRoomId);
+        CommonResDto<Void> commonResDto = new CommonResDto<>(HttpStatus.OK, "채팅방 삭제 완료", null);
         return new ResponseEntity(commonResDto, HttpStatus.OK);
     }
 
