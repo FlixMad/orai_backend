@@ -3,7 +3,6 @@ package com.ovengers.chatservice.controller;
 import com.ovengers.chatservice.common.dto.CommonResDto;
 import com.ovengers.chatservice.dto.ChatMessageDto;
 import com.ovengers.chatservice.dto.ChatRoomDto;
-import com.ovengers.chatservice.entity.ChatRoom;
 import com.ovengers.chatservice.service.ChatRoomService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
