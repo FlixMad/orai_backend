@@ -2,8 +2,10 @@ package com.ovengers.chatservice.dto;
 
 import lombok.*;
 
-@Getter
+@Getter @ToString
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ChatMessageDto {
 /*    // 메시지  타입 : 입장, 채팅
     public enum MessageType{
@@ -19,9 +21,4 @@ public class ChatMessageDto {
     private String name; //
     private String message;
 
-    public ChatMessageDto(Long id, String name, String message) {
-        this.id = id;
-        this.name = name;
-        this.message = message;
-    }
 }

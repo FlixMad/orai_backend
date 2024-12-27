@@ -1,6 +1,10 @@
 package com.ovengers.chatservice.controller;
 
 import com.ovengers.chatservice.dto.ChatMessageDto;
+import com.ovengers.chatservice.dto.ChatRoomDto;
+import com.ovengers.chatservice.entity.ChatRoom;
+import com.ovengers.chatservice.service.ChatRoomService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -14,9 +18,16 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "ChatController", description = "채팅 관련 controller")
 public class ChatController {
 
     private final SimpMessageSendingOperations template;
+    private final ChatRoomService chatRoomService;
+
+    @GetMapping("/chatRoomList")
+    public List<ChatRoomDto> getChatRoomList() {
+        return chatRoomService.chatRoomDtoList();
+    }
 
     // 채팅 리스트 반환
     @GetMapping("/chat/{id}")
