@@ -111,6 +111,8 @@ public class AdminController {
             User user = adminService.createUser(dto, imageUrl);
             // 성공 응답
             CommonResDto resDto = new CommonResDto(HttpStatus.CREATED, "회원가입 성공", user.getUserId());
+            // 비용 이슈로 비활성화
+//            adminService.smsService(user.getPhoneNum().replaceAll("-",""));
             return ResponseEntity.status(HttpStatus.CREATED).body(resDto);
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -180,6 +182,7 @@ public class AdminController {
         CommonResDto resDto = new CommonResDto(HttpStatus.OK,"직급 변경 성공", userId);
         return ResponseEntity.status(HttpStatus.OK).body(resDto);
     }
+
 
 
     }
