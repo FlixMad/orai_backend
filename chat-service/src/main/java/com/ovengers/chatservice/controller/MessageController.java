@@ -1,8 +1,6 @@
 package com.ovengers.chatservice.controller;
 
 import com.ovengers.chatservice.common.dto.CommonResDto;
-import com.ovengers.chatservice.dto.ChatRoomDto;
-import com.ovengers.chatservice.dto.ChatRoomRequestDto;
 import com.ovengers.chatservice.dto.MessageDto;
 import com.ovengers.chatservice.dto.MessageRequestDto;
 import com.ovengers.chatservice.service.MessageService;
