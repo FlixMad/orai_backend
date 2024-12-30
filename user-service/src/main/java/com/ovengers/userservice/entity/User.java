@@ -2,7 +2,6 @@ package com.ovengers.userservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.List;
 
 @Entity
 @Table(name = "tbl_users")
@@ -12,10 +11,9 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class User extends BaseTimeEntity {
-    // UUID를 기본 키로 사용하는 설정
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "user_id", updatable = false, nullable = false)
+    @Column(name = "user_id")
     private String userId;
 
     @Column(nullable = false, unique = true)
@@ -29,13 +27,10 @@ public class User extends BaseTimeEntity {
 
     @Column(nullable = false, name = "profile_image")
     private String profileImage;
-    //이게 직책 컬럼이 필요한가?, 난 잘 모르겠당 일딴 보류
-//    @Column(nullable = false)
-//    private Position position;
-//
-//    public enum Position {
-//
-//    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Position position;
 
     @Column(nullable = false)
     private String phoneNum;
@@ -45,16 +40,20 @@ public class User extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserState state; // 사용자 상태 (ex: ACTIVE, INACTIVE 등)
+    private UserState state;
 
-    @Column(nullable = false, name = "aff_id")
-    private String affId; // 소속 ID
+    @JoinColumn(nullable = false, name = "department_id")
+    private String departmentId;
 
-    // 연차와의 관계 (1:N)
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Vacation> vacations;
+    // getDepartmentId 메서드 추가
+    public String getDepartmentId() {
+        return this.departmentId;
+    }
 
-    // 근태와의 관계 (1:N)
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Attitude> attitudes;
+    // Position enum 추가
+    public enum Position {
+        MANAGER,
+        STAFF,
+        ADMIN
+    }
 }
