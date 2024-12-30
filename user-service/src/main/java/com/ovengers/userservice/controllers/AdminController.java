@@ -8,6 +8,8 @@ import com.ovengers.userservice.entity.User;
 import com.ovengers.userservice.service.AdminService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
@@ -114,7 +116,18 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
      }
 
-    @Operation(summary = "사용자 활성화 토글 변경", description = "관리자가 사용자 활성화 변경하는 api")
+    @Operation(summary = "사용자 활성화 토글 변경",
+            description = "관리자가 사용자 활성화 변경하는 api",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "Example JSON",
+                                    value = "{ \"userId\": \"5f45129e-c3ff-11ef-a3fa-8cb0e9d872ae\", \"accountActive\": true }"
+                            )
+                    )
+            )
+    )
     @PatchMapping(value = "admin/users/actives")
     public ResponseEntity<?> activateUser(@RequestBody Map<String, Object> params) {
         if(!params.containsKey("accountActive")) {
@@ -138,14 +151,34 @@ public class AdminController {
     public ResponseEntity<?> updateUserInfo(@RequestBody Map<String, Object> params) {
         //추후에 토큰으로 받아오는 로직으로 변경해야 함
         long userId = adminService.updateUsers((String) params.get("userId"), params);
-        CommonResDto resDto = new CommonResDto(HttpStatus.OK,"활성화 변경 성공", userId);
+        CommonResDto resDto = new CommonResDto(HttpStatus.OK,"사용자 정보 변경 성공", userId);
         return ResponseEntity.status(HttpStatus.OK).body(resDto);
     }
 
-    @Operation(summary = "사용자 변경", description = "관리자가 사용자 직급 변경하는 api")
+    //사용자 직급 변경
+    @Operation(summary = "사용자 직급 변경",
+            description = "관리자가 사용자 직급 변경하는 api",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "Example JSON",
+                                    value = "{ \"userId\": \"5f45129e-c3ff-11ef-a3fa-8cb0e9d872ae\", \"position\": \"TEAM_LEADER\" }"
+                            )
+                    )
+            )
+
+    )
     @PatchMapping(value = "admin/users/position")
-    public ResponseEntity<?> updateUserPosition(){
-        return null;
+    public ResponseEntity<?> updateUserPosition(@RequestBody Map<String, Object> params){
+        if(!params.containsKey("position")) {
+            CommonResDto resDto = new CommonResDto(HttpStatus.BAD_REQUEST,"잘못된 요청입니다.","");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resDto);
+        }
+        //추후에 토큰으로 받아오는 로직으로 변경해야 함
+        long userId = adminService.updateUsers((String) params.get("userId"), params);
+        CommonResDto resDto = new CommonResDto(HttpStatus.OK,"직급 변경 성공", userId);
+        return ResponseEntity.status(HttpStatus.OK).body(resDto);
     }
 
 
