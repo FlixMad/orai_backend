@@ -18,7 +18,7 @@ spring:
       ddl-auto: update
   data:
     mongodb:
-      uri: mongodb+srv://rlaalswl086:qwer1234@cluster0.r9y2y.mongodb.net/chat?authSource=admin&retryWrites=true&w=majority&appName=Cluster0
+      uri: mongodb+srv://rlaalswl086:qwer1234@cluster0.r9y2y.mongodb.net/chat
 eureka:
   instance:
     prefer-ip-address: true
