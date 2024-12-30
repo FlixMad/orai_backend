@@ -1,6 +1,6 @@
-package com.ovengers.chatservice.repository;
+package com.ovengers.chatservice.mysql.repository;
 
-import com.ovengers.chatservice.entity.ChatRoom;
+import com.ovengers.chatservice.mysql.entity.ChatRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

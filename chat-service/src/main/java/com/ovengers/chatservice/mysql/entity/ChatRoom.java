@@ -1,4 +1,4 @@
-package com.ovengers.chatservice.entity;
+package com.ovengers.chatservice.mysql.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

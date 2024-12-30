@@ -1,8 +1,8 @@
-package com.ovengers.chatservice.service;
+package com.ovengers.chatservice.mysql.service;
 
-import com.ovengers.chatservice.dto.ChatRoomDto;
-import com.ovengers.chatservice.entity.ChatRoom;
-import com.ovengers.chatservice.repository.ChatRoomRepository;
+import com.ovengers.chatservice.mysql.dto.ChatRoomDto;
+import com.ovengers.chatservice.mysql.entity.ChatRoom;
+import com.ovengers.chatservice.mysql.repository.ChatRoomRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.Getter;

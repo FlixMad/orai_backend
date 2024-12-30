@@ -1,6 +1,6 @@
-package com.ovengers.chatservice.dto;
+package com.ovengers.chatservice.mysql.dto;
 
-import com.ovengers.chatservice.entity.ChatRoom;
+import com.ovengers.chatservice.mysql.entity.ChatRoom;
 import lombok.*;
 
 import java.time.LocalDateTime;

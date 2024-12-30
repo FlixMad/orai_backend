@@ -1,4 +1,4 @@
-package com.ovengers.chatservice.dto;
+package com.ovengers.chatservice.mysql.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

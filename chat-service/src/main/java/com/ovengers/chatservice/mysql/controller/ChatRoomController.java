@@ -1,9 +1,9 @@
-package com.ovengers.chatservice.controller;
+package com.ovengers.chatservice.mysql.controller;
 
 import com.ovengers.chatservice.common.dto.CommonResDto;
-import com.ovengers.chatservice.dto.ChatRoomDto;
-import com.ovengers.chatservice.dto.ChatRoomRequestDto;
-import com.ovengers.chatservice.service.ChatRoomService;
+import com.ovengers.chatservice.mysql.dto.ChatRoomDto;
+import com.ovengers.chatservice.mysql.dto.ChatRoomRequestDto;
+import com.ovengers.chatservice.mysql.service.ChatRoomService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

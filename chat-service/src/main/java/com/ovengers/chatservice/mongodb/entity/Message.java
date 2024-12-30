@@ -1,14 +1,15 @@
-package com.ovengers.chatservice.entity;
+package com.ovengers.chatservice.mongodb.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.bson.types.ObjectId;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
-@Document(collection = "ChatMessage") // 실제 몽고 DB 컬렉션 이름
+@Document(collection = "chatMessage") // 실제 몽고 DB 컬렉션 이름
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,7 +20,7 @@ public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "message_id")
-    private String messageId;
+    private ObjectId messageId;
 
     @Column(name = "content")
     private String content;
