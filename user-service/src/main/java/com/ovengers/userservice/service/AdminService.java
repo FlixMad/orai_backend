@@ -9,6 +9,7 @@ import com.ovengers.userservice.repository.UserRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.querydsl.jpa.impl.JPAUpdateClause;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,12 +19,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import static com.ovengers.userservice.entity.QUser.user;
@@ -50,7 +53,44 @@ public class AdminService{
         return userResponseDTOS;
 
     }
-    // 리스트 페이지로 바꾸기
+    @Transactional
+    public long updateUsers(final String userId, final Map<String, Object> updateFields) {
+        // 조건 생성
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(user.userId.eq(userId)); // 유저 ID로 조건 설정
+
+        // 업데이트 빌더 생성
+        JPAUpdateClause updateQuery = queryFactory
+                .update(user)
+                .where(builder);
+
+        // 업데이트 필드 적용
+        if (updateFields.containsKey("email")) {
+            updateQuery.set(user.email, (String) updateFields.get("email"));
+        }
+        if (updateFields.containsKey("name")) {
+            updateQuery.set(user.name, (String) updateFields.get("name"));
+        }
+        if (updateFields.containsKey("position")) {
+            updateQuery.set(user.position, Enum.valueOf(Position.class, (String) updateFields.get("position")));
+        }
+        if (updateFields.containsKey("phoneNum")) {
+            updateQuery.set(user.phoneNum, (String) updateFields.get("phoneNum"));
+        }
+        if (updateFields.containsKey("state")) {
+            updateQuery.set(user.state, Enum.valueOf(UserState.class, (String) updateFields.get("state")));
+        }
+        if (updateFields.containsKey("accountActive")) {
+            updateQuery.set(user.accountActive, (Boolean) updateFields.get("accountActive"));
+        }
+        if (updateFields.containsKey("departmentId")) {
+            updateQuery.set(user.departmentId, (String) updateFields.get("departmentId"));
+        }
+
+        // 실행 및 결과 반환
+        return updateQuery.execute();
+    }
+
 
 
     //검색 관련 BooleanBuilder 생성
