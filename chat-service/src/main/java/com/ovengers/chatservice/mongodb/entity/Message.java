@@ -34,5 +34,6 @@ public class Message {
     private LocalDateTime createdAt;
 
     @JoinColumn(nullable = false)
+    @Column(name = "chat_room_id")
     private Long chatRoomId;
 }
