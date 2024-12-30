@@ -1,5 +1,6 @@
 package com.ovengers.userservice.service;
 
+import com.ovengers.userservice.common.util.SmsUtil;
 import com.ovengers.userservice.dto.SignUpRequestDto;
 import com.ovengers.userservice.dto.UserResponseDTO;
 import com.ovengers.userservice.entity.Position;
@@ -13,6 +14,7 @@ import com.querydsl.jpa.impl.JPAUpdateClause;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.nurigo.sdk.message.response.SingleMessageSentResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +39,7 @@ public class AdminService{
     private final UserRepository userRepository;
     private final PasswordEncoder encoder;
     private final JPAQueryFactory queryFactory;
+    private final SmsUtil smsUtil;
 
     // 유저 생성 쿼리
     public User createUser(@Valid SignUpRequestDto dto, String uniqueFileName) {
@@ -228,5 +231,10 @@ public class AdminService{
         int end = Math.min(start + pageable.getPageSize(), sortedUsers.size());
 
         return new PageImpl<>(sortedUsers.subList(start, end), pageable, sortedUsers.size());
+    }
+
+    public void smsService(String phoneNum) {
+        SingleMessageSentResponse res = smsUtil.sendOne(phoneNum);
+        log.info("smsservice : {} ",res);
     }
 }

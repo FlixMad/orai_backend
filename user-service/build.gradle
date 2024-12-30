@@ -57,7 +57,8 @@ dependencies {
     // 쿼리 파라미터 추가 외부 로그 남기기
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
 
-
+    //문자 서비스 api
+    implementation 'net.nurigo:sdk:4.3.0'
 }
 
 dependencyManagement {
