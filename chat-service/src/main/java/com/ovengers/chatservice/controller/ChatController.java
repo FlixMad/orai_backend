@@ -31,8 +31,8 @@ public class ChatController {
         return new ResponseEntity(commonResDto, HttpStatus.OK);
     }
 
-    // 새로운 채팅방 생성
-    @PostMapping("/creatChatRoom")
+        // 새로운 채팅방 생성
+    @PostMapping("/createChatRoom")
     public ResponseEntity<ChatRoomDto> createChatRoom(@RequestBody ChatRoomRequestDto requestDTO) {
         ChatRoomDto newChatRoom = chatRoomService.createChatRoom(requestDTO.getName());
         CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "새로운 채팅방 생성 완료", newChatRoom);
