@@ -121,15 +121,25 @@ public class AdminController {
             CommonResDto resDto = new CommonResDto(HttpStatus.BAD_REQUEST,"잘못된 요청입니다.","");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resDto);
         }
+        //추후에 토큰으로 받아오는 로직으로 변경해야 함
         long userId = adminService.updateUsers((String) params.get("userId"), params);
         CommonResDto resDto = new CommonResDto(HttpStatus.OK,"활성화 변경 성공", userId);
         return ResponseEntity.status(HttpStatus.OK).body(resDto);
     }
 
+    //사용자 정보 변경
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "회원가입 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @ApiResponse(responseCode = "500", description = "서버 에러(프론트에서 잘못된 값 보냈을 가능성 농후)")
+    })
     @Operation(summary = "사용자 정보 변경", description = "관리자가 사용자 정보 변경하는 api")
     @PatchMapping(value = "admin/users/info")
-    public ResponseEntity<?> updateUserInfo(){
-        return null;
+    public ResponseEntity<?> updateUserInfo(@RequestBody Map<String, Object> params) {
+        //추후에 토큰으로 받아오는 로직으로 변경해야 함
+        long userId = adminService.updateUsers((String) params.get("userId"), params);
+        CommonResDto resDto = new CommonResDto(HttpStatus.OK,"활성화 변경 성공", userId);
+        return ResponseEntity.status(HttpStatus.OK).body(resDto);
     }
 
     @Operation(summary = "사용자 변경", description = "관리자가 사용자 직급 변경하는 api")
