@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +17,6 @@ import java.util.List;
 @Tag(name = "ChatController", description = "채팅방 관련 controller")
 public class ChatRoomController {
 
-    private final SimpMessageSendingOperations template;
     private final ChatRoomService chatRoomService;
 
     // 채팅방 리스트 조회
