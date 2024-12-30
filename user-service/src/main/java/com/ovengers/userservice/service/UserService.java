@@ -64,8 +64,13 @@ public class UserService {
      */
     public UserResponseDto getMyInfo() {
         // 현재 인증된 사용자 정보 가져오기
-        TokenUserInfo userInfo = (TokenUserInfo) SecurityContextHolder.getContext()
-                .getAuthentication().getPrincipal();
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (!(principal instanceof TokenUserInfo)) {
+            throw new IllegalArgumentException("인증된 사용자 정보를 찾을 수 없습니다.");
+        }
+
+        TokenUserInfo userInfo = (TokenUserInfo) principal;
 
         // 이메일로 사용자 조회
         User user = userRepository.findByEmail(userInfo.getEmail())

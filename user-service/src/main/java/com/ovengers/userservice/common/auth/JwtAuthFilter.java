@@ -30,15 +30,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         // 요청 헤더에서 사용자 정보를 가져옴
         String userEmail = request.getHeader("X-User-Email");
-        String userAffId = request.getHeader("X-User-AffId");
         String userName = request.getHeader("X-User-Name");
 
-        log.info("Incoming request - Email: {}, AffId: {}, Name: {}", userEmail, userAffId, userName);
+        log.info("Incoming request - Email: {}, Name: {}", userEmail, userName);
         log.info("Request URL: {}", request.getRequestURI());
 
         try {
             // 헤더 값 검증
-            if (StringUtils.hasText(userEmail) && StringUtils.hasText(userAffId)) {
+            if (StringUtils.hasText(userEmail)) {
 
                 // 사용자 정보를 기반으로 TokenUserInfo 객체 생성
                 TokenUserInfo userInfo = new TokenUserInfo(userEmail, userName);
@@ -54,7 +53,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 log.info("Authentication set for user: {}", userEmail);
             } else {
-                log.warn("Missing or invalid headers - Email: {}, AffId: {}", userEmail, userAffId);
+                log.warn("Missing or invalid headers - Email: {}", userEmail);
             }
 
             // 필터 체인 진행
