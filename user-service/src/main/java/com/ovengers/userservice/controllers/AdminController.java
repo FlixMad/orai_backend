@@ -52,6 +52,7 @@ public class AdminController {
     }
 
 
+    //사용자 조회
     @Operation(summary = "사용자 조회(페이지)(오버라이딩)", description = "사용자 조회할 때 사용하는 api")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "사용자 조회 성공"),
@@ -75,6 +76,8 @@ public class AdminController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
+
+    // 사용자 생성
     @PostMapping(value = "/admin/users", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createUser(
             @Parameter(description = "이메일", example = "example@example.com", required = true) @RequestParam String email,
@@ -99,10 +102,9 @@ public class AdminController {
         // 파일 처리 로직
         String uniqueFileName;
         if (profileImage != null && !profileImage.isEmpty()) {
-            uniqueFileName = UUID.randomUUID() + "_" + profileImage.getOriginalFilename();
-            // S3 파일 업로드 로직 추가 (생략)
-            String imageUrl
-                    = s3Config.uploadToS3Bucket(profileImage.getBytes(), uniqueFileName);
+                uniqueFileName = UUID.randomUUID() + "_" + profileImage.getOriginalFilename();
+                String imageUrl
+                        = s3Config.uploadToS3Bucket(profileImage.getBytes(), uniqueFileName);
             // 사용자 생성
             User user = adminService.createUser(dto, imageUrl);
             // 성공 응답
@@ -110,6 +112,32 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.CREATED).body(resDto);
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+     }
+
+    @Operation(summary = "사용자 활성화 토글 변경", description = "관리자가 사용자 활성화 변경하는 api")
+    @PatchMapping(value = "admin/users/actives")
+    public ResponseEntity<?> activateUser(@RequestBody Map<String, Object> params) {
+        if(!params.containsKey("accountActive")) {
+            CommonResDto resDto = new CommonResDto(HttpStatus.BAD_REQUEST,"잘못된 요청입니다.","");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resDto);
+        }
+        long userId = adminService.updateUsers((String) params.get("userId"), params);
+        CommonResDto resDto = new CommonResDto(HttpStatus.OK,"활성화 변경 성공", userId);
+        return ResponseEntity.status(HttpStatus.OK).body(resDto);
+    }
+
+    @Operation(summary = "사용자 정보 변경", description = "관리자가 사용자 정보 변경하는 api")
+    @PatchMapping(value = "admin/users/info")
+    public ResponseEntity<?> updateUserInfo(){
+        return null;
+    }
+
+    @Operation(summary = "사용자 변경", description = "관리자가 사용자 직급 변경하는 api")
+    @PatchMapping(value = "admin/users/position")
+    public ResponseEntity<?> updateUserPosition(){
+        return null;
+    }
+
 
     }
-}
+
