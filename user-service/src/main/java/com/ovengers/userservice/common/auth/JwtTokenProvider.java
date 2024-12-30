@@ -28,10 +28,9 @@ public class JwtTokenProvider {
     /**
      * 액세스 토큰 생성
      */
-    public String createToken(String id, String affId, String name) {
+    public String createToken(String id, String departmentId) {
         Claims claims = Jwts.claims().setSubject(id); // 사용자 ID를 subject로 설정
-        claims.put("affId", affId); // 소속 ID 추가
-        claims.put("name", name);  // 사용자 이름 추가
+        claims.put("departmentId", departmentId); // 부서 ID 추가
         Date now = new Date();
 
         return Jwts.builder()
@@ -45,10 +44,9 @@ public class JwtTokenProvider {
     /**
      * 리프레시 토큰 생성
      */
-    public String createRefreshToken(String id, String affId, String name) {
+    public String createRefreshToken(String id, String departmentId) {
         Claims claims = Jwts.claims().setSubject(id); // 사용자 ID를 subject로 설정
-        claims.put("affId", affId); // 소속 ID 추가
-        claims.put("name", name);  // 사용자 이름 추가
+        claims.put("departmentId", departmentId); // 부서 ID 추가
         Date now = new Date();
 
         return Jwts.builder()
@@ -73,8 +71,7 @@ public class JwtTokenProvider {
 
         return TokenUserInfo.builder()
                 .id(claims.getSubject()) // 사용자 ID
-//                .affId(claims.get("affId", String.class)) // 소속 ID
-                .name(claims.get("name", String.class))  // 사용자 이름
+                .departmentId(claims.get("departmentId", String.class)) // 부서 ID
                 .build();
     }
 }
