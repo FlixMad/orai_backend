@@ -26,7 +26,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import static com.ovengers.userservice.entity.QUser.user;
@@ -39,6 +38,7 @@ public class AdminService{
     private final PasswordEncoder encoder;
     private final JPAQueryFactory queryFactory;
 
+    // 유저 생성 쿼리
     public User createUser(@Valid SignUpRequestDto dto, String uniqueFileName) {
         return userRepository.save(dto.toEntity(encoder,uniqueFileName));
     }
@@ -53,6 +53,7 @@ public class AdminService{
         return userResponseDTOS;
 
     }
+    //유저 정보 업데이트
     @Transactional
     public long updateUsers(final String userId, final Map<String, Object> updateFields) {
         // 조건 생성
