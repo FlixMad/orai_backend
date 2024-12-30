@@ -36,7 +36,7 @@ public class ChatRoomController {
     }
 
     // 채팅방 이름 수정
-    @PutMapping("/{chatRoomId}/update")
+    @PutMapping("/{chatRoomId}/updateChatRoom")
     public ResponseEntity<ChatRoomDto> updateChatRoom(@PathVariable Long chatRoomId, @RequestBody ChatRoomRequestDto requestDTO) {
         ChatRoomDto updatedChatRoom = chatRoomService.updateChatRoom(chatRoomId, requestDTO.getName());
         CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "채팅방 이름 수정 완료", updatedChatRoom);
@@ -44,7 +44,7 @@ public class ChatRoomController {
     }
 
     // 채팅방 삭제
-    @DeleteMapping("/{chatRoomId}/delete")
+    @DeleteMapping("/{chatRoomId}/deleteChatRoom")
     public ResponseEntity<Void> deleteChatRoom(@PathVariable Long chatRoomId) {
         chatRoomService.deleteChatRoom(chatRoomId);
         CommonResDto<Void> commonResDto = new CommonResDto<>(HttpStatus.OK, "채팅방 삭제 완료", null);

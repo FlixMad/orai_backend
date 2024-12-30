@@ -35,7 +35,7 @@ public class MessageController {
     }
 
     // 메시지 내용 수정
-    @PutMapping("/{messageId}/update")
+    @PutMapping("/{messageId}/updateMessage")
     public ResponseEntity<MessageDto> updateMessage(@PathVariable Long messageId, @RequestBody MessageRequestDto requestDTO) {
         MessageDto updatedMessage = messageService.updateMessage(messageId, requestDTO.getContent());
         CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "메시지 내용 수정 완료", updatedMessage);
@@ -43,7 +43,7 @@ public class MessageController {
     }
 
     // 메시지 내용 삭제
-    @DeleteMapping("/{messageId}/delete")
+    @DeleteMapping("/{messageId}/deleteMessage")
     public ResponseEntity<Void> deleteMessage(@PathVariable Long messageId) {
         messageService.deleteMessage(messageId);
         CommonResDto<Void> commonResDto = new CommonResDto<>(HttpStatus.OK, "메시지 내용 삭제 완료", null);
