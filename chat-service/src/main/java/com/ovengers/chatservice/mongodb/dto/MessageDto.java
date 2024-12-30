@@ -1,16 +1,10 @@
 package com.ovengers.chatservice.mongodb.dto;
 
 import com.ovengers.chatservice.mongodb.entity.Message;
-import com.ovengers.chatservice.mysql.dto.ChatRoomDto;
-import com.ovengers.chatservice.mysql.entity.ChatRoom;
-import jakarta.persistence.*;
 import lombok.*;
 import org.bson.types.ObjectId;
-import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 @Getter
 @Setter
