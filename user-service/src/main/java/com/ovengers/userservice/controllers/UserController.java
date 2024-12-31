@@ -1,4 +1,4 @@
-package com.ovengers.userservice.controller;
+package com.ovengers.userservice.controllers;
 
 import com.ovengers.userservice.dto.UserRequestDto;
 import com.ovengers.userservice.dto.UserResponseDto;
