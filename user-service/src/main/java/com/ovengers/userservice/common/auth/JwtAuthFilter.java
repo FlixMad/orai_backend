@@ -24,47 +24,41 @@ import java.util.Collections;
 // 클라이언트가 전송한 토큰을 검사하는 필터
 public class JwtAuthFilter extends OncePerRequestFilter {
 
+    private final JwtTokenProvider jwtTokenProvider;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 요청 헤더에서 사용자 정보를 가져옴
-        String userEmail = request.getHeader("X-User-Email");
-        String userName = request.getHeader("X-User-Name");
+        // Authorization 헤더에서 JWT 토큰 가져오기
+        String token = request.getHeader("Authorization");
 
-        log.info("Incoming request - Email: {}, Name: {}", userEmail, userName);
-        log.info("Request URL: {}", request.getRequestURI());
+        if (StringUtils.hasText(token) && token.startsWith("Bearer ")) {
+            token = token.substring(7);  // "Bearer " 부분 제거
 
-        try {
-            // 헤더 값 검증
-            if (StringUtils.hasText(userEmail)) {
+            try {
+                // JWT 토큰을 검증하고 사용자 정보를 설정
+                TokenUserInfo userInfo = jwtTokenProvider.validateAndGetTokenUserInfo(token);
 
-                // 사용자 정보를 기반으로 TokenUserInfo 객체 생성
-                TokenUserInfo userInfo = new TokenUserInfo(userEmail, userName);
-
-                // 인증 객체 생성 (기본 권한 ROLE_USER 부여)
+                // 사용자 인증 정보를 SecurityContext에 설정
                 Authentication auth = new UsernamePasswordAuthenticationToken(
                         userInfo, // 사용자 정보
-                        "",       // 비밀번호 (빈 문자열)
-                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")) // 기본 권한
+                        null, // 비밀번호는 null
+                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
                 );
 
-                // SecurityContextHolder에 인증 정보 설정
+                // 인증 정보 설정
                 SecurityContextHolder.getContext().setAuthentication(auth);
-                log.info("Authentication set for user: {}", userEmail);
-            } else {
-                log.warn("Missing or invalid headers - Email: {}", userEmail);
+                log.info("User authenticated: {}", userInfo.getId());
+            } catch (Exception e) {
+                log.error("JWT token validation failed", e);
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                response.getWriter().write("Invalid or expired JWT token.");
+                return;  // 인증 실패 시 후속 필터 실행 중단
             }
-
-            // 필터 체인 진행
-            filterChain.doFilter(request, response);
-
-        } catch (Exception e) {
-            // 예외 처리
-            log.error("Authentication error", e);
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            response.setContentType("application/json; charset=utf-8");
-            response.getWriter().write("인증에 실패했습니다. 요청 헤더를 확인하세요.");
         }
+
+        // 필터 체인 진행
+        filterChain.doFilter(request, response);
     }
 }
