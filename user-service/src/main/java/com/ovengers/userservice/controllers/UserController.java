@@ -1,5 +1,6 @@
 package com.ovengers.userservice.controllers;
 
+import com.ovengers.userservice.common.auth.JwtTokenProvider;
 import com.ovengers.userservice.dto.UserRequestDto;
 import com.ovengers.userservice.dto.UserResponseDto;
 import com.ovengers.userservice.service.UserService;
@@ -17,11 +18,14 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final JwtTokenProvider jwtTokenProvider;
+
 
     /**
      * 사용자 등록
      */
-    @PostMapping
+
+    @PostMapping("/create")
     public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody UserRequestDto userRequestDto) {
         UserResponseDto responseDto = userService.createUser(userRequestDto);
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
@@ -58,7 +62,7 @@ public class UserController {
      * 특정 사용자 조회
      */
     @GetMapping("/{userId}")
-    public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long userId) {
+    public ResponseEntity<UserResponseDto> getUserById(@PathVariable String userId) {  // 파라미터를 String으로 수정
         UserResponseDto responseDto = userService.getUserById(userId);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
@@ -66,14 +70,14 @@ public class UserController {
     /**
      * 비밀번호 변경
      */
+
     @PutMapping("/change-password")
-    public ResponseEntity<String> changePassword(@RequestParam Long userId,
+    public ResponseEntity<String> changePassword(@RequestParam String userId,  // 파라미터를 String으로 수정
                                                  @RequestParam String currentPassword,
                                                  @RequestParam String newPassword) {
         userService.changePassword(userId, currentPassword, newPassword);
         return new ResponseEntity<>("비밀번호가 변경되었습니다.", HttpStatus.OK);
     }
-
     /**
      * 이메일 중복 체크
      */
