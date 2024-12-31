@@ -4,6 +4,7 @@ import com.ovengers.chatservice.mysql.entity.ChatRoom;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Getter @Setter
 @ToString
@@ -13,15 +14,16 @@ import java.time.LocalDateTime;
 public class ChatRoomDto {
     private Long chatRoomId;
     private String name;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
 
     public static ChatRoomDto fromEntity(ChatRoom chatRoom) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return ChatRoomDto.builder()
                 .chatRoomId(chatRoom.getChatRoomId())
                 .name(chatRoom.getName())
-                .createdAt(chatRoom.getCreatedAt())
-                .updatedAt(chatRoom.getUpdatedAt())
+                .createdAt(chatRoom.getCreatedAt().format(formatter))
+                .updatedAt(chatRoom.getUpdatedAt().format(formatter))
                 .build();
     }
 }
