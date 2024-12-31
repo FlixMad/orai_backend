@@ -1,5 +1,5 @@
 server:
-  port: 0
+  port: 8181
 spring:
   application:
     name: user-service
@@ -37,7 +37,7 @@ springdoc:
   default-produces-media-type: application/json
 
 jwt:  # JWT 관련 설정 추가
-  secretKey: my-secret-key   # JWT 서명용 비밀 키
+  secretKey: mysecretkeymysecretkeymysecretkeymysecretkeymysecretkeymysecretkeymysecretkey   # JWT 서명용 비밀 키
   expiration: 60             # 액세스 토큰 유효 시간 (분 단위)
-  secretKeyRt: my-refresh-secret-key # 리프레시 토큰 서명용 비밀 키
+  secretKeyRt: myrefreshsecretkeymyrefreshsecretkeymyrefreshsecretkeymyrefreshsecretkeymyrefreshsecretkey # 리프레시 토큰 서명용 비밀 키
   expirationRt: 1440         # 리프레시 토큰 유효 시간 (분 단위)
