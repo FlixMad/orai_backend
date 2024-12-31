@@ -74,4 +74,5 @@ public class JwtTokenProvider {
                 .departmentId(claims.get("departmentId", String.class)) // 부서 ID
                 .build();
     }
+
 }
