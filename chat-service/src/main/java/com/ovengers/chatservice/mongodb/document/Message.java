@@ -4,10 +4,8 @@ import com.ovengers.chatservice.mongodb.dto.MessageDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.bson.types.ObjectId;
-import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -21,22 +19,16 @@ import java.time.format.DateTimeFormatter;
 @Builder
 public class Message {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "message_id")
     private ObjectId messageId;
 
-    @Column(name = "content")
     private String content;
 
-    @Column(name = "read_count")
     private Long readCount;
 
     @CreatedDate
-    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @JoinColumn(nullable = false)
-    @Column(name = "chat_room_id")
     private Long chatRoomId;
 
     public MessageDto toDto() {
@@ -45,7 +37,7 @@ public class Message {
                 .messageId(getMessageId())
                 .content(getContent())
                 .readCount(getReadCount())
-                .createdAt(getCreatedAt().format(formatter))
+                .createdAt(getCreatedAt() != null ? getCreatedAt().format(formatter) : "N/A")
                 .chatRoomId(getChatRoomId())
                 .build();
     }
