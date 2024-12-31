@@ -17,7 +17,6 @@ public class MessageService {
     public MessageDto saveChat(MessageDto messageDto) {
 
         Message message = Message.builder()
-                .messageId(messageDto.getMessageId())
                 .content(messageDto.getContent())
                 .readCount(messageDto.getReadCount() != null ? messageDto.getReadCount() : 0L)
                 .chatRoomId(messageDto.getChatRoomId())
