@@ -89,19 +89,21 @@ public class UserService {
     /**
      * 특정 ID로 사용자 조회
      */
-    public UserResponseDto getUserById(Long userId) {
-        User user = userRepository.findById(userId)
+    public UserResponseDto getUserById(String userId) {  // 파라미터를 String으로 수정
+        User user = userRepository.findByUserId(userId)  // findById 대신 findByUserId로 변경
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
         return new UserResponseDto(user);
     }
 
+
+
     /**
      * 사용자 비밀번호 변경
      */
     @Transactional
-    public void changePassword(Long userId, String currentPassword, String newPassword) {
-        User user = userRepository.findById(userId)
+    public void changePassword(String userId, String currentPassword, String newPassword) {  // 파라미터를 String으로 수정
+        User user = userRepository.findByUserId(userId)  // findById 대신 findByUserId로 변경
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
         // 현재 비밀번호 확인
