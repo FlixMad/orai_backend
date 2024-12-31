@@ -42,8 +42,9 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private UserState state;
 
-    @JoinColumn(nullable = false, name = "department_id")
+    @JoinColumn(nullable = false, name = "aff_id") // SQL에 맞춰 이름 수정
     private String departmentId;
+
 
     // getDepartmentId 메서드 추가
     public String getDepartmentId() {
@@ -52,8 +53,17 @@ public class User extends BaseTimeEntity {
 
     // Position enum 추가
     public enum Position {
+        CEO,  // 추가
         MANAGER,
-        STAFF,
+        TEAM_LEADER,  // 추가
+        EMPLOYEE,  // 추가
         ADMIN
     }
+    public enum UserState {
+        IDLE,
+        ACTIVE, // 필요한 상태 추가
+        INACTIVE // 필요한 상태 추가
+    }
+
+
 }
