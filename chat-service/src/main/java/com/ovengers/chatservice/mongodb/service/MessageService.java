@@ -1,7 +1,7 @@
 package com.ovengers.chatservice.mongodb.service;
 
 import com.ovengers.chatservice.mongodb.dto.MessageDto;
-import com.ovengers.chatservice.mongodb.entity.Message;
+import com.ovengers.chatservice.mongodb.document.Message;
 import com.ovengers.chatservice.mongodb.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,18 +20,19 @@ public class MessageService {
                 .messageId(messageDto.getMessageId())
                 .content(messageDto.getContent())
                 .readCount(messageDto.getReadCount())
-                .createdAt(messageDto.getCreatedAt())
                 .chatRoomId(messageDto.getChatRoomId())
                 .build();
 
-        return MessageDto.fromEntity(messageRepository.save(message));
+        message = messageRepository.save(message);
+
+        return message.toDto();
     }
 
     public List<MessageDto> getMessageByChatRoomId(Long ChatRoomId) {
         List<Message> messages = messageRepository.findByChatRoomId(ChatRoomId);
         List<MessageDto> messageDto = new ArrayList<>();
         for (Message message : messages) {
-            messageDto.add(MessageDto.fromEntity(message));
+            messageDto.add(message.toDto());
         }
 
         return messageDto;

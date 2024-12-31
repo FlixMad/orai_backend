@@ -1,6 +1,6 @@
 package com.ovengers.chatservice.mongodb.repository;
 
-import com.ovengers.chatservice.mongodb.entity.Message;
+import com.ovengers.chatservice.mongodb.document.Message;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
