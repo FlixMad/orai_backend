@@ -23,12 +23,12 @@ public class Message {
 
     private String content;
 
-    private Long readCount;
+    @Builder.Default
+    private Long readCount = 0L;
 
     @CreatedDate
     private LocalDateTime createdAt;
 
-    @JoinColumn(nullable = false)
     private Long chatRoomId;
 
     public MessageDto toDto() {
