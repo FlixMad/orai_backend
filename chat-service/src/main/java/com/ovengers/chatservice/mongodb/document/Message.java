@@ -37,7 +37,7 @@ public class Message {
                 .messageId(getMessageId())
                 .content(getContent())
                 .readCount(getReadCount())
-                .createdAt(getCreatedAt() != null ? getCreatedAt().format(formatter) : "N/A")
+                .createdAt(getCreatedAt() != null ? getCreatedAt().format(formatter) : "비어있음")
                 .chatRoomId(getChatRoomId())
                 .build();
     }
