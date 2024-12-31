@@ -3,7 +3,6 @@ package com.ovengers.chatservice.mysql.dto;
 import com.ovengers.chatservice.mysql.entity.ChatRoom;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Getter @Setter
