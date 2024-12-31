@@ -19,7 +19,7 @@ public class MessageService {
         Message message = Message.builder()
                 .messageId(messageDto.getMessageId())
                 .content(messageDto.getContent())
-                .readCount(messageDto.getReadCount())
+                .readCount(messageDto.getReadCount() != null ? messageDto.getReadCount() : 0L)
                 .chatRoomId(messageDto.getChatRoomId())
                 .build();
 
