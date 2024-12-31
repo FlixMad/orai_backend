@@ -1,51 +1,69 @@
 package com.ovengers.calendarservice.controller;
 
 import com.ovengers.calendarservice.common.CommonResDto;
+import com.ovengers.calendarservice.dto.request.ScheduleRequestDto;
+import com.ovengers.calendarservice.dto.response.ScheduleResponseDto;
+import com.ovengers.calendarservice.entity.Schedule;
+import com.ovengers.calendarservice.service.CalendarService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @RestController
-@RequestMapping("/api/events")
+@RequestMapping("/api/schedules")
+@RequiredArgsConstructor
 public class CalendarController {
 
-    // 일정조회
+    private final CalendarService calendarService;
+
+    // 전체 일정 조회
     @GetMapping("")
-    public CommonResDto getEvents(
-            @RequestParam("start") String start,
-            @RequestParam("end") String end) {
-
-        Map<String, Objects> response = new HashMap<>();
-
-        return new CommonResDto(HttpStatus.OK, "일정 조회 완료", response);
+    public ResponseEntity<List<ScheduleResponseDto>> getAllSchedules(
+            @RequestParam("start")LocalDateTime start,
+            @RequestParam("end")LocalDateTime end) {
+        List<ScheduleResponseDto> schedules = calendarService.getAllSchedules();
+        return ResponseEntity.ok(schedules);
     }
 
-    // 일정생성
-    @PostMapping("")
-    public CommonResDto addEvent() {
-        Map<String, Object> response = new HashMap<>();
-
-        return new CommonResDto(HttpStatus.OK, "일정 생성 완료", response);
-
+    // 특정 일정 조회
+    @GetMapping("/{id}")
+    public ResponseEntity<ScheduleResponseDto> getScheduleById(@PathVariable("id") UUID scheduleId) {
+        ScheduleResponseDto schedule = calendarService.getScheduleById(scheduleId);
+        return ResponseEntity.ok(schedule);
     }
 
-    // 일정수정
-    @PutMapping("/{id}")
-    public CommonResDto updateEvent() {
-        Map<String, Object> response = new HashMap<>();
 
-        return new CommonResDto(HttpStatus.OK, "일정 수정 완료", response);
-
+    // 일정 생성
+    @PostMapping("/create-schedule")
+    public ResponseEntity<ScheduleResponseDto> addSchedule(@RequestBody ScheduleRequestDto scheduleRequestDto) {
+        ScheduleResponseDto createdSchedule = calendarService.createSchedule(scheduleRequestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdSchedule);
     }
 
-    // 일정삭제
-    @DeleteMapping("/{id}")
-    public CommonResDto deleteEvent(@RequestBody CommonResDto commonResDto) {
+    // 일정 수정
+    @PutMapping("/modify-schedule/{id}")
+    public ResponseEntity<ScheduleResponseDto> modifySchedule(
+            @RequestBody ScheduleRequestDto scheduleRequestDto,
+            @PathVariable("id") UUID scheduleId) {
 
-        return new CommonResDto(HttpStatus.OK, "일정 삭제 완료", commonResDto);
+        ScheduleResponseDto modifySchedule = calendarService.updateSchedule(scheduleId, scheduleRequestDto);
 
+        return ResponseEntity.ok(modifySchedule);
     }
+
+    // 일정 삭제
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<CommonResDto> deleteSchedule(@PathVariable("id") UUID scheduleId) {
+        calendarService.deleteSchedule(scheduleId);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+
+
 }
