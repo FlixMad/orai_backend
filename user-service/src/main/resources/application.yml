@@ -26,7 +26,6 @@ eureka:
       defaultZone: http://127.0.0.1:8761/eureka/
     instance:
       instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id}:${random.value}}
-
 springdoc:
   api-docs:
     version: openapi_3_1
@@ -36,3 +35,9 @@ springdoc:
   enable-spring-security: true
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
+
+jwt:  # JWT 관련 설정 추가
+  secretKey: my-secret-key   # JWT 서명용 비밀 키
+  expiration: 60             # 액세스 토큰 유효 시간 (분 단위)
+  secretKeyRt: my-refresh-secret-key # 리프레시 토큰 서명용 비밀 키
+  expirationRt: 1440         # 리프레시 토큰 유효 시간 (분 단위)
