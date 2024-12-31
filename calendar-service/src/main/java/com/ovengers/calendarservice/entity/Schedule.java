@@ -57,7 +57,8 @@ public class Schedule {
 
     @Enumerated(EnumType.STRING)
     @NotNull
-    private Type type;
+    @Builder.Default
+    private Type type = Type.TEAM;
 
     public enum ScheduleStatus {
         PENDING, APPROVED, REJECTED, CANCELED

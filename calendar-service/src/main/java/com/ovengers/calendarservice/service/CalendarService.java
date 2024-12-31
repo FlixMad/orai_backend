@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,7 @@ public class CalendarService {
                 .title(savedSchedule.getTitle())
                 .start(savedSchedule.getStartTime().toString())
                 .end(savedSchedule.getEndTime().toString())
+                .type(savedSchedule.getType().name())
                 .build();
     }
 
@@ -61,7 +63,6 @@ public class CalendarService {
                 .title(schedule.getTitle())
                 .start(schedule.getStartTime().toString())
                 .end(schedule.getEndTime().toString())
-                .type(schedule.getType().name())
                 .build();
     }
 
