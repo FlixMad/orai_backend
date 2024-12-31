@@ -29,11 +29,11 @@ public class MessageService {
 
     public List<MessageDto> getMessageByChatRoomId(Long ChatRoomId) {
         List<Message> messages = messageRepository.findByChatRoomId(ChatRoomId);
-        List<MessageDto> messageDtos = new ArrayList<>();
+        List<MessageDto> messageDto = new ArrayList<>();
         for (Message message : messages) {
-            messageDtos.add(MessageDto.fromEntity(message));
+            messageDto.add(MessageDto.fromEntity(message));
         }
 
-        return messageDtos;
+        return messageDto;
     }
 }
