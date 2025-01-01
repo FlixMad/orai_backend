@@ -28,8 +28,8 @@ public class User extends BaseTimeEntity{
     @Column(nullable = false, name = "profile_image")
     private String profileImage;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Position position;
 
     @Column(nullable = false)

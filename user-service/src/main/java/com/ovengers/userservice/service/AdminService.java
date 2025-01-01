@@ -2,7 +2,7 @@ package com.ovengers.userservice.service;
 
 import com.ovengers.userservice.common.util.SmsUtil;
 import com.ovengers.userservice.dto.SignUpRequestDto;
-import com.ovengers.userservice.dto.UserResponseDTO;
+import com.ovengers.userservice.dto.UserResponseDto;
 import com.ovengers.userservice.entity.Position;
 import com.ovengers.userservice.entity.User;
 import com.ovengers.userservice.entity.UserState;
@@ -47,12 +47,12 @@ public class AdminService{
     }
 
     // 검색 Query
-    public List<UserResponseDTO> search(final Map<String, String> searchCondition) {
+    public List<UserResponseDto> search(final Map<String, String> searchCondition) {
         List<User> users = queryFactory
                 .selectFrom(user)
                 .where(allCond(searchCondition))
                 .fetch();
-        List<UserResponseDTO> userResponseDTOS = users.stream().map(user -> new UserResponseDTO(user)).collect(Collectors.toList());
+        List<UserResponseDto> userResponseDTOS = users.stream().map(user -> new UserResponseDto(user)).collect(Collectors.toList());
         return userResponseDTOS;
 
     }
@@ -187,13 +187,13 @@ public class AdminService{
      * @param pageable 페이지네이션 정보를 담고 있는 Pageable 객체
      * @return UserResponseDTO 객체의 Page
      */
-    public Page<UserResponseDTO> listToPage(List<UserResponseDTO> users, Pageable pageable) {
+    public Page<UserResponseDto> listToPage(List<UserResponseDto> users, Pageable pageable) {
         if (users == null || pageable == null) {
             throw new IllegalArgumentException("Users 리스트와 pageable은 null이 될 수 없습니다.");
         }
 
         // 정렬 처리: pageable.getSort()에 설정된 필드를 기준으로 정렬
-        List<UserResponseDTO> sortedUsers = users.stream()
+        List<UserResponseDto> sortedUsers = users.stream()
                 .sorted((user1, user2) -> {
                     for (Sort.Order order : pageable.getSort()) {
                         int comparisonResult = 0;

@@ -13,17 +13,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class SmsUtil {
 
-    @Value("${coolsms.api.key}")
-    private String apiKey;
-    @Value("${coolsms.api.secret}")
-    private String apiSecretKey;
+//    @Value("${coolsms.api.key}")
+//    private String apiKey;
+//    @Value("${coolsms.api.secret}")
+//    private String apiSecretKey;
 
     private DefaultMessageService messageService;
 
-    @PostConstruct
-    private void init(){
-        this.messageService = NurigoApp.INSTANCE.initialize(apiKey, apiSecretKey, "https://api.coolsms.co.kr");
-    }
+//    @PostConstruct
+//    private void init(){
+//        this.messageService = NurigoApp.INSTANCE.initialize(apiKey, apiSecretKey, "https://api.coolsms.co.kr");
+//    }
 
     public SingleMessageSentResponse sendOne(String to) {
         Message message = new Message();

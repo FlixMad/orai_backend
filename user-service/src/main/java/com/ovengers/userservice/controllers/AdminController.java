@@ -2,7 +2,7 @@ package com.ovengers.userservice.controllers;
 import com.ovengers.userservice.common.configs.AwsS3Config;
 import com.ovengers.userservice.common.dto.CommonResDto;
 import com.ovengers.userservice.dto.SignUpRequestDto;
-import com.ovengers.userservice.dto.UserResponseDTO;
+import com.ovengers.userservice.dto.UserResponseDto;
 import com.ovengers.userservice.entity.Position;
 import com.ovengers.userservice.entity.User;
 import com.ovengers.userservice.service.AdminService;
@@ -48,7 +48,7 @@ public class AdminController {
     @GetMapping(value = "/admin/users")
     public ResponseEntity<CommonResDto> getUsers(@RequestParam Map<String, String> params) {
         log.info("Search params: {}", params);
-        List<UserResponseDTO> users = adminService.search(params);
+        List<UserResponseDto> users = adminService.search(params);
         CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "조회 성공", users);
         return ResponseEntity.ok(commonResDto);
     }
@@ -66,8 +66,8 @@ public class AdminController {
     public ResponseEntity<?> getUsers(@RequestParam Map<String,String> params,
                                       @PageableDefault(size = 10, page = 0) Pageable pageable) {
         log.info("params : {}", params);
-        List<UserResponseDTO> users = adminService.search(params);
-        Page<UserResponseDTO> userPage = adminService.listToPage(users,pageable);
+        List<UserResponseDto> users = adminService.search(params);
+        Page<UserResponseDto> userPage = adminService.listToPage(users,pageable);
 
         CommonResDto commonResDto = new CommonResDto(HttpStatus.OK,"조회 성공", userPage);
         return ResponseEntity.status(HttpStatus.OK).body(commonResDto);
