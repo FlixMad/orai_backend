@@ -1,4 +1,4 @@
-package com.ovengers.userservice.common.dto;
+package com.ovengers.calendarservice.common;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 
 @Getter @Setter @ToString
 @NoArgsConstructor
-public class CommonResDto<T> {
+public class CommonResDto {
 
     private int statusCode;
     private String statusMessage;

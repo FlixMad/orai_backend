@@ -1,7 +1,7 @@
 package com.ovengers.userservice.dto;
-
+import com.ovengers.userservice.entity.Position;
 import com.ovengers.userservice.entity.User;
-import com.ovengers.userservice.entity.User.Position;
+import com.ovengers.userservice.entity.UserState;
 import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -19,7 +19,7 @@ public class UserRequestDto {
     private String phoneNum;
     private Position position;  // 추가된 필드
     private boolean accountActive;
-    private User.UserState state;
+    private UserState state;
     private String departmentId;
 
     // User 엔티티로 변환하는 메서드
@@ -36,4 +36,5 @@ public class UserRequestDto {
                 .departmentId(this.departmentId)  // 추가된 필드
                 .build();
     }
+
 }
