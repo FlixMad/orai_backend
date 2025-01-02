@@ -31,14 +31,17 @@ public class Message {
 
     private Long chatRoomId;
 
+    private Long userId;
+
     public MessageDto toDto() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         return MessageDto.builder()
-                .messageId(getMessageId())
+                .messageId(String.valueOf(getMessageId()))
                 .content(getContent())
                 .readCount(getReadCount())
                 .createdAt(getCreatedAt() != null ? getCreatedAt().format(formatter) : "비어있음")
                 .chatRoomId(getChatRoomId())
+                .userId(getUserId())
                 .build();
     }
 }

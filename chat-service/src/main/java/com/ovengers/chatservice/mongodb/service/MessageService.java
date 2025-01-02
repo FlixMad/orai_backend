@@ -5,9 +5,10 @@ import com.ovengers.chatservice.mongodb.document.Message;
 import com.ovengers.chatservice.mongodb.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -22,18 +23,13 @@ public class MessageService {
                 .chatRoomId(messageDto.getChatRoomId())
                 .build();
 
-        message = messageRepository.save(message);
+        message = messageRepository.save(message).block();
 
-        return message.toDto();
+        return Objects.requireNonNull(message).toDto();
     }
 
-    public List<MessageDto> getMessageByChatRoomId(Long ChatRoomId) {
-        List<Message> messages = messageRepository.findByChatRoomId(ChatRoomId);
-        List<MessageDto> messageDto = new ArrayList<>();
-        for (Message message : messages) {
-            messageDto.add(message.toDto());
-        }
-
-        return messageDto;
+    public Flux<MessageDto> findMessages(Long ChatRoomId) {
+        Flux<Message> messages = messageRepository.findAllByChatRoomId(ChatRoomId);
+        return messages.map(Message::toDto);
     }
 }

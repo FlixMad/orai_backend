@@ -1,10 +1,6 @@
 package com.ovengers.chatservice.mongodb.dto;
 
-import com.ovengers.chatservice.mongodb.document.Message;
 import lombok.*;
-import org.bson.types.ObjectId;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -13,9 +9,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class MessageDto {
-    private ObjectId messageId;
+    private String messageId;
     private String content;
     private Long readCount;
     private String createdAt;
     private Long chatRoomId;
+    private Long userId;
 }
