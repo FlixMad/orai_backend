@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "users")
+@Table(name = "tbl_users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,8 +28,8 @@ public class User extends BaseTimeEntity{
     @Column(nullable = false, name = "profile_image")
     private String profileImage;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Position position;
 
     @Column(nullable = false)
@@ -42,9 +42,9 @@ public class User extends BaseTimeEntity{
     @Enumerated(EnumType.STRING)
     private UserState state;
 
-    @JoinColumn(nullable = false, name = "aff_id")
+    @JoinColumn(nullable = false, name = "department_id")
     //소속 아이디
-    private String affId;
+    private String departmentId;
 
 
 

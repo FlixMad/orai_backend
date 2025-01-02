@@ -36,8 +36,8 @@ public class SignUpRequestDto {
     @Schema(description = "전화번호", example = "010-1234-5678")
     private String phoneNum;
 
-    @Schema(description = "소속 ID", example = "AFF123")
-    private String affId;
+    @Schema(description = "부서 ID", example = "AFF123")
+    private String departmentId;
 
     @Schema(description = "직급", example = "MANAGER")
     private Position position;
@@ -56,7 +56,7 @@ public class SignUpRequestDto {
                 .phoneNum(phoneNum)
                 .position(position)
                 .state(IDLE)
-                .affId(affId)
+                .departmentId(departmentId)
                 .build();
     }
 }
