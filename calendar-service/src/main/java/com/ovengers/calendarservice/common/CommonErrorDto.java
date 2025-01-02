@@ -1,4 +1,4 @@
-package com.ovengers.userservice.common.dto;
+package com.ovengers.calendarservice.common;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +18,7 @@ public class CommonErrorDto {
         this.statusCode = httpStatus.value();
         this.statusMessage = statusMessage;
     }
+
 
 
 }

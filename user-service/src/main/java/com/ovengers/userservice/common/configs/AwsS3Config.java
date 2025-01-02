@@ -74,8 +74,6 @@ public class AwsS3Config {
     // 버킷에 오브젝트를 지우기 위해서는 키값을 줘야 하는데
     // 우리가 가지고 있는 건 키가 아니라 url입니다.
 
-    // 우리가 가진 데이터: https://orderservice-prod-img8917.s3.ap-northeast-2.amazonaws.com/74b59c79-d5da-4d05-b99a-557f00b4da07_fileName.gif
-    // 가공 결과: 74b59c79-d5da-4d05-b99a-557f00b4da07_fileName.gif
     public void deleteFromS3Bucket(String fileName) throws Exception {
         log.info("Deleting file {}", fileName);
 
