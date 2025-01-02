@@ -14,7 +14,7 @@ import java.util.Objects;
 public class MessageService {
     private final MessageRepository messageRepository;
 
-    public MessageDto saveChat(MessageDto messageDto) {
+    public MessageDto saveMessage(MessageDto messageDto) {
 
         Message message = Message.builder()
                 .content(messageDto.getContent())
