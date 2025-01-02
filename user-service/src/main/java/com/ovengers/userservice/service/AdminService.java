@@ -1,16 +1,20 @@
 package com.ovengers.userservice.service;
 
 import com.ovengers.userservice.common.util.SmsUtil;
+import com.ovengers.userservice.dto.AttitudeResponseDto;
 import com.ovengers.userservice.dto.SignUpRequestDto;
 import com.ovengers.userservice.dto.UserResponseDto;
+import com.ovengers.userservice.entity.Attitude;
 import com.ovengers.userservice.entity.Position;
 import com.ovengers.userservice.entity.User;
 import com.ovengers.userservice.entity.UserState;
+import com.ovengers.userservice.repository.AttitudeRepository;
 import com.ovengers.userservice.repository.UserRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAUpdateClause;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +41,7 @@ import static com.ovengers.userservice.entity.QUser.user;
 @Slf4j
 public class AdminService{
     private final UserRepository userRepository;
+    private final AttitudeRepository attitudeRepository;
     private final PasswordEncoder encoder;
     private final JPAQueryFactory queryFactory;
     private final SmsUtil smsUtil;
@@ -52,8 +57,7 @@ public class AdminService{
                 .selectFrom(user)
                 .where(allCond(searchCondition))
                 .fetch();
-        List<UserResponseDto> userResponseDTOS = users.stream().map(user -> new UserResponseDto(user)).collect(Collectors.toList());
-        return userResponseDTOS;
+        return users.stream().map(UserResponseDto::new).collect(Collectors.toList());
 
     }
     //유저 정보 업데이트
@@ -236,5 +240,13 @@ public class AdminService{
     public void smsService(String phoneNum) {
         SingleMessageSentResponse res = smsUtil.sendOne(phoneNum);
         log.info("smsservice : {} ",res);
+    }
+
+    //근태 조회
+    public List<AttitudeResponseDto> selectAttitude(String userId) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+            new EntityNotFoundException("User with id " + userId + " not found.")
+        );
+        return attitudeRepository.findByUser(user).stream().map(AttitudeResponseDto::new).collect(Collectors.toList());
     }
 }
