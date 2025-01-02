@@ -4,6 +4,7 @@ import com.ovengers.calendarservice.dto.request.ScheduleRequestDto;
 import com.ovengers.calendarservice.dto.response.ScheduleResponseDto;
 import com.ovengers.calendarservice.entity.Schedule;
 import com.ovengers.calendarservice.repository.CalendarRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -79,12 +80,17 @@ public class CalendarService {
     }
 
 
-
     // 일정 수정
+    @Transactional
     public ScheduleResponseDto updateSchedule(UUID scheduleId, ScheduleRequestDto scheduleRequestDto) {
 
         Schedule oldSchedule = calendarRepository.findById(scheduleId)
                 .orElseThrow(() -> new RuntimeException("Schedule not found"));
+
+        // 수정 요청 데이터를 기존 엔티티에 반영
+        oldSchedule.setTitle(scheduleRequestDto.getTitle());
+        oldSchedule.setStartTime(scheduleRequestDto.getStart());
+        oldSchedule.setEndTime(scheduleRequestDto.getEnd());
 
         Schedule updatedSchedule = calendarRepository.save(oldSchedule);
 
