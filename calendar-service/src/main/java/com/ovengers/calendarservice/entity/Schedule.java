@@ -2,8 +2,7 @@ package com.ovengers.calendarservice.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -14,12 +13,16 @@ import java.util.UUID;
 
 @Getter @Setter
 @Entity
+@Builder
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "schedules")
+@Table(name = "tbl_schedule")
+@AllArgsConstructor
+@NoArgsConstructor
 public class Schedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "schedule_id")
     private UUID scheduleId;
 
     @NotNull
@@ -29,28 +32,33 @@ public class Schedule {
 
     @CreatedDate
     @NotNull
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @LastModifiedDate
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @NotNull
+    @Column(name = "start_time")
     private LocalDateTime startTime;
 
     @NotNull
+    @Column(name = "end_time")
     private LocalDateTime endTime;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private String userId;
 
     @Enumerated(EnumType.STRING)
     @NotNull
+    @Column(name = "schedule_status")
     private ScheduleStatus scheduleStatus = ScheduleStatus.PENDING;
 
     @Enumerated(EnumType.STRING)
     @NotNull
-    private Type type;
+    @Builder.Default
+    private Type type = Type.TEAM;
 
     public enum ScheduleStatus {
         PENDING, APPROVED, REJECTED, CANCELED
@@ -59,4 +67,5 @@ public class Schedule {
     public enum Type {
         PERSONAL, TEAM
     }
+
 }
