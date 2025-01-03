@@ -19,12 +19,12 @@ public class WebSocketController {
     // 채팅 메시지 수신 및 저장
     @MessageMapping("/send")
     @Operation(summary = "메시지 전송", description = "메시지를 전송합니다.")
-    public ResponseEntity<String> receiveMessage(@RequestBody MessageDto messageDto) {
+    public void receiveMessage(@RequestBody MessageDto messageDto) {
         // 메시지 저장
         MessageDto message = messageService.saveMessage(messageDto);
 
         // 메시지를 해당 채팅방 구독자들에게 전송
         messagingTemplate.convertAndSend("/sub/" + messageDto.getChatRoomId() + "/find", message);
-        return ResponseEntity.ok("메시지 전송 완료");
+//        return ResponseEntity.ok("메시지 전송 완료");
     }
 }

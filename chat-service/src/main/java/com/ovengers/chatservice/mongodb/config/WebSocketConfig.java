@@ -17,9 +17,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // stomp 접속 주소 url = ws://localhost:8181/ws
         // setAllowedOrigins("*")는 모든 ip에서 접속 가능하도록 해줌
-        registry.addEndpoint("/ws") // 연결될 엔드포인트
-                .setAllowedOrigins("*")
+        registry.addEndpoint("/connection") // 연결될 엔드포인트
+                .setAllowedOriginPatterns("*")
                 .withSockJS();
+        registry.addEndpoint("/connection")
+                .setAllowedOriginPatterns("*");
     }
 
     @Override

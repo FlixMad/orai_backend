@@ -12,6 +12,10 @@ public class TokenUserInfo {
     private String email;        // 사용자 이메일
     private String departmentId; // 부서 ID 추가
 
+    public TokenUserInfo(String id){
+        this.id = id;
+    }
+
     // String, String 타입의 생성자 추가
     public TokenUserInfo(String email, String name) {
         this.email = email;
