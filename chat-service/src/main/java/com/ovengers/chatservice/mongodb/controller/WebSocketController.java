@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "ReactiveMongoDBMessageController", description = "리액티브 MongoDB 메시지 관련 controller")
+@Tag(name = "WebSocketController", description = "웹소켓 관련 controller")
 public class WebSocketController {
     private final MessageService messageService;
 }

@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -20,30 +19,28 @@ import java.util.List;
 public class MessageController {
     private final MessageService messageService;
 
-    @GetMapping("/{chatRoomId}/find")
-    public Mono<ResponseEntity<List<MessageDto>>> find(@PathVariable Long chatRoomId) {
-        Flux<MessageDto> response = messageService.findMessages(chatRoomId);
-        return response.collectList().map(ResponseEntity::ok);
-    }
-
     // 채팅방마다의 전체 메시지
     @GetMapping("/{chatRoomId}/getMessages")
-    public Flux<MessageDto> getMessages(@PathVariable Long chatRoomId) {
-        return messageService.getMessages(chatRoomId);
+    public Mono<ResponseEntity<List<MessageDto>>> getMessages(@PathVariable Long chatRoomId) {
+        return messageService.getMessages(chatRoomId)
+                .collectList()
+                .map(ResponseEntity::ok);
     }
 
     // 메시지 전송
     @PostMapping("/createMessage")
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<Message> createMessage(@RequestBody Message message) {
+    public Mono<MessageDto> createMessage(@RequestBody Message message) {
         return messageService.createMessage(message);
     }
 
     // 메시지 수정
     @PutMapping("/{messageId}/updateMessage")
-    public Mono<ResponseEntity<Message>> updateUser(@PathVariable String  messageId, @RequestBody MessageRequestDto requestDto) {
+    public Mono<ResponseEntity<MessageDto>> updateUser(
+            @PathVariable String messageId,
+            @RequestBody MessageRequestDto requestDto) {
         return messageService.updateMessage(messageId, requestDto.getContent())
-                .map(updatedMessage -> ResponseEntity.ok(updatedMessage))
+                .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 

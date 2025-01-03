@@ -13,11 +13,6 @@ import reactor.core.publisher.Mono;
 public class MessageService {
     private final MessageRepository messageRepository;
 
-    public Flux<MessageDto> findMessages(Long ChatRoomId) {
-        Flux<Message> messages = messageRepository.findAllByChatRoomId(ChatRoomId);
-        return messages.map(Message::toDto);
-    }
-
     // 채팅방마다의 전체 메시지
     public Flux<MessageDto> getMessages(Long ChatRoomId) {
         Flux<Message> messages = messageRepository.findAllByChatRoomId(ChatRoomId);
@@ -25,17 +20,19 @@ public class MessageService {
     }
 
     // 메시지 전송
-    public Mono<Message> createMessage(Message message) {
-        return messageRepository.save(message);
+    public Mono<MessageDto> createMessage(Message message) {
+        return messageRepository.save(message)
+                .map(Message::toDto);
     }
 
     // 메시지 수정
-    public Mono<Message> updateMessage(String messageId, String newContent) {
+    public Mono<MessageDto> updateMessage(String messageId, String newContent) {
         return messageRepository.findById(messageId)
                 .flatMap(existingMessage -> {
                     existingMessage.setContent(newContent);
                     return messageRepository.save(existingMessage);
-                });
+                })
+                .map(Message::toDto);
     }
 
     // 메시지 삭제
