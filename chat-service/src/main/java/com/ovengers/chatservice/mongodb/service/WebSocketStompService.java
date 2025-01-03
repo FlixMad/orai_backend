@@ -20,11 +20,11 @@ public class WebSocketStompService {
     /**
      * 메시지 송신
      */
-    public Mono<MessageDto> sendMessage(Long chatRoomId, MessageRequestDto requestDto) {
+    public Mono<MessageDto> sendMessage(Long chatRoomId, MessageDto messageDto) {
         Message message = Message.builder()
-                .content(requestDto.getContent())
-                .chatRoomId(chatRoomId)
-                .userId(null) // 사용자 ID를 동적으로 설정 가능
+                .content(messageDto.getContent())
+                .chatRoomId(messageDto.getChatRoomId())
+                .userId(messageDto.getUserId()) // 사용자 ID를 동적으로 설정 가능
                 .build();
 
         return messageRepository.save(message)

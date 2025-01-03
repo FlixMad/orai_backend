@@ -24,8 +24,8 @@ public class WebSocketStompController {
      */
     @MessageMapping("/send/{chatRoomId}")
     @SendTo("/sub/chat/{chatRoomId}")
-    public Mono<MessageDto> sendMessage(@PathVariable Long chatRoomId, MessageRequestDto requestDto) {
-        return webSocketStompService.sendMessage(chatRoomId, requestDto);
+    public Mono<MessageDto> sendMessage(@PathVariable Long chatRoomId, MessageDto messageDto) {
+        return webSocketStompService.sendMessage(chatRoomId, messageDto);
     }
 
     /**

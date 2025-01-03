@@ -14,8 +14,8 @@ public class MessageService {
     private final MessageRepository messageRepository;
 
     // 채팅방마다의 전체 메시지
-    public Flux<MessageDto> getMessages(Long ChatRoomId) {
-        Flux<Message> messages = messageRepository.findAllByChatRoomId(ChatRoomId);
+    public Flux<MessageDto> getMessages(Long chatRoomId) {
+        Flux<Message> messages = messageRepository.findAllByChatRoomId(chatRoomId);
         return messages.map(Message::toDto);
     }
 

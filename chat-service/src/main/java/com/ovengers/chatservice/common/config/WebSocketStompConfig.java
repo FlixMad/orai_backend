@@ -17,9 +17,7 @@ public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-
-        registry.setApplicationDestinationPrefixes("/pub", "/sub"); // 발행자가 메시지를 보낼 때 해당 메시지의 목적지를 설정
-
-        registry.enableSimpleBroker("/sub"); // 클라이언트 간에 메시지를 교환하고 전달
+        registry.enableSimpleBroker("/sub"); // 메시지 수신
+        registry.setApplicationDestinationPrefixes("/pub"); // 메시지 발신
     }
 }
