@@ -1,30 +1,44 @@
 package com.ovengers.chatservice.mongodb.controller;
 
-import com.ovengers.chatservice.mongodb.dto.MessageDto;
+import com.ovengers.chatservice.mongodb.document.Message;
 import com.ovengers.chatservice.mongodb.service.MessageService;
-import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "ReactiveMongoDBMessageController", description = "리액티브 MongoDB 메시지 관련 controller")
 public class WebSocketController {
     private final MessageService messageService;
-    private final SimpMessagingTemplate messagingTemplate;
 
-    // 채팅 메시지 수신 및 저장
-    @MessageMapping("/send")
-    @Operation(summary = "메시지 전송", description = "메시지를 전송합니다.")
-    public ResponseEntity<String> receiveMessage(@RequestBody MessageDto messageDto) {
-        // 메시지 저장
-        MessageDto message = messageService.saveMessage(messageDto);
+    @GetMapping("/{chatRoomId}/getMessages")
+    public Flux<Message> getMessageByChatRoomId(@PathVariable Long chatRoomId) {
+        return messageService.getMessageByChatRoomId(chatRoomId);
+    }
 
-        // 메시지를 해당 채팅방 구독자들에게 전송
-        messagingTemplate.convertAndSend("/sub/" + messageDto.getChatRoomId() + "/find", message);
-        return ResponseEntity.ok("메시지 전송 완료");
+    @PostMapping("/createMessage")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<Message> createMessage(@RequestBody Message message) {
+        return messageService.createMessage(message);
+    }
+
+    @PutMapping("/{messageId}/updateMessage")
+    public Mono<ResponseEntity<Message>> updateUser(@PathVariable String  messageId, @RequestBody Message message) {
+        return messageService.updateMessage(messageId, message)
+                .map(updatedMessage -> ResponseEntity.ok(updatedMessage))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{messageId}/deleteMessage")
+    public Mono<ResponseEntity<Void>> deleteUser(@PathVariable String messageId) {
+        return messageService.deleteMessage(messageId)
+                .then(Mono.just(ResponseEntity.ok().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }

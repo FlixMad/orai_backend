@@ -2,7 +2,6 @@ package com.ovengers.chatservice.mongodb.document;
 
 import com.ovengers.chatservice.mongodb.dto.MessageDto;
 import lombok.*;
-import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -19,7 +18,7 @@ import java.time.format.DateTimeFormatter;
 @Builder
 public class Message {
     @Id
-    private ObjectId messageId;
+    private String messageId;
 
     private String content;
 
@@ -36,7 +35,7 @@ public class Message {
     public MessageDto toDto() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         return MessageDto.builder()
-                .messageId(String.valueOf(getMessageId()))
+                .messageId(getMessageId())
                 .content(getContent())
                 .readCount(getReadCount())
                 .createdAt(getCreatedAt() != null ? getCreatedAt().format(formatter) : "비어있음")
