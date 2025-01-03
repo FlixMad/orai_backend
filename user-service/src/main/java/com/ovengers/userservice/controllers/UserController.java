@@ -49,16 +49,16 @@ public class UserController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
-    /**
-     * 모든 사용자 조회
-     */
-    @GetMapping
-    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
-        List<UserResponseDto> users = userService.getAllUsers();
-        return new ResponseEntity<>(users, HttpStatus.OK);
-    }
+//    /**
+//     * 모든 사용자 조회
+//     */
+//    @GetMapping
+//    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
+//        List<UserResponseDto> users = userService.getAllUsers();
+//        return new ResponseEntity<>(users, HttpStatus.OK);
+//    }
 
-    /**
+    /**http://localhost:8181/api/attitude/checkin
      * 특정 사용자 조회
      */
     @GetMapping("/{userId}")
