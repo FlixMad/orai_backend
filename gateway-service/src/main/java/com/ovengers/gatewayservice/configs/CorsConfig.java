@@ -1,3 +1,4 @@
+/*
 package com.ovengers.gatewayservice.configs;
 
 import org.springframework.context.annotation.Bean;
@@ -15,6 +16,7 @@ public class CorsConfig {
         corsConfiguration.addAllowedOrigin("*"); // 필요한 Origin을 명시적으로 설정하는 것이 더 안전합니다.
         corsConfiguration.addAllowedMethod("*");
         corsConfiguration.addAllowedHeader("*");
+        corsConfiguration.addAllowedHeader("Authorization");
         corsConfiguration.setAllowCredentials(true); // 클라이언트에 쿠키 허용
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -23,3 +25,4 @@ public class CorsConfig {
         return new CorsWebFilter(source);
     }
 }
+*/
