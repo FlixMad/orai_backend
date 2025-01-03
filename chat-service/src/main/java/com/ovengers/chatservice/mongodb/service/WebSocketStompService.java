@@ -2,7 +2,6 @@ package com.ovengers.chatservice.mongodb.service;
 
 import com.ovengers.chatservice.mongodb.document.Message;
 import com.ovengers.chatservice.mongodb.dto.MessageDto;
-import com.ovengers.chatservice.mongodb.dto.MessageRequestDto;
 import com.ovengers.chatservice.mongodb.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
