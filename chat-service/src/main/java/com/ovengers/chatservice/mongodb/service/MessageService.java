@@ -13,36 +13,32 @@ import reactor.core.publisher.Mono;
 public class MessageService {
     private final MessageRepository messageRepository;
 
-    // Read
     public Flux<MessageDto> findMessages(Long ChatRoomId) {
         Flux<Message> messages = messageRepository.findAllByChatRoomId(ChatRoomId);
         return messages.map(Message::toDto);
     }
 
-    public Flux<Message> getMessageByChatRoomId(Long ChatRoomId) {
-        return messageRepository.findAllByChatRoomId(ChatRoomId);
+    // 채팅방마다의 전체 메시지
+    public Flux<MessageDto> getMessages(Long ChatRoomId) {
+        Flux<Message> messages = messageRepository.findAllByChatRoomId(ChatRoomId);
+        return messages.map(Message::toDto);
     }
 
-    // Create
+    // 메시지 전송
     public Mono<Message> createMessage(Message message) {
         return messageRepository.save(message);
     }
 
-    // Update
-    public Mono<Message> updateMessage(String messageId, Message message) {
+    // 메시지 수정
+    public Mono<Message> updateMessage(String messageId, String newContent) {
         return messageRepository.findById(messageId)
                 .flatMap(existingMessage -> {
-                    existingMessage.setMessageId(message.getMessageId());
-                    existingMessage.setContent(message.getContent());
-                    existingMessage.setReadCount(message.getReadCount());
-                    existingMessage.setCreatedAt(message.getCreatedAt());
-                    existingMessage.setChatRoomId(message.getChatRoomId());
-                    existingMessage.setUserId(message.getUserId());
+                    existingMessage.setContent(newContent);
                     return messageRepository.save(existingMessage);
                 });
     }
 
-    // Delete
+    // 메시지 삭제
     public Mono<Void> deleteMessage(String messageId) {
         return messageRepository.deleteById(messageId);
     }
