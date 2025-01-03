@@ -19,17 +19,13 @@ public class WebSocketStompService {
     /**
      * 메시지 송신
      */
-    public Mono<MessageDto> sendMessage(Long chatRoomId, MessageDto messageDto) {
-        Message message = Message.builder()
-                .content(messageDto.getContent())
-                .chatRoomId(messageDto.getChatRoomId())
-                .userId(messageDto.getUserId()) // 사용자 ID를 동적으로 설정 가능
-                .build();
-
-        return messageRepository.save(message)
+    public Mono<MessageDto> sendMessage(/*Long chatRoomId,*/Message message) {
+/*        return messageRepository.save(message)
                 .doOnSuccess(savedMessage ->
                         messagingTemplate.convertAndSend("/sub/chat/" + chatRoomId, savedMessage.toDto())
                 )
+                .map(Message::toDto);*/
+        return messageRepository.save(message)
                 .map(Message::toDto);
     }
 

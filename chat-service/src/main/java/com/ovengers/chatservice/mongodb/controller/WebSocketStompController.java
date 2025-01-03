@@ -1,5 +1,6 @@
 package com.ovengers.chatservice.mongodb.controller;
 
+import com.ovengers.chatservice.mongodb.document.Message;
 import com.ovengers.chatservice.mongodb.dto.MessageDto;
 import com.ovengers.chatservice.mongodb.service.WebSocketStompService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,10 +22,10 @@ public class WebSocketStompController {
     /**
      * 메시지 송신 (STOMP 기반)
      */
-    @MessageMapping("/send/{chatRoomId}")
-    @SendTo("/sub/chat/{chatRoomId}")
-    public Mono<MessageDto> sendMessage(@PathVariable Long chatRoomId, MessageDto messageDto) {
-        return webSocketStompService.sendMessage(chatRoomId, messageDto);
+    @MessageMapping("/send")
+    @SendTo("/sub/chat")
+    public Mono<MessageDto> sendMessage(/*@PathVariable Long chatRoomId,*/@RequestBody Message message) {
+        return webSocketStompService.sendMessage(message);
     }
 
     /**
