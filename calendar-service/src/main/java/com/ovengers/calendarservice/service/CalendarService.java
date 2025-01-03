@@ -30,7 +30,8 @@ public class CalendarService {
         Schedule savedSchedule = calendarRepository.save(schedule);
 
         return ScheduleResponseDto.builder()
-                .userId(savedSchedule.getUserId())
+//                .userId(savedSchedule.getUserId())
+                .ScheduleId(savedSchedule.getScheduleId())
                 .title(savedSchedule.getTitle())
                 .start(savedSchedule.getStartTime().toString())
                 .end(savedSchedule.getEndTime().toString())
@@ -44,7 +45,8 @@ public class CalendarService {
     public List<ScheduleResponseDto> getAllSchedules() {
         return calendarRepository.findAll().stream()
                 .map(schedule -> ScheduleResponseDto.builder()
-                        .userId(schedule.getUserId())
+//                        .userId(schedule.getUserId())
+                        .ScheduleId(schedule.getScheduleId())
                         .title(schedule.getTitle())
                         .start(schedule.getStartTime().toString())
                         .end(schedule.getEndTime().toString())
@@ -60,7 +62,8 @@ public class CalendarService {
                 .orElseThrow(() -> new RuntimeException("Schedule not found"));
 
         return ScheduleResponseDto.builder()
-                .userId(schedule.getUserId())
+//                .userId(schedule.getUserId())
+                .ScheduleId(schedule.getScheduleId())
                 .title(schedule.getTitle())
                 .start(schedule.getStartTime().toString())
                 .end(schedule.getEndTime().toString())
@@ -70,7 +73,8 @@ public class CalendarService {
     public List<ScheduleResponseDto> getSchedulesByDateRange(LocalDateTime start, LocalDateTime end) {
         return calendarRepository.findByStartTimeBetween(start, end).stream()
                 .map(schedule -> ScheduleResponseDto.builder()
-                        .userId(schedule.getUserId())
+//                        .userId(schedule.getUserId())
+                        .ScheduleId(schedule.getScheduleId())
                         .title(schedule.getTitle())
                         .start(schedule.getStartTime().toString())
                         .end(schedule.getEndTime().toString())
@@ -95,7 +99,8 @@ public class CalendarService {
         Schedule updatedSchedule = calendarRepository.save(oldSchedule);
 
         return ScheduleResponseDto.builder()
-                .userId(updatedSchedule.getUserId())
+//                .userId(updatedSchedule.getUserId())
+                .ScheduleId(updatedSchedule.getScheduleId())
                 .title(updatedSchedule.getTitle())
                 .start(updatedSchedule.getStartTime().toString())
                 .end(updatedSchedule.getEndTime().toString())
@@ -106,10 +111,8 @@ public class CalendarService {
     public void deleteSchedule(UUID scheduleId) {
 
         if (!calendarRepository.existsById(scheduleId)) {
-            throw new RuntimeException("Schedule not found");
+            throw new RuntimeException("Schedule not found for ID: " + scheduleId);
         }
         calendarRepository.deleteById(scheduleId);
     }
-
-
 }
