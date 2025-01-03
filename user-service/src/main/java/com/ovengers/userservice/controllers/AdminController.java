@@ -1,6 +1,7 @@
 package com.ovengers.userservice.controllers;
 import com.ovengers.userservice.common.configs.AwsS3Config;
 import com.ovengers.userservice.common.dto.CommonResDto;
+import com.ovengers.userservice.dto.AttitudeResponseDto;
 import com.ovengers.userservice.dto.SignUpRequestDto;
 import com.ovengers.userservice.dto.UserResponseDto;
 import com.ovengers.userservice.entity.Position;
@@ -180,6 +181,13 @@ public class AdminController {
         //추후에 토큰으로 받아오는 로직으로 변경해야 함
         long userId = adminService.updateUsers((String) params.get("userId"), params);
         CommonResDto resDto = new CommonResDto(HttpStatus.OK,"직급 변경 성공", userId);
+        return ResponseEntity.status(HttpStatus.OK).body(resDto);
+    }
+
+    @GetMapping(value = "admin/attitudes")
+    public ResponseEntity<?> selectAttitude(@RequestParam String userId){
+        List<AttitudeResponseDto> attitudes = adminService.selectAttitude(userId);
+        CommonResDto resDto = new CommonResDto(HttpStatus.OK, "근태 조회 성공", attitudes);
         return ResponseEntity.status(HttpStatus.OK).body(resDto);
     }
 

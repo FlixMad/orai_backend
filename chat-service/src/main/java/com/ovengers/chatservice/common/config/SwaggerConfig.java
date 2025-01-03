@@ -1,4 +1,4 @@
-package com.ovengers.chatservice.config;
+package com.ovengers.chatservice.common.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
