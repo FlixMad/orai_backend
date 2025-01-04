@@ -52,4 +52,5 @@ public class WebSocketStompController {
     public Flux<MessageDto> getMessages(@PathVariable Long chatRoomId) {
         return webSocketStompService.getMessagesByChatRoom(chatRoomId);
     }
+
 }

@@ -32,9 +32,9 @@ public class MessageController {
     /**
      * 데이터 저장
      */
-    @PostMapping("/createMessage")
+    @PostMapping("/{chatRoomId}/createMessage")
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<MessageDto> createMessage(@RequestBody Message message) {
+    public Mono<MessageDto> createMessage(@PathVariable Long chatRoomId, @RequestBody Message message) {
         return messageService.createMessage(message);
     }
 

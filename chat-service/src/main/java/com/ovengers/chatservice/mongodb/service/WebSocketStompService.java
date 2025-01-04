@@ -60,4 +60,5 @@ public class WebSocketStompService {
         return messageRepository.findAllByChatRoomId(chatRoomId)
                 .map(Message::toDto);
     }
+
 }
