@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "MessageController", description = "단순하게 MongoDB에 CRUD하는 컨트롤러")
+@Tag(name = "MessageController", description = "단순히 MongoDB에 CRUD하는 컨트롤러")
 public class MessageController {
     private final MessageService messageService;
 
