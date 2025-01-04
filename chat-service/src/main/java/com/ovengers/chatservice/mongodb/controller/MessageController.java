@@ -15,11 +15,13 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "MessageController", description = "메시지 관련 controller")
+@Tag(name = "MessageController", description = "단순하게 MongoDB에 CRUD하는 컨트롤러")
 public class MessageController {
     private final MessageService messageService;
 
-    // 채팅방마다의 전체 메시지
+    /**
+     * 데이터 조회
+     */
     @GetMapping("/{chatRoomId}/getMessages")
     public Mono<ResponseEntity<List<MessageDto>>> getMessages(@PathVariable Long chatRoomId) {
         return messageService.getMessages(chatRoomId)
@@ -27,14 +29,18 @@ public class MessageController {
                 .map(ResponseEntity::ok);
     }
 
-    // 메시지 전송
+    /**
+     * 데이터 저장
+     */
     @PostMapping("/createMessage")
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<MessageDto> createMessage(@RequestBody Message message) {
         return messageService.createMessage(message);
     }
 
-    // 메시지 수정
+    /**
+     * 데이터 수정
+     */
     @PutMapping("/{messageId}/updateMessage")
     public Mono<ResponseEntity<MessageDto>> updateUser(
             @PathVariable String messageId,
@@ -44,7 +50,9 @@ public class MessageController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    // 메시지 삭제
+    /**
+     * 데이터 삭제
+     */
     @DeleteMapping("/{messageId}/deleteMessage")
     public Mono<ResponseEntity<Void>> deleteUser(@PathVariable String messageId) {
         return messageService.deleteMessage(messageId)
