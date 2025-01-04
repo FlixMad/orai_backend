@@ -5,6 +5,7 @@ import com.ovengers.chatservice.mongodb.dto.MessageDto;
 import com.ovengers.chatservice.mongodb.service.WebSocketStompService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
@@ -22,9 +23,9 @@ public class WebSocketStompController {
     /**
      * 메시지 송신 (STOMP 기반)
      */
-    @MessageMapping("/send")
-    @SendTo("/sub/chat")
-    public Mono<MessageDto> sendMessage(/*@PathVariable Long chatRoomId,*/@RequestBody Message message) {
+    @MessageMapping("/{chatRoomId}/send")
+    @SendTo("/sub/{chatRoomId}/chat")
+    public Mono<MessageDto> sendMessage(@DestinationVariable Long chatRoomId, @RequestBody Message message) {
         return webSocketStompService.sendMessage(message);
     }
 

@@ -19,12 +19,7 @@ public class WebSocketStompService {
     /**
      * 메시지 송신
      */
-    public Mono<MessageDto> sendMessage(/*Long chatRoomId,*/Message message) {
-/*        return messageRepository.save(message)
-                .doOnSuccess(savedMessage ->
-                        messagingTemplate.convertAndSend("/sub/chat/" + chatRoomId, savedMessage.toDto())
-                )
-                .map(Message::toDto);*/
+    public Mono<MessageDto> sendMessage(Message message) {
         return messageRepository.save(message)
                 .map(Message::toDto);
     }
@@ -40,7 +35,7 @@ public class WebSocketStompService {
                 })
                 .map(Message::toDto)
                 .doOnSuccess(updatedMessage ->
-                        messagingTemplate.convertAndSend("/sub/chat/" + updatedMessage.getChatRoomId(), updatedMessage)
+                        messagingTemplate.convertAndSend("/sub/" + updatedMessage.getChatRoomId() + "/chat/", updatedMessage)
                 );
     }
 
