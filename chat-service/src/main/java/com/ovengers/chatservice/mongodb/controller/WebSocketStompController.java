@@ -26,6 +26,7 @@ public class WebSocketStompController {
     @MessageMapping("/{chatRoomId}/send")
     @SendTo("/sub/{chatRoomId}/chat")
     public Mono<MessageDto> sendMessage(@DestinationVariable Long chatRoomId, @RequestBody Message message) {
+        message.setChatRoomId(chatRoomId); // 메시지에 ChatRoom ID 설정
         return webSocketStompService.sendMessage(message);
     }
 

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -24,9 +25,13 @@ public class MessageController {
      */
     @GetMapping("/{chatRoomId}/getMessages")
     public Mono<ResponseEntity<List<MessageDto>>> getMessages(@PathVariable Long chatRoomId) {
-        return messageService.getMessages(chatRoomId)
-                .collectList()
-                .map(ResponseEntity::ok);
+        try {
+            return messageService.getMessages(chatRoomId)
+                    .collectList()
+                    .map(ResponseEntity::ok);
+        } catch (IllegalArgumentException ex) {
+            return Mono.just(ResponseEntity.badRequest().body(null));
+        }
     }
 
     /**
@@ -35,7 +40,12 @@ public class MessageController {
     @PostMapping("/{chatRoomId}/createMessage")
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<MessageDto> createMessage(@PathVariable Long chatRoomId, @RequestBody Message message) {
-        return messageService.createMessage(message);
+        message.setChatRoomId(chatRoomId); // ChatRoom ID 설정
+        try {
+            return messageService.createMessage(message);
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
+        }
     }
 
     /**
