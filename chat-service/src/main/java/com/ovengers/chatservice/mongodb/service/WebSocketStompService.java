@@ -3,6 +3,7 @@ package com.ovengers.chatservice.mongodb.service;
 import com.ovengers.chatservice.mongodb.document.Message;
 import com.ovengers.chatservice.mongodb.dto.MessageDto;
 import com.ovengers.chatservice.mongodb.repository.MessageRepository;
+import com.ovengers.chatservice.mysql.repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import reactor.core.publisher.Mono;
 public class WebSocketStompService {
 
     private final MessageRepository messageRepository;
+    private final ChatRoomRepository chatRoomRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
     /**

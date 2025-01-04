@@ -30,7 +30,7 @@ public class Message {
 
     private Long chatRoomId;
 
-    private Long userId;
+//    private Long userId;
 
     public MessageDto toDto() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -40,7 +40,7 @@ public class Message {
                 .readCount(getReadCount())
                 .createdAt(getCreatedAt() != null ? getCreatedAt().format(formatter) : "비어있음")
                 .chatRoomId(getChatRoomId())
-                .userId(getUserId())
+//                .userId(getUserId())
                 .build();
     }
 }

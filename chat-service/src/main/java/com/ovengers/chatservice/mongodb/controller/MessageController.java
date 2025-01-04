@@ -42,7 +42,7 @@ public class MessageController {
      * 데이터 수정
      */
     @PutMapping("/{messageId}/updateMessage")
-    public Mono<ResponseEntity<MessageDto>> updateUser(
+    public Mono<ResponseEntity<MessageDto>> updateMessage(
             @PathVariable String messageId,
             @RequestBody MessageRequestDto requestDto) {
         return messageService.updateMessage(messageId, requestDto.getContent())
@@ -54,7 +54,7 @@ public class MessageController {
      * 데이터 삭제
      */
     @DeleteMapping("/{messageId}/deleteMessage")
-    public Mono<ResponseEntity<Void>> deleteUser(@PathVariable String messageId) {
+    public Mono<ResponseEntity<Void>> deleteMessage(@PathVariable String messageId) {
         return messageService.deleteMessage(messageId)
                 .then(Mono.just(ResponseEntity.ok().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
