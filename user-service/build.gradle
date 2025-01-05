@@ -31,10 +31,6 @@ dependencies {
     // Spring Boot 기본 라이브러리
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    // json web token 라이브러리
-    implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
-    implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
-    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'
 //    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -70,6 +66,9 @@ dependencies {
     implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.2.0'
     runtimeOnly 'com.mysql:mysql-connector-j'
 
+    //redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
     //스웨거 관련설정
     implementation 'io.awspring.cloud:spring-cloud-aws-s3:3.0.2'
 
@@ -84,6 +83,9 @@ dependencies {
 
     //문자 서비스 api
     implementation 'net.nurigo:sdk:4.3.0'
+
+    // Spring Cloud 환경에서 server to server 요청을 처리해 주는 feign client 라이브러리
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 }
 
 dependencyManagement {
