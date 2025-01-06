@@ -1,4 +1,4 @@
-package com.ovengers.userservice.common.auth;
+package com.ovengers.calendarservice.common.auth;
 
 import lombok.*;
 
