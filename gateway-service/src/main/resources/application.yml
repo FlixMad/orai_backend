@@ -15,8 +15,15 @@ spring:
         cors-configurations:
           "[/**]": # 모든 경로에 대한 CORS 설정
             allowed-origins:
+              - "https://jiangxy.github.io"
               - "http://localhost:3000"
               - "http://localhost:8181"
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
             allowed-headers:
               - "Content-Type"
               - "Authorization"
@@ -50,19 +57,19 @@ spring:
           filters:
             - RewritePath=/api/payments/(?<path>.*), /$\{path}
 
-        #채팅 서비스
-        - id: chat-service
+        # 채팅 서비스(웹소켓)
+        - id: chat-service-ws
+          predicates:
+            - Path=/ws, /ws/**, /stomp
+          uri: lb://CHAT-SERVICE
+
+        # 채팅 서비스 (일반 http)
+        - id: chat-service-http
           uri: lb://CHAT-SERVICE
           predicates:
             - Path=/chat-service/**
           filters:
             - RewritePath=/chat-service/(?<path>.*), /$\{path}
-
-        #채팅 웹소켓 통신
-        - id: chat-service-ws
-          uri: ws://CHAT-SERVICE/connection
-          predicates:
-            - Path=/connection/**
 
         #캘린더 서비스
         - id: calendar-service
