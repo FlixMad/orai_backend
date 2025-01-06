@@ -1,4 +1,4 @@
-package com.ovengers.chatservice.mongodb.config;
+package com.ovengers.chatservice.common.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
