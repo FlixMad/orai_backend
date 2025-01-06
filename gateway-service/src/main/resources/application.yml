@@ -60,7 +60,7 @@ spring:
         # 채팅 서비스(웹소켓)
         - id: chat-service-ws
           predicates:
-            - Path=/ws, /ws/**, /stomp
+            - Path=/ws, /ws/**, /stomp/**
           uri: lb://CHAT-SERVICE
 
         # 채팅 서비스 (일반 http)
