@@ -54,6 +54,11 @@ dependencies {
 
     // Spring Cloud 환경에서 server to server 요청을 처리해 주는 feign client 라이브러리
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
+    implementation 'org.webjars:webjars-locator-core'
+    implementation 'org.webjars:sockjs-client:1.0.2'
+    implementation 'org.webjars:stomp-websocket:2.3.3'
+    implementation 'org.webjars:jquery:3.1.1-1'
 }
 
 dependencyManagement {
