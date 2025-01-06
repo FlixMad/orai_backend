@@ -3,7 +3,6 @@ package com.ovengers.userservice.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class Attitude {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "attitude_id")
@@ -26,7 +26,7 @@ public class Attitude {
     @Column(nullable = false, name = "check_in_time")
     private LocalDateTime checkInTime; // 출근 시간
 
-    @Column(nullable = false, name = "check_out_time")
+    @Column(nullable = true, name = "check_out_time")
     private LocalDateTime checkOutTime; // 퇴근 시간
 
     // User와의 관계 (N:1)
@@ -34,3 +34,4 @@ public class Attitude {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }
+

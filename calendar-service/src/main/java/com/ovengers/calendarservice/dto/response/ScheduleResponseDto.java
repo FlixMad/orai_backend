@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 @Setter @Getter
 @Builder
@@ -14,7 +15,9 @@ import java.time.format.DateTimeFormatter;
 @NoArgsConstructor
 public class ScheduleResponseDto {
 
-    private String userId;
+//    private String userId;
+
+    private UUID ScheduleId;
 
     private String title;
 
