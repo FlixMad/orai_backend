@@ -1,6 +1,9 @@
 server:
   port: 8181
-
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.web.socket: DEBUG
 spring:
   application:
     name: gateway-service
@@ -38,6 +41,7 @@ spring:
             - Path=/user-service/**
           filters:
             - RewritePath=/user-service/(?<path>.*), /$\{path}
+            - AuthorizationHeaderFilter
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
@@ -53,6 +57,12 @@ spring:
             - Path=/chat-service/**
           filters:
             - RewritePath=/chat-service/(?<path>.*), /$\{path}
+
+        #채팅 웹소켓 통신
+        - id: chat-service-ws
+          uri: ws://CHAT-SERVICE/connection
+          predicates:
+            - Path=/connection/**
 
         #캘린더 서비스
         - id: calendar-service
@@ -82,8 +92,9 @@ eureka:
 
 jwt:
   expiration: 60
-  secretKey: ICzihf230K36+z90UWHfOEJZCf/CYB2CJaeKvX06/2QxI//izqT7pIs5Yr5KrIetZcQmt2JF6AlxU5zAcc38KQ==
-
+  secretKey: mysecretkeymysecretkeymysecretkeymysecretkeymysecretkeymysecretkeymysecretkey
+  secretKeyRt: myrefreshsecretkeymyrefreshsecretkeymyrefreshsecretkeymyrefreshsecretkeymyrefreshsecretkey # 리프레시 토큰 서명용 비밀 키
+  expirationRt: 1440         # 리프레시 토큰 유효 시간 (분 단위)
 # 액츄에이터 등록 (beans: 컨테이너에 등록된 빈 보여줌, health: 서버 살아 있는지 알려줌)
 #management:
 #  endpoints:

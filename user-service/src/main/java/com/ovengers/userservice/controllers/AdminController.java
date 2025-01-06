@@ -46,7 +46,7 @@ public class AdminController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
-    @GetMapping(value = "/admin/users")
+    @GetMapping(value = "/admin/users/list")
     public ResponseEntity<CommonResDto> getUsers(@RequestParam Map<String, String> params) {
         log.info("Search params: {}", params);
         List<UserResponseDto> users = adminService.search(params);
@@ -63,7 +63,7 @@ public class AdminController {
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @PageableAsQueryParam
-    @GetMapping(value = "/admin/users-page")
+    @GetMapping(value = "/admin/users/page")
     public ResponseEntity<?> getUsers(@RequestParam Map<String,String> params,
                                       @PageableDefault(size = 10, page = 0) Pageable pageable) {
         log.info("params : {}", params);
@@ -137,7 +137,6 @@ public class AdminController {
             CommonResDto resDto = new CommonResDto(HttpStatus.BAD_REQUEST,"잘못된 요청입니다.","");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resDto);
         }
-        //추후에 토큰으로 받아오는 로직으로 변경해야 함
         long userId = adminService.updateUsers((String) params.get("userId"), params);
         CommonResDto resDto = new CommonResDto(HttpStatus.OK,"활성화 변경 성공", userId);
         return ResponseEntity.status(HttpStatus.OK).body(resDto);
@@ -152,7 +151,6 @@ public class AdminController {
     @Operation(summary = "사용자 정보 변경", description = "관리자가 사용자 정보 변경하는 api")
     @PatchMapping(value = "admin/users/info")
     public ResponseEntity<?> updateUserInfo(@RequestBody Map<String, Object> params) {
-        //추후에 토큰으로 받아오는 로직으로 변경해야 함
         long userId = adminService.updateUsers((String) params.get("userId"), params);
         CommonResDto resDto = new CommonResDto(HttpStatus.OK,"사용자 정보 변경 성공", userId);
         return ResponseEntity.status(HttpStatus.OK).body(resDto);
@@ -178,7 +176,6 @@ public class AdminController {
             CommonResDto resDto = new CommonResDto(HttpStatus.BAD_REQUEST,"잘못된 요청입니다.","");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resDto);
         }
-        //추후에 토큰으로 받아오는 로직으로 변경해야 함
         long userId = adminService.updateUsers((String) params.get("userId"), params);
         CommonResDto resDto = new CommonResDto(HttpStatus.OK,"직급 변경 성공", userId);
         return ResponseEntity.status(HttpStatus.OK).body(resDto);
