@@ -1,5 +1,6 @@
 server:
   port: 8181
+
 spring:
   application:
     name: gateway-service
@@ -19,16 +20,16 @@ spring:
               - "X-Requested-With"
             allow-credentials: true
 
-#      default-filters:
+      default-filters:
 #        - name: GlobalFilter
 #          args:
 #            baseMessage: Cloud Gateway Global Filter
 #            preLogger: true
 #            postLogger: true
-#        - name: DedupeResponseHeader
-#          args:
-#            name: Access-Control-Allow-Credentials Access-Control-Allow-Origin
-#            strategy: RETAIN_FIRST
+        - name: DedupeResponseHeader
+          args:
+            name: Access-Control-Allow-Credentials Access-Control-Allow-Origin
+            strategy: RETAIN_FIRST
       routes:
         #유저 서비스
         - id: user-service

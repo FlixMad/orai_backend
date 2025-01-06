@@ -2,6 +2,7 @@ package com.ovengers.userservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.List;
 
 @Entity
 @Table(name = "tbl_users")
@@ -10,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User extends BaseTimeEntity{
+public class User extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "user_id")
@@ -42,11 +43,10 @@ public class User extends BaseTimeEntity{
     @Enumerated(EnumType.STRING)
     private UserState state;
 
-    @JoinColumn(nullable = false, name = "department_id")
-    //소속 아이디
+    @Column(nullable = false, name = "department_id")
     private String departmentId;
 
-
-
-
+    // User와 Attitude의 관계 (1:N)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Attitude> attitudes;
 }
