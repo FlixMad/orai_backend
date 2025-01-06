@@ -19,7 +19,6 @@ public class WebSocketStompController {
 
     private final WebSocketStompService webSocketStompService;
 
-
     /**
      * 메시지 송신 (STOMP 기반)
      */
