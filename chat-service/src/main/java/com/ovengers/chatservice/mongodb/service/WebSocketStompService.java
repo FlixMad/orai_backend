@@ -21,11 +21,11 @@ public class WebSocketStompService {
     /**
      * 메시지 송신
      */
-    public Mono<MessageDto> sendMessage(Message message, String userId) {
+    public Mono<MessageDto> sendMessage(Message message, String senderId) {
         return Mono.fromCallable(() -> chatRoomRepository.existsById(message.getChatRoomId()))
                 .flatMap(chatRoomExists -> {
                     if (chatRoomExists) {
-                        message.setUserId(userId); // JWT 인증된 사용자 설정
+                        message.setSenderId(senderId); // JWT 인증된 사용자 설정
                         return messageRepository.save(message).map(Message::toDto);
                     } else {
                         return Mono.error(new IllegalArgumentException(message.getChatRoomId() + "번 채팅방은 존재하지 않습니다."));
@@ -36,10 +36,10 @@ public class WebSocketStompService {
     /**
      * 메시지 수정
      */
-    public Mono<MessageDto> updateMessage(String messageId, String newContent, String userId) {
+    public Mono<MessageDto> updateMessage(String messageId, String newContent, String senderId) {
         return messageRepository.findById(messageId)
                 .flatMap(existingMessage -> {
-                    if (!existingMessage.getUserId().equals(userId)) {
+                    if (!existingMessage.getSenderId().equals(senderId)) {
                         return Mono.error(new SecurityException("권한이 없습니다."));
                     }
                     existingMessage.setContent(newContent);
@@ -55,10 +55,10 @@ public class WebSocketStompService {
     /**
      * 메시지 삭제
      */
-    public Mono<Void> deleteMessage(String messageId, String userId) {
+    public Mono<Void> deleteMessage(String messageId, String senderId) {
         return messageRepository.findById(messageId)
                 .flatMap(existingMessage -> {
-                    if (!existingMessage.getUserId().equals(userId)) {
+                    if (!existingMessage.getSenderId().equals(senderId)) {
                         return Mono.error(new SecurityException("권한이 없습니다."));
                     }
                     messagingTemplate.convertAndSend(
@@ -72,7 +72,7 @@ public class WebSocketStompService {
     /**
      * 채팅방 메시지 조회
      */
-    public Flux<MessageDto> getMessagesByChatRoom(Long chatRoomId, String userId) {
+    public Flux<MessageDto> getMessagesByChatRoom(Long chatRoomId, String senderId) {
         return Mono.fromCallable(() -> chatRoomRepository.existsById(chatRoomId))
                 .flatMapMany(chatRoomExists -> {
                     if (chatRoomExists) {
