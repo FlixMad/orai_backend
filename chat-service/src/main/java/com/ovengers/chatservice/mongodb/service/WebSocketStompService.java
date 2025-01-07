@@ -1,5 +1,6 @@
 package com.ovengers.chatservice.mongodb.service;
 
+import com.ovengers.chatservice.common.auth.TokenUserInfo;
 import com.ovengers.chatservice.mongodb.document.Message;
 import com.ovengers.chatservice.mongodb.dto.MessageDto;
 import com.ovengers.chatservice.mongodb.repository.MessageRepository;
@@ -21,11 +22,11 @@ public class WebSocketStompService {
     /**
      * 메시지 송신
      */
-    public Mono<MessageDto> sendMessage(Message message, String senderId) {
+    public Mono<MessageDto> sendMessage(Message message, TokenUserInfo tokenUserInfo) {
         return Mono.fromCallable(() -> chatRoomRepository.existsById(message.getChatRoomId()))
                 .flatMap(chatRoomExists -> {
                     if (chatRoomExists) {
-                        message.setSenderId(senderId); // JWT 인증된 사용자 설정
+                        message.setSenderId(tokenUserInfo.getId()); // JWT 인증된 사용자 설정
                         return messageRepository.save(message).map(Message::toDto);
                     } else {
                         return Mono.error(new IllegalArgumentException(message.getChatRoomId() + "번 채팅방은 존재하지 않습니다."));
