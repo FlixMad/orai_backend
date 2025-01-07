@@ -11,8 +11,7 @@ import lombok.*;
 public class MessageDto {
     private String messageId;
     private String content;
-    private Long readCount;
     private String createdAt;
     private Long chatRoomId;
-//    private Long userId;
+    private String userId;
 }

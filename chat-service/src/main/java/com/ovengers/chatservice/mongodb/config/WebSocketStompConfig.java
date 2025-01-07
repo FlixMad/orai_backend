@@ -1,4 +1,4 @@
-package com.ovengers.chatservice.common.config;
+package com.ovengers.chatservice.mongodb.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
