@@ -31,6 +31,7 @@ public class WebSocketStompController {
                                         @RequestBody Message message,
                                         @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
         message.setChatRoomId(chatRoomId); // 메시지에 ChatRoom ID 설정
+        message.setSenderId(tokenUserInfo.getId()); // 인증된 사용자 ID 설정
         return webSocketStompService.sendMessage(message, tokenUserInfo.getId());
     }
 
