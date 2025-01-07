@@ -28,9 +28,6 @@ public class Department {
     @JoinColumn(name = "parent_id")
     private Department parent; // 상위 부서를 참조
 
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true) // 하위 부서 (Children)
-    private List<Department> children; // 하위 부서를 참조
-
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt; // 생성일자
 
