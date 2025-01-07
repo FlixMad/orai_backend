@@ -57,13 +57,13 @@ public class UserService {
         }
 
         // JWT 토큰 발급 (부서 ID만 전달, 역할은 부서 정보로 대체)
-        String token = jwtTokenProvider.createToken(user.getEmail(), user.getDepartmentId());
+        String token = jwtTokenProvider.createToken(user.getUserId(), user.getDepartmentId());
 
         // Refresh Token을 생성해 주겠다.
         // Access Token의 수명이 만료되었을 경우 Refresh Token을 확인해서 리프레시가 유효한 경우
         // 로그인 없이 Access Token을 재발급 해주는 용도로 사용.
         String refreshToken
-                = jwtTokenProvider.createRefreshToken(user.getEmail(), user.getDepartmentId());
+                = jwtTokenProvider.createRefreshToken(user.getUserId(), user.getDepartmentId());
 
         // refresh Token을 DB에 저장하자. -> redis에 저장.
         redisTemplate.opsForValue().set(user.getEmail(), refreshToken, 240, TimeUnit.HOURS);

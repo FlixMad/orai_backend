@@ -31,7 +31,7 @@ public class AuthorizationHeaderFilter
 
     private final List<String> allowUrl = Arrays.asList(
             "/v3/api-docs/**","/api/users/create", "/api/users/login", "/refresh", "/", "/findByEmail", "/users/email" ,
-            "/api/attitude/*"
+            "/api/attitude/*","/api/admin/users"
 
     );
 

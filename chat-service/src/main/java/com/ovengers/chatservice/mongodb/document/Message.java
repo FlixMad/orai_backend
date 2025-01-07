@@ -22,25 +22,21 @@ public class Message {
 
     private String content;
 
-    @Builder.Default
-    private Long readCount = 0L;
-
     @CreatedDate
     private LocalDateTime createdAt;
 
     private Long chatRoomId;
 
-//    private Long userId;
+    private String userId;
 
     public MessageDto toDto() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         return MessageDto.builder()
                 .messageId(getMessageId())
                 .content(getContent())
-                .readCount(getReadCount())
                 .createdAt(getCreatedAt() != null ? getCreatedAt().format(formatter) : "비어있음")
                 .chatRoomId(getChatRoomId())
-//                .userId(getUserId())
+                .userId(getUserId())
                 .build();
     }
 }
