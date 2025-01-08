@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class WebSocketStompService {
@@ -22,15 +24,22 @@ public class WebSocketStompService {
     /**
      * 메시지 송신
      */
-    public Mono<MessageDto> sendMessage(Message message, TokenUserInfo tokenUserInfo) {
+    public Mono<MessageDto> sendMessage(Message message) {
+        // chatRoomId 유효성 확인
         return Mono.fromCallable(() -> chatRoomRepository.existsById(message.getChatRoomId()))
-                .flatMap(chatRoomExists -> {
-                    if (chatRoomExists) {
-                        message.setSenderId(tokenUserInfo.getId()); // JWT 인증된 사용자 설정
-                        return messageRepository.save(message).map(Message::toDto);
-                    } else {
+                .flatMap(exists -> {
+                    if (!exists) {
                         return Mono.error(new IllegalArgumentException(message.getChatRoomId() + "번 채팅방은 존재하지 않습니다."));
                     }
+                    // MongoDB에 메시지 저장
+                    return messageRepository.save(message).map(Message::toDto)
+                            .flatMap(messageDto -> {
+                                // STOMP 브로드캐스트
+                                String destination = "/sub/" + message.getChatRoomId() + "/chat";
+                                messagingTemplate.convertAndSend(destination, messageDto);
+
+                                return Mono.just(messageDto); // 메시지 DTO 반환
+                            });
                 });
     }
 
@@ -48,10 +57,9 @@ public class WebSocketStompService {
                 })
                 .map(Message::toDto)
                 .doOnSuccess(updatedMessage ->
-                        messagingTemplate.convertAndSend("/sub/" + updatedMessage.getChatRoomId() + "/chat/", updatedMessage)
+                        messagingTemplate.convertAndSend("/sub/" + updatedMessage.getChatRoomId() + "/chat", updatedMessage)
                 );
     }
-
 
     /**
      * 메시지 삭제
@@ -63,8 +71,8 @@ public class WebSocketStompService {
                         return Mono.error(new SecurityException("권한이 없습니다."));
                     }
                     messagingTemplate.convertAndSend(
-                            "/sub/chat/" + existingMessage.getChatRoomId(),
-                            "Message deleted: " + messageId
+                            "/sub/" + existingMessage.getChatRoomId() + "/chat",
+                            messageId + "메시지를 삭제했습니다."
                     );
                     return messageRepository.delete(existingMessage);
                 });
