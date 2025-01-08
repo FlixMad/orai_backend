@@ -28,7 +28,7 @@ public class MessageService {
 
     /**
      * MongoDB에 데이터 저장
-     * (JSON - {"content":"Hello", "chatRoomId": 1})
+     * (JSON - {"content":"Hello"})
      */
     public Mono<MessageDto> createMessage(Message message) {
         if (!chatRoomRepository.existsById(message.getChatRoomId())) {
