@@ -3,14 +3,18 @@ package com.ovengers.chatservice.mongodb.controller;
 import com.ovengers.chatservice.common.auth.TokenUserInfo;
 import com.ovengers.chatservice.mongodb.document.Message;
 import com.ovengers.chatservice.mongodb.dto.MessageDto;
+import com.ovengers.chatservice.mongodb.service.MessageService;
 import com.ovengers.chatservice.mongodb.service.WebSocketStompService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -20,6 +24,7 @@ import reactor.core.publisher.Mono;
 public class WebSocketStompController {
 
     private final WebSocketStompService webSocketStompService;
+    private final MessageService messageService;
 
     /**
      * 메시지 송신 (STOMP 기반)
@@ -27,10 +32,18 @@ public class WebSocketStompController {
     @MessageMapping("/{chatRoomId}/send")
     @SendTo("/sub/{chatRoomId}/chat")
     public Mono<MessageDto> sendMessage(@DestinationVariable Long chatRoomId,
-                                        @RequestBody Message message,
+                                        @RequestBody String content,
                                         @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
-        message.setChatRoomId(chatRoomId); // 메시지에 ChatRoom ID 설정
-        return webSocketStompService.sendMessage(message, tokenUserInfo.getId());
+        try {
+            Message message = new Message();
+            message.setContent(content);
+            message.setChatRoomId(chatRoomId);
+            message.setSenderId(tokenUserInfo.getId());
+
+            return webSocketStompService.sendMessage(message);
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
+        }
     }
 
     /**

@@ -27,7 +27,7 @@ public class Message {
 
     private Long chatRoomId;
 
-    private String userId;
+    private String senderId;
 
     public MessageDto toDto() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -36,7 +36,7 @@ public class Message {
                 .content(getContent())
                 .createdAt(getCreatedAt() != null ? getCreatedAt().format(formatter) : "비어있음")
                 .chatRoomId(getChatRoomId())
-                .userId(getUserId())
+                .senderId(getSenderId())
                 .build();
     }
 }

@@ -63,8 +63,6 @@ spring:
           predicates:
             - Path=/ws, /ws/**, /stomp/**
           uri: lb://CHAT-SERVICE
-          filters:
-            - AuthorizationHeaderFilter
 
         # 채팅 서비스 (일반 http)
         - id: chat-service-http
