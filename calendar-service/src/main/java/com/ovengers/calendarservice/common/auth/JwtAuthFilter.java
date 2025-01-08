@@ -29,7 +29,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         // 게이트웨이가 토큰 내에 클레임을 헤더에 담아서 보내준다.
         String userId = request.getHeader("X-User-Id");
-        String departmentId = request.getHeader("X-Department-Id");
+        String departmentId = request.getHeader("X-User-Department-Id");
 
         log.info(": {}", userId);
         log.info("request Url: {}", request.getRequestURI());
