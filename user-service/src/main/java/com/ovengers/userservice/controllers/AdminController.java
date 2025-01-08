@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -65,7 +64,7 @@ public class AdminController {
     @PageableAsQueryParam
     @GetMapping(value = "/admin/users/page")
     public ResponseEntity<?> getUsers(@RequestParam Map<String,String> params,
-                                      @PageableDefault(size = 10, page = 0) Pageable pageable) {
+                                      Pageable pageable) {
         log.info("params : {}", params);
         List<UserResponseDto> users = adminService.search(params);
         Page<UserResponseDto> userPage = adminService.listToPage(users,pageable);
@@ -132,26 +131,21 @@ public class AdminController {
             )
     )
     @PatchMapping(value = "admin/users/actives")
-    public ResponseEntity<?> activateUser(@RequestBody Map<String, Object> params) {
+    public ResponseEntity<?> activateUser(@RequestBody Map<String, Object> params) throws IOException {
         if(!params.containsKey("accountActive")) {
             CommonResDto resDto = new CommonResDto(HttpStatus.BAD_REQUEST,"잘못된 요청입니다.","");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resDto);
         }
-        long userId = adminService.updateUsers((String) params.get("userId"), params);
+        long userId = adminService.patchUsers((String) params.get("userId"), params);
         CommonResDto resDto = new CommonResDto(HttpStatus.OK,"활성화 변경 성공", userId);
         return ResponseEntity.status(HttpStatus.OK).body(resDto);
     }
 
     //사용자 정보 변경
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "회원가입 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청"),
-            @ApiResponse(responseCode = "500", description = "서버 에러(프론트에서 잘못된 값 보냈을 가능성 농후)")
-    })
     @Operation(summary = "사용자 정보 변경", description = "관리자가 사용자 정보 변경하는 api")
-    @PatchMapping(value = "admin/users/info")
-    public ResponseEntity<?> updateUserInfo(@RequestBody Map<String, Object> params) {
-        long userId = adminService.updateUsers((String) params.get("userId"), params);
+    @PutMapping(value = "admin/users/info", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateUserInfo(@RequestParam Map<String, Object> params) throws IOException {
+        long userId = adminService.patchUsers((String) params.get("userId"), params);
         CommonResDto resDto = new CommonResDto(HttpStatus.OK,"사용자 정보 변경 성공", userId);
         return ResponseEntity.status(HttpStatus.OK).body(resDto);
     }
@@ -171,23 +165,40 @@ public class AdminController {
 
     )
     @PatchMapping(value = "admin/users/position")
-    public ResponseEntity<?> updateUserPosition(@RequestBody Map<String, Object> params){
+    public ResponseEntity<?> updateUserPosition(@RequestBody Map<String, Object> params) throws IOException {
         if(!params.containsKey("position")) {
             CommonResDto resDto = new CommonResDto(HttpStatus.BAD_REQUEST,"잘못된 요청입니다.","");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resDto);
         }
-        long userId = adminService.updateUsers((String) params.get("userId"), params);
+        long userId = adminService.patchUsers((String) params.get("userId"), params);
         CommonResDto resDto = new CommonResDto(HttpStatus.OK,"직급 변경 성공", userId);
         return ResponseEntity.status(HttpStatus.OK).body(resDto);
     }
 
+
+    @Operation(summary = "사용자 삭제", description = "관리자가 사용자 삭제하는 api")
+    @DeleteMapping(value = "admin/users")
+    public ResponseEntity<?> deleteUser(@RequestBody Map<String,String> params) {
+        String userId = params.get("userId");
+        boolean b = adminService.deleteUser(userId);
+        CommonResDto resDto;
+        if(!b){
+            //서비스단에서예외처리 했는데 왜 또 하냐
+            resDto = new CommonResDto<>(HttpStatus.BAD_REQUEST,"유저 삭제 실패","유저 아이디"+userId);
+        }
+        else{
+            resDto = new CommonResDto<>(HttpStatus.OK, "유저 삭제 완료", "유저 아이디:"+userId);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(resDto);
+    }
+
+    @Operation(summary = "사용자 근태 조회", description = "관리자가 사용자 근태 조회하는 api")
     @GetMapping(value = "admin/attitudes")
     public ResponseEntity<?> selectAttitude(@RequestParam String userId){
         List<AttitudeResponseDto> attitudes = adminService.selectAttitude(userId);
         CommonResDto resDto = new CommonResDto(HttpStatus.OK, "근태 조회 성공", attitudes);
         return ResponseEntity.status(HttpStatus.OK).body(resDto);
     }
-
 
 
     }
