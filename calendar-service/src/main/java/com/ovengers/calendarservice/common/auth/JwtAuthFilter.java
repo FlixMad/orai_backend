@@ -31,6 +31,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String userId = request.getHeader("X-User-Id");
         String departmentId = request.getHeader("X-User-DepartmentId");
 
+
         // 헤더 값 로깅
         log.info("X-User-Id: {}", userId);
         log.info("X-User-DepartmentId: {}", departmentId);
@@ -51,6 +52,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             // 시큐리티 컨테이너에 인증 정보 객체 등록
             SecurityContextHolder.getContext().setAuthentication(auth);
+
         }
 
         // 필터 체인 진행

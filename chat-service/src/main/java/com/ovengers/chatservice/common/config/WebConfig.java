@@ -1,3 +1,4 @@
+/*
 package com.ovengers.chatservice.common.config;
 
 import org.springframework.context.annotation.Configuration;
@@ -18,3 +19,4 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowCredentials(true);
     }
 }
+*/

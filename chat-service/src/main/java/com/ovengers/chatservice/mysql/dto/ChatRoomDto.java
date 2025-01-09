@@ -15,6 +15,7 @@ public class ChatRoomDto {
     private String name;
     private String createdAt;
     private String updatedAt;
+    private String creatorId;
 
     public static ChatRoomDto fromEntity(ChatRoom chatRoom) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -23,6 +24,7 @@ public class ChatRoomDto {
                 .name(chatRoom.getName())
                 .createdAt(chatRoom.getCreatedAt().format(formatter))
                 .updatedAt(chatRoom.getUpdatedAt().format(formatter))
+                .creatorId(chatRoom.getCreatorId())
                 .build();
     }
 }

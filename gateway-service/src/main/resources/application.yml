@@ -49,13 +49,14 @@ spring:
           filters:
             - RewritePath=/user-service/(?<path>.*), /$\{path}
             - AuthorizationHeaderFilter
-        - id: user-service
-          uri: lb://USER-SERVICE
-          predicates:
-            - Path=/api/user-service/v3/api-docs/**
-            - Method=GET
-          filters:
-            - RewritePath=/api/payments/(?<path>.*), /$\{path}
+
+#        - id: user-service-swagger
+#          uri: lb://USER-SERVICE
+#          predicates:
+#            - Path=/api/user-service/v3/api-docs/**
+#            - Method=GET
+#          filters:
+#            - RewritePath=/api/payments/(?<path>.*), /$\{path}
 
         # 채팅 서비스(웹소켓)
         - id: chat-service-ws
@@ -70,6 +71,7 @@ spring:
             - Path=/chat-service/**
           filters:
             - RewritePath=/chat-service/(?<path>.*), /$\{path}
+            - AuthorizationHeaderFilter
 
         #캘린더 서비스
         - id: calendar-service

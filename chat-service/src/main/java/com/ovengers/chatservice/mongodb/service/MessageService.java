@@ -28,12 +28,14 @@ public class MessageService {
 
     /**
      * MongoDB에 데이터 저장
-     * (JSON - {"content":"Hello", "chatRoomId": 1})
+     * (JSON - {"content":"Hello"})
      */
     public Mono<MessageDto> createMessage(Message message) {
+        // 채팅방이 존재하는지 확인
         if (!chatRoomRepository.existsById(message.getChatRoomId())) {
             throw new IllegalArgumentException(message.getChatRoomId() + "번 채팅방은 존재하지 않습니다.");
         }
+        // 메시지 저장 및 DTO로 변환 후 반환
         return messageRepository.save(message).map(Message::toDto);
     }
 

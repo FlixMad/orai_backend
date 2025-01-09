@@ -1,10 +1,10 @@
 package com.ovengers.userservice.service;
 
+import com.ovengers.userservice.common.configs.AwsS3Config;
 import com.ovengers.userservice.common.util.SmsUtil;
 import com.ovengers.userservice.dto.AttitudeResponseDto;
 import com.ovengers.userservice.dto.SignUpRequestDto;
 import com.ovengers.userservice.dto.UserResponseDto;
-import com.ovengers.userservice.entity.Attitude;
 import com.ovengers.userservice.entity.Position;
 import com.ovengers.userservice.entity.User;
 import com.ovengers.userservice.entity.UserState;
@@ -27,11 +27,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.ovengers.userservice.entity.QUser.user;
@@ -45,6 +48,8 @@ public class AdminService{
     private final PasswordEncoder encoder;
     private final JPAQueryFactory queryFactory;
     private final SmsUtil smsUtil;
+    private final AwsS3Config s3Config;
+
 
     // 유저 생성 쿼리
     public User createUser(@Valid SignUpRequestDto dto, String uniqueFileName) {
@@ -62,7 +67,7 @@ public class AdminService{
     }
     //유저 정보 업데이트
     @Transactional
-    public long updateUsers(final String userId, final Map<String, Object> updateFields) {
+    public long patchUsers(final String userId, final Map<String, Object> updateFields) throws IOException {
         // 조건 생성
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(user.userId.eq(userId)); // 유저 ID로 조건 설정
@@ -93,6 +98,16 @@ public class AdminService{
         }
         if (updateFields.containsKey("departmentId")) {
             updateQuery.set(user.departmentId, (String) updateFields.get("departmentId"));
+        }
+        if (updateFields.containsKey("profile")) {
+            MultipartFile profileImage = (MultipartFile) updateFields.get("profile");
+            if (profileImage != null && !profileImage.isEmpty()) {
+                String uniqueFileName = UUID.randomUUID() + "_" + profileImage.getOriginalFilename();
+                String imageUrl
+                        = s3Config.uploadToS3Bucket(profileImage.getBytes(), uniqueFileName);
+                updateQuery.set(user.profileImage, imageUrl);
+
+            }
         }
 
         // 실행 및 결과 반환
@@ -248,5 +263,16 @@ public class AdminService{
             new EntityNotFoundException("User with id " + userId + " not found.")
         );
         return attitudeRepository.findByUser(user).stream().map(AttitudeResponseDto::new).collect(Collectors.toList());
+    }
+
+    public boolean deleteUser(String userId) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+            new EntityNotFoundException("User not found.")
+        );
+        if(user==null) return false;
+        else{
+            userRepository.delete(user);
+            return true;
+        }
     }
 }
