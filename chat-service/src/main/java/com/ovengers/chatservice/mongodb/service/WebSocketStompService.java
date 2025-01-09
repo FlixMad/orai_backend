@@ -33,13 +33,9 @@ public class WebSocketStompService {
                     }
                     // MongoDB에 메시지 저장
                     return messageRepository.save(message).map(Message::toDto)
-                            .flatMap(messageDto -> {
-                                // STOMP 브로드캐스트
-                                String destination = "/sub/" + message.getChatRoomId() + "/chat";
-                                messagingTemplate.convertAndSend(destination, messageDto);
-
-                                return Mono.just(messageDto); // 메시지 DTO 반환
-                            });
+                            .doOnSuccess(createMessage ->
+                                    messagingTemplate.convertAndSend("/sub/" + createMessage.getChatRoomId() + "/chat", createMessage)
+                            );
                 });
     }
 

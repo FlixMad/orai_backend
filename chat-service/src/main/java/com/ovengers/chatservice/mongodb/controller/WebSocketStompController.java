@@ -3,12 +3,10 @@ package com.ovengers.chatservice.mongodb.controller;
 import com.ovengers.chatservice.common.auth.TokenUserInfo;
 import com.ovengers.chatservice.mongodb.document.Message;
 import com.ovengers.chatservice.mongodb.dto.MessageDto;
-import com.ovengers.chatservice.mongodb.service.MessageService;
 import com.ovengers.chatservice.mongodb.service.WebSocketStompService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -24,7 +22,6 @@ import reactor.core.publisher.Mono;
 public class WebSocketStompController {
 
     private final WebSocketStompService webSocketStompService;
-    private final MessageService messageService;
 
     /**
      * 메시지 송신 (STOMP 기반)
