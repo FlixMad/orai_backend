@@ -99,8 +99,9 @@ public class AdminService{
         if (updateFields.containsKey("departmentId")) {
             updateQuery.set(user.departmentId, (String) updateFields.get("departmentId"));
         }
-        if (updateFields.containsKey("profile")) {
-            MultipartFile profileImage = (MultipartFile) updateFields.get("profile");
+        if (updateFields.containsKey("profileImage")) {
+            log.info("profile exists");
+            MultipartFile profileImage = (MultipartFile) updateFields.get("profileImage");
             if (profileImage != null && !profileImage.isEmpty()) {
                 String uniqueFileName = UUID.randomUUID() + "_" + profileImage.getOriginalFilename();
                 String imageUrl

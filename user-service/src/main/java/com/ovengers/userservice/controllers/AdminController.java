@@ -21,10 +21,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -45,6 +47,7 @@ public class AdminController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(value = "/admin/users/list")
     public ResponseEntity<CommonResDto> getUsers(@RequestParam Map<String, String> params) {
         log.info("Search params: {}", params);
@@ -62,6 +65,7 @@ public class AdminController {
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @PageableAsQueryParam
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(value = "/admin/users/page")
     public ResponseEntity<?> getUsers(@RequestParam Map<String,String> params,
                                       Pageable pageable) {
@@ -80,6 +84,8 @@ public class AdminController {
     })
 
     // 사용자 생성
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(value = "/admin/users", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createUser(
             @Parameter(description = "이메일", example = "example@example.com", required = true) @RequestParam String email,
@@ -130,6 +136,7 @@ public class AdminController {
                     )
             )
     )
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping(value = "admin/users/actives")
     public ResponseEntity<?> activateUser(@RequestBody Map<String, Object> params) throws IOException {
         if(!params.containsKey("accountActive")) {
@@ -143,9 +150,24 @@ public class AdminController {
 
     //사용자 정보 변경
     @Operation(summary = "사용자 정보 변경", description = "관리자가 사용자 정보 변경하는 api")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(value = "admin/users/info", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> updateUserInfo(@RequestParam Map<String, Object> params) throws IOException {
-        long userId = adminService.patchUsers((String) params.get("userId"), params);
+    public ResponseEntity<?> updateUserInfo(
+            @Parameter(description = "유저 아이디", required = true)@RequestParam String userId,
+            @Parameter(description = "이메일", example = "example@example.com", required = true) @RequestParam(required = false) String email,
+            @Parameter(description = "이름", example = "John Doe", required = true) @RequestParam(required = false) String name,
+            @Parameter(description = "전화번호", example = "010-1234-5678", required = true) @RequestParam(required = false) String phoneNum,
+            @Parameter(description = "부서 ID", example = "AFF123",required = true) @RequestParam(required = false) String departmentId,
+            @Parameter(description = "직급", example = "MANAGER") @RequestParam(required = false) String position,
+            @Parameter(description = "프로필 이미지 파일") @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) throws IOException {
+        Map<String,Object> params = new HashMap<>();
+        params.put("email", email);
+        params.put("name", name);
+        params.put("phoneNum", phoneNum);
+        params.put("departmentId", departmentId);
+        params.put("position", position);
+        if(profileImage != null) params.put("profileImage", profileImage);
+        adminService.patchUsers(userId, params);
         CommonResDto resDto = new CommonResDto(HttpStatus.OK,"사용자 정보 변경 성공", userId);
         return ResponseEntity.status(HttpStatus.OK).body(resDto);
     }
@@ -164,6 +186,7 @@ public class AdminController {
             )
 
     )
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping(value = "admin/users/position")
     public ResponseEntity<?> updateUserPosition(@RequestBody Map<String, Object> params) throws IOException {
         if(!params.containsKey("position")) {
@@ -177,6 +200,7 @@ public class AdminController {
 
 
     @Operation(summary = "사용자 삭제", description = "관리자가 사용자 삭제하는 api")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping(value = "admin/users")
     public ResponseEntity<?> deleteUser(@RequestBody Map<String,String> params) {
         String userId = params.get("userId");
@@ -193,6 +217,7 @@ public class AdminController {
     }
 
     @Operation(summary = "사용자 근태 조회", description = "관리자가 사용자 근태 조회하는 api")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(value = "admin/attitudes")
     public ResponseEntity<?> selectAttitude(@RequestParam String userId){
         List<AttitudeResponseDto> attitudes = adminService.selectAttitude(userId);
