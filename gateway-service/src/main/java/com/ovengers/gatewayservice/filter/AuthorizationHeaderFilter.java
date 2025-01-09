@@ -76,6 +76,7 @@ public class AuthorizationHeaderFilter
                 return onError(exchange, "Invalid token", HttpStatus.UNAUTHORIZED);
             }
 
+            log.info("departmentId in Gateway Filter: {}", claims.get("departmentId"));
             // 사용자 정보를 클레임에서 꺼내서 헤더에 담자.
             ServerHttpRequest request = exchange.getRequest()
                     .mutate()
