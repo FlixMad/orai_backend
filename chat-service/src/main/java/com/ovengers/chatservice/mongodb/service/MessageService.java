@@ -6,7 +6,6 @@ import com.ovengers.chatservice.mongodb.repository.MessageRepository;
 import com.ovengers.chatservice.mysql.repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -28,9 +27,8 @@ public class MessageService {
         return messageRepository.save(message).map(Message::toDto);
     }
 
-/*    *//**
-     * MongoDB에 저장된 chatRoomId 마다의 모든 데이터 조회
-     *//*
+/*
+    // MongoDB에 저장된 chatRoomId 마다의 모든 데이터 조회
     public Flux<MessageDto> getMessages(Long chatRoomId) {
         if (!chatRoomRepository.existsById(chatRoomId)) {
             throw new IllegalArgumentException(chatRoomId + "번 채팅방은 존재하지 않습니다.");
@@ -39,10 +37,7 @@ public class MessageService {
         return messages.map(Message::toDto);
     }
 
-    *//**
-     * MongoDB에 저장된 데이터 중 해당 messageId를 가진 content 수정
-     * (JSON - {"content":"Hi"})
-     *//*
+    // MongoDB에 저장된 데이터 중 해당 messageId를 가진 content 수정
     public Mono<MessageDto> updateMessage(String messageId, String newContent) {
         return messageRepository.findById(messageId)
                 .flatMap(existingMessage -> {
@@ -52,9 +47,7 @@ public class MessageService {
                 .map(Message::toDto);
     }
 
-    *//**
-     * MongoDB에 저장된 데이터 중 해당 messageId를 가진 데이터 삭제
-     *//*
+    // MongoDB에 저장된 데이터 중 해당 messageId를 가진 데이터 삭제
     public Mono<Void> deleteMessage(String messageId) {
         return messageRepository.deleteById(messageId);
     }*/

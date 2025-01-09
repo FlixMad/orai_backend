@@ -1,6 +1,5 @@
 package com.ovengers.chatservice.mongodb.service;
 
-import com.ovengers.chatservice.common.auth.TokenUserInfo;
 import com.ovengers.chatservice.mongodb.document.Message;
 import com.ovengers.chatservice.mongodb.dto.MessageDto;
 import com.ovengers.chatservice.mongodb.repository.MessageRepository;
@@ -11,8 +10,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor

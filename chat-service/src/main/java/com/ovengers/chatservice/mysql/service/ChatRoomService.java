@@ -2,7 +2,6 @@ package com.ovengers.chatservice.mysql.service;
 
 import com.ovengers.chatservice.common.auth.TokenUserInfo;
 import com.ovengers.chatservice.mysql.dto.ChatRoomDto;
-import com.ovengers.chatservice.mysql.dto.UserChatRoomDto;
 import com.ovengers.chatservice.mysql.entity.ChatRoom;
 import com.ovengers.chatservice.mysql.entity.UserChatRoom;
 import com.ovengers.chatservice.mysql.exception.InvalidChatRoomNameException;

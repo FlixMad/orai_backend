@@ -37,9 +37,8 @@ public class MessageController {
         }
     }
 
-/*    *//**
-     * 데이터 조회
-     *//*
+/*
+     // 데이터 조회
     @GetMapping("/{chatRoomId}/getMessages")
     public Mono<ResponseEntity<List<MessageDto>>> getMessages(@PathVariable Long chatRoomId) {
         try {
@@ -51,9 +50,7 @@ public class MessageController {
         }
     }
 
-    *//**
-     * 데이터 수정
-     *//*
+    // 데이터 수정
     @PutMapping("/{messageId}/updateMessage")
     public Mono<ResponseEntity<MessageDto>> updateMessage(
             @PathVariable String messageId,
@@ -63,9 +60,7 @@ public class MessageController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    *//**
-     * 데이터 삭제
-     *//*
+    // 데이터 삭제
     @DeleteMapping("/{messageId}/deleteMessage")
     public Mono<ResponseEntity<Void>> deleteMessage(@PathVariable String messageId) {
         return messageService.deleteMessage(messageId)
