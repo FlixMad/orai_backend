@@ -14,7 +14,7 @@ import lombok.*;
 public class UnreadMessage {
 
     @Id
-    @Column(name = "uread_count_id")
+    @Column(name = "unread_count_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long unreadCountId;
 
