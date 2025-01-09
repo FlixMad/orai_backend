@@ -29,10 +29,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         // 게이트웨이가 토큰 내에 클레임을 헤더에 담아서 보내준다.
         String userId = request.getHeader("X-User-Id");
-        String departmentId = request.getHeader("X-User-Department-Id");
+        String departmentId = request.getHeader("X-User-DepartmentId");
 
-        log.info(": {}", userId);
+
+        // 헤더 값 로깅
+        log.info("X-User-Id: {}", userId);
+        log.info("X-User-DepartmentId: {}", departmentId);
         log.info("request Url: {}", request.getRequestURI());
+
         // 토큰 위조검사 및 인증 완료
         if (userId != null){
             // 인증 완료 처리
@@ -50,7 +54,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(auth);
 
         }
-
 
         // 필터 체인 진행
         filterChain.doFilter(request, response);
