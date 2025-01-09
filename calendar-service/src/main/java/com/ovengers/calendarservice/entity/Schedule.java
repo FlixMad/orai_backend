@@ -73,4 +73,8 @@ public class Schedule {
         PERSONAL, TEAM
     }
 
+    @ManyToOne(fetch = FetchType.LAZY) // 부서와 다대일 관계
+    @JoinColumn(name = "department_id", nullable = false) // 부서 ID와 조인
+    private Department department; // 해당 일정과 연관된 부서
+
 }
