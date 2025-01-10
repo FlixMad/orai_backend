@@ -31,6 +31,8 @@ public class JwtTokenProvider {
     public String createToken(String id, String departmentId) {
         Claims claims = Jwts.claims().setSubject(id); // 사용자 ID를 subject로 설정
         claims.put("departmentId", departmentId); // 부서 ID 추가
+//        claims.get("departmentId", String.class);
+
         Date now = new Date();
 
         return Jwts.builder()
