@@ -80,6 +80,7 @@ spring:
             - Path=/calendar-service/**
           filters:
             - RewritePath=/calendar-service/(?<path>.*), /$\{path}
+            - AuthorizationHeaderFilter
 springdoc:
   swagger-ui:
     use-root-path: true
