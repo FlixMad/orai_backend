@@ -1,12 +1,16 @@
 package com.ovengers.chatservice.mongodb.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.*;
 
 @Configuration
 @EnableWebSocketMessageBroker // WebSocket을 이용한 메시징 기능 사용
+@RequiredArgsConstructor
 public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
+
+    private final JwtChannelInterceptor jwtChannelInterceptor;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -20,4 +24,10 @@ public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
         registry.enableSimpleBroker("/sub"); // 메시지 수신
         registry.setApplicationDestinationPrefixes("/pub"); // 메시지 발신
     }
+
+    @Override
+    public void configureClientInboundChannel(org.springframework.messaging.simp.config.ChannelRegistration registration) {
+        registration.interceptors(jwtChannelInterceptor); // 인터셉터 추가
+    }
+
 }

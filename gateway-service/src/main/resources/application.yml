@@ -63,8 +63,6 @@ spring:
           predicates:
             - Path=/ws, /ws/**, /stomp/**
           uri: lb://CHAT-SERVICE
-          filters:
-            - AuthorizationHeaderFilter
 
         # 채팅 서비스 (일반 http)
         - id: chat-service-http
@@ -82,6 +80,7 @@ spring:
             - Path=/calendar-service/**
           filters:
             - RewritePath=/calendar-service/(?<path>.*), /$\{path}
+            - AuthorizationHeaderFilter
 springdoc:
   swagger-ui:
     use-root-path: true

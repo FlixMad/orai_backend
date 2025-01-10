@@ -3,8 +3,10 @@ package com.ovengers.chatservice.mysql.service;
 import com.ovengers.chatservice.common.auth.TokenUserInfo;
 import com.ovengers.chatservice.mysql.dto.ChatRoomDto;
 import com.ovengers.chatservice.mysql.entity.ChatRoom;
+import com.ovengers.chatservice.mysql.entity.UserChatRoom;
 import com.ovengers.chatservice.mysql.exception.InvalidChatRoomNameException;
 import com.ovengers.chatservice.mysql.repository.ChatRoomRepository;
+import com.ovengers.chatservice.mysql.repository.UserChatRoomRepository;
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -14,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -23,16 +26,25 @@ import java.util.List;
 @Transactional
 public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
+    private final UserChatRoomRepository userChatRoomRepository;
 
     // 채팅방 리스트 조회
-    public List<ChatRoomDto> getAllChatRooms(String creatorId) {
-        log.info("채팅방 조회 요청 처리 중 - 사용자 ID: {}", creatorId);
-        List<ChatRoomDto> list = chatRoomRepository.findAllByCreatorIdOrderByCreatedAtDesc(creatorId)
+    public List<ChatRoomDto> getAllChatRooms(String userId) {
+        // 사용자가 구독 중인 채팅방 ID 목록 가져오기
+        List<Long> subscribedChatRoomIds = userChatRoomRepository.findAllByUserId(userId)
+                .stream()
+                .map(UserChatRoom::getChatRoomId)
+                .toList();
+
+        if (subscribedChatRoomIds.isEmpty()) {
+            return Collections.emptyList(); // 빈 리스트 반환
+        }
+
+        // 구독 중인 채팅방만 조회
+        return chatRoomRepository.findAllById(subscribedChatRoomIds)
                 .stream()
                 .map(ChatRoomDto::fromEntity) // 엔티티를 DTO로 변환
                 .toList();
-        log.info("채팅방 조회 완료 - 사용자 ID: {}, 채팅방 개수: {}", creatorId, list.size());
-        return list;
     }
 
     // 채팅방 생성

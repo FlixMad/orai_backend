@@ -30,9 +30,7 @@ public class AuthorizationHeaderFilter
     private String secretKey;
 
     private final List<String> allowUrl = Arrays.asList(
-            "/v3/api-docs/**","/api/users/create", "/api/users/login", "/refresh", "/", "/findByEmail", "/users/email" ,
-            "/api/admin/users"
-
+            "/v3/api-docs/**","/api/users/create", "/api/users/login", "/refresh", "/", "/findByEmail", "/users/email"
     );
 
     public AuthorizationHeaderFilter() {
@@ -76,6 +74,7 @@ public class AuthorizationHeaderFilter
                 return onError(exchange, "Invalid token", HttpStatus.UNAUTHORIZED);
             }
 
+            log.info("departmentId in Gateway Filter: {}", claims.get("departmentId"));
             // 사용자 정보를 클레임에서 꺼내서 헤더에 담자.
             ServerHttpRequest request = exchange.getRequest()
                     .mutate()

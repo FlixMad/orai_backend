@@ -1,6 +1,8 @@
 package com.ovengers.calendarservice.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -41,10 +43,12 @@ public class Schedule {
     private LocalDate updatedAt;
 
     @NotNull
+    @FutureOrPresent(message = "시작 날짜는 현재 날짜 또는 미래 날짜여야 합니다.")
     @Column(name = "start_time")
     private LocalDate startTime;
 
     @NotNull
+    @AssertTrue(message = "종료 날짜는 시작 날짜 이후여야 합니다.")
     @Column(name = "end_time")
     private LocalDate endTime;
 
@@ -68,5 +72,9 @@ public class Schedule {
     public enum Type {
         PERSONAL, TEAM
     }
+
+    @ManyToOne(fetch = FetchType.LAZY) // 부서와 다대일 관계
+    @JoinColumn(name = "department_id", nullable = false) // 부서 ID와 조인
+    private Department department; // 해당 일정과 연관된 부서
 
 }

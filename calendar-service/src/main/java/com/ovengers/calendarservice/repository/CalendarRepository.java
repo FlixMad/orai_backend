@@ -1,7 +1,9 @@
 package com.ovengers.calendarservice.repository;
 
+import com.ovengers.calendarservice.dto.response.ScheduleResponseDto;
 import com.ovengers.calendarservice.entity.Schedule;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
 import java.util.Calendar;
@@ -13,4 +15,7 @@ public interface CalendarRepository extends JpaRepository<Schedule, UUID> {
     // startTime 필드와 endTime 필드를 기준으로 조회
     List<Schedule> findByStartTimeBetween(LocalDateTime start, LocalDateTime end);
 
+    // 부서별 일정 조회
+    @Query("SELECT s FROM Schedule s WHERE s.department.departmentId = :departmentId")
+    List<Schedule> findByDepartmentId(String departmentId);
 }
