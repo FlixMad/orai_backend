@@ -10,21 +10,17 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "tbl_unread_count")
-public class UnreadMessage {
+@Table(name = "tbl_user_chat_room")
+public class UserChatRoom {
 
     @Id
-    @Column(name = "unread_count_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long unreadCountId;
+    private Long id;
 
-    @Column(name = "unread_count")
-    private Long unreadCount;
-
-    @Column(name = "chat_room_id")
+    @JoinColumn(name = "chat_room_id")
     private Long chatRoomId;
 
-    @Column(name = "user_id")
+    @JoinColumn(name = "user_id")
     private String userId;
 
 }

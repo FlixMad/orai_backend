@@ -15,9 +15,6 @@ public class JwtUtils {
     // 토큰 서명에 사용할 비밀키
     private final Key secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
-    // 토큰의 유효시간 (예: 1시간)
-    private final long TOKEN_VALIDITY = 60 * 60 * 1000L;
-
     /**
      * JWT 토큰 생성
      * @param userId 사용자 ID
@@ -25,6 +22,8 @@ public class JwtUtils {
      * @return 생성된 JWT 토큰
      */
     public String generateToken(String userId, String departmentId) {
+        // 토큰의 유효시간 (예: 1시간)
+        long TOKEN_VALIDITY = 60 * 60 * 1000L;
         return Jwts.builder()
                 .setSubject(userId) // 사용자 ID를 주제로 설정
                 .claim("departmentId", departmentId) // 부서 ID를 클레임으로 추가
