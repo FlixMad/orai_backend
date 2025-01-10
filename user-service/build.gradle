@@ -35,6 +35,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
+
+    // servlet-api를 jakarta.servlet-api로 변경
+    implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
+
     // Eureka 클라이언트
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
