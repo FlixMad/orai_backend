@@ -28,6 +28,16 @@ public class WebSocketStompController {
     private final WebSocketStompService webSocketStompService;
     private final UserChatRoomService userChatRoomService;
 
+    public String cleanInput(String input) {
+        if (input == null) {
+            return null;
+        }
+        // 문자열 양 끝의 쌍따옴표만 제거
+        return input.startsWith("\"") && input.endsWith("\"")
+                ? input.substring(1, input.length() - 1)
+                : input;
+    }
+
     /**
      * 메시지 송신 (STOMP 기반)
      */
@@ -36,9 +46,12 @@ public class WebSocketStompController {
     public Mono<MessageDto> sendMessage(@DestinationVariable Long chatRoomId,
                                         @RequestBody String content,
                                         @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
+
+        String cleanedContent = cleanInput(content);
+
         try {
             Message message = new Message();
-            message.setContent(content);
+            message.setContent(cleanedContent);
             message.setChatRoomId(chatRoomId);
             message.setSenderId(tokenUserInfo.getId());
 

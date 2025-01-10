@@ -20,6 +20,16 @@ public class WebSocketStompService {
     private final UserChatRoomRepository userChatRoomRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
+    public String cleanInput(String input) {
+        if (input == null) {
+            return null;
+        }
+        // 문자열 양 끝의 쌍따옴표만 제거
+        return input.startsWith("\"") && input.endsWith("\"")
+                ? input.substring(1, input.length() - 1)
+                : input;
+    }
+
     /**
      * 메시지 송신
      */
@@ -55,12 +65,15 @@ public class WebSocketStompService {
      * 메시지 수정
      */
     public Mono<MessageDto> updateMessage(String messageId, String newContent, String senderId) {
+
+        String cleanedContent = cleanInput(newContent);
+
         return messageRepository.findById(messageId)
                 .flatMap(existingMessage -> {
                     if (!existingMessage.getSenderId().equals(senderId)) {
                         return Mono.error(new SecurityException("권한이 없습니다."));
                     }
-                    existingMessage.setContent(newContent);
+                    existingMessage.setContent(cleanedContent);
                     return messageRepository.save(existingMessage);
                 })
                 .map(Message::toDto)

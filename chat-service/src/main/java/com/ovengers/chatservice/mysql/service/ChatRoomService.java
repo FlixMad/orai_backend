@@ -28,6 +28,16 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserChatRoomRepository userChatRoomRepository;
 
+    public String cleanInput(String input) {
+        if (input == null) {
+            return null;
+        }
+        // 문자열 양 끝의 쌍따옴표만 제거
+        return input.startsWith("\"") && input.endsWith("\"")
+                ? input.substring(1, input.length() - 1)
+                : input;
+    }
+
     // 채팅방 리스트 조회
     public List<ChatRoomDto> getAllChatRooms(String userId) {
         // 사용자가 구독 중인 채팅방 ID 목록 가져오기
@@ -49,20 +59,31 @@ public class ChatRoomService {
 
     // 채팅방 생성
     public ChatRoomDto createChatRoom(String name, TokenUserInfo tokenUserInfo) {
-        validateChatRoomName(name); // 유효성 검사 추가
-        log.info("채팅방 생성 요청 - 사용자 ID: {}", tokenUserInfo.getId());
+
+        // 입력값 정제
+        String cleanedName = cleanInput(name);
+
+        // 유효성 검사
+        validateChatRoomName(cleanedName);
+        
         ChatRoom chatRoom = ChatRoom.builder()
-                .name(name.trim()) // 이름 양끝 공백 제거
-                .createdAt(LocalDateTime.now())
+                .name(cleanedName.trim())
                 .creatorId(tokenUserInfo.getId())
                 .build();
-        return ChatRoomDto.fromEntity(chatRoomRepository.save(chatRoom));
+
+        ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
+
+        return ChatRoomDto.fromEntity(savedChatRoom);
     }
 
     // 채팅방 이름 수정
     public ChatRoomDto updateChatRoom(Long chatRoomId, String newName, TokenUserInfo tokenUserInfo) {
-        validateChatRoomName(newName); // 유효성 검사 추가
-        log.info("채팅방 수정 요청 - 사용자 ID: {}", tokenUserInfo.getId());
+
+        // 입력값 정제
+        String cleanedName = cleanInput(newName);
+
+        // 유효성 검사
+        validateChatRoomName(cleanedName);
 
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new EntityNotFoundException(chatRoomId + "번 채팅방은 존재하지 않습니다."));
@@ -72,7 +93,7 @@ public class ChatRoomService {
             throw new SecurityException("채팅방 수정 권한이 없습니다.");
         }
 
-        chatRoom.setName(newName.trim()); // 이름 양끝 공백 제거
+        chatRoom.setName(cleanedName.trim()); // 이름 양끝 공백 제거
         return ChatRoomDto.fromEntity(chatRoomRepository.save(chatRoom));
     }
 

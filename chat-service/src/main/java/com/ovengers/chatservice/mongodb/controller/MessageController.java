@@ -18,17 +18,30 @@ import reactor.core.publisher.Mono;
 public class MessageController {
     private final MessageService messageService;
 
+    public String cleanInput(String input) {
+        if (input == null) {
+            return null;
+        }
+        // 문자열 양 끝의 쌍따옴표만 제거
+        return input.startsWith("\"") && input.endsWith("\"")
+                ? input.substring(1, input.length() - 1)
+                : input;
+    }
+
     /**
      * 데이터 저장
      */
     @PostMapping("/{chatRoomId}/createMessage")
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<MessageDto> createMessage(@PathVariable Long chatRoomId, @RequestBody String content, @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
+
+        String cleanedContent = cleanInput(content);
+
         try {
             // content만 받아서 Message 객체 생성
             Message message = new Message();
             message.setChatRoomId(chatRoomId); // 채팅방 ID 설정
-            message.setContent(content); // 클라이언트가 보낸 content 설정
+            message.setContent(cleanedContent); // 클라이언트가 보낸 content 설정
             message.setSenderId(tokenUserInfo.getId());
 
             return messageService.createMessage(message);
