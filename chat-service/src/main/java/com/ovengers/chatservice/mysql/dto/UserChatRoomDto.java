@@ -3,12 +3,13 @@
     import lombok.*;
 
     @Getter
-    @Setter
     @ToString
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
     public class UserChatRoomDto {
+        private Long id;
+        private String subAt;
         private Long chatRoomId;
         private String userId;
     }

@@ -1,32 +1,28 @@
 package com.ovengers.chatservice.mysql.dto;
 
-import com.ovengers.chatservice.mysql.entity.ChatRoom;
 import lombok.*;
 
-import java.time.format.DateTimeFormatter;
+import java.util.List;
 
-@Getter @Setter
+@Getter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class ChatRoomDto {
+
     private Long chatRoomId;
+
     private String image;
+
     private String name;
+
     private String createdAt;
+
     private String updatedAt;
+
     private String creatorId;
 
-    public static ChatRoomDto fromEntity(ChatRoom chatRoom) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return ChatRoomDto.builder()
-                .chatRoomId(chatRoom.getChatRoomId())
-                .image(chatRoom.getImage())
-                .name(chatRoom.getName())
-                .createdAt(chatRoom.getCreatedAt().format(formatter))
-                .updatedAt(chatRoom.getUpdatedAt().format(formatter))
-                .creatorId(chatRoom.getCreatorId())
-                .build();
-    }
+    private List<String> userIds; // 채팅방에 참여한 사용자 ID 목록
+
 }
