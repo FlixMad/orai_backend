@@ -25,9 +25,11 @@ public class ChatRoom {
     @Column(name = "chat_room_id")
     private Long chatRoomId;
 
+    @Setter
     @Column(name = "image")
     private String image;
 
+    @Setter
     @Column(name = "name", length = 100, nullable = false)
     private String name;
 
@@ -60,11 +62,4 @@ public class ChatRoom {
                 .build();
     }
 
-    public void setName(String cleanedName) {
-        this.name = cleanedName;
-    }
-
-    public void setImage(String newImage) {
-        this.image = newImage;
-    }
 }

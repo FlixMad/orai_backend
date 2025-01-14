@@ -22,14 +22,17 @@ public class Message {
     @Id
     private String messageId;
 
+    @Setter
     private String content;
 
     @CreatedDate
     @Field("created_at")
     private LocalDateTime createdAt;
 
+    @Setter
     private Long chatRoomId;
 
+    @Setter
     private String senderId;
 
     @Field("unread_user_ids")
@@ -47,15 +50,4 @@ public class Message {
                 .build();
     }
 
-    public void setChatRoomId(Long chatRoomId) {
-        this.chatRoomId = chatRoomId;
-    }
-
-    public void setContent(String cleanedContent) {
-        this.content = cleanedContent;
-    }
-
-    public void setSenderId(String senderId) {
-        this.senderId = senderId;
-    }
 }
