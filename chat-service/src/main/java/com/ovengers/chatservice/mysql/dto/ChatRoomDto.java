@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter;
 @Builder
 public class ChatRoomDto {
     private Long chatRoomId;
+    private String image;
     private String name;
     private String createdAt;
     private String updatedAt;
@@ -21,6 +22,7 @@ public class ChatRoomDto {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return ChatRoomDto.builder()
                 .chatRoomId(chatRoom.getChatRoomId())
+                .image(chatRoom.getImage())
                 .name(chatRoom.getName())
                 .createdAt(chatRoom.getCreatedAt().format(formatter))
                 .updatedAt(chatRoom.getUpdatedAt().format(formatter))

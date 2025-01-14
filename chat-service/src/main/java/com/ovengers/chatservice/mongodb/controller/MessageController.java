@@ -1,16 +1,18 @@
 package com.ovengers.chatservice.mongodb.controller;
 
-import com.ovengers.chatservice.common.auth.TokenUserInfo;
 import com.ovengers.chatservice.mongodb.document.Message;
 import com.ovengers.chatservice.mongodb.dto.MessageDto;
 import com.ovengers.chatservice.mongodb.service.MessageService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
+
+import java.security.Principal;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,16 +35,23 @@ public class MessageController {
      */
     @PostMapping("/{chatRoomId}/createMessage")
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<MessageDto> createMessage(@PathVariable Long chatRoomId, @RequestBody String content, @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
-
+    public Mono<MessageDto> createMessage(
+            @PathVariable Long chatRoomId,
+            @RequestBody String content,
+            Principal principal
+    ) {
         String cleanedContent = cleanInput(content);
 
         try {
-            // content만 받아서 Message 객체 생성
+            // principal.getName()에서 id 파싱
+            String principalName = principal.getName();
+            String senderId = extractIdFromPrincipal(principalName);
+
+            // Message 객체 생성
             Message message = new Message();
-            message.setChatRoomId(chatRoomId); // 채팅방 ID 설정
-            message.setContent(cleanedContent); // 클라이언트가 보낸 content 설정
-            message.setSenderId(tokenUserInfo.getId());
+            message.setChatRoomId(chatRoomId);
+            message.setContent(cleanedContent);
+            message.setSenderId(senderId);
 
             return messageService.createMessage(message);
         } catch (IllegalArgumentException ex) {
@@ -50,35 +59,22 @@ public class MessageController {
         }
     }
 
-/*
-     // 데이터 조회
-    @GetMapping("/{chatRoomId}/getMessages")
-    public Mono<ResponseEntity<List<MessageDto>>> getMessages(@PathVariable Long chatRoomId) {
-        try {
-            return messageService.getMessages(chatRoomId)
-                    .collectList()
-                    .map(ResponseEntity::ok);
-        } catch (IllegalArgumentException ex) {
-            return Mono.just(ResponseEntity.badRequest().body(null));
+    /**
+     * Principal에서 id를 추출하는 유틸리티 메서드
+     *
+     * @param principalName Principal에서 가져온 name 값
+     * @return 추출된 id
+     */
+    private String extractIdFromPrincipal(String principalName) {
+        // 정규식으로 id 값 추출
+        Pattern pattern = Pattern.compile("id=([a-f0-9-]+)");
+        Matcher matcher = pattern.matcher(principalName);
+
+        if (matcher.find()) {
+            return matcher.group(1); // 첫 번째 그룹(id 값) 반환
+        } else {
+            throw new IllegalArgumentException("Invalid Principal format");
         }
     }
-
-    // 데이터 수정
-    @PutMapping("/{messageId}/updateMessage")
-    public Mono<ResponseEntity<MessageDto>> updateMessage(
-            @PathVariable String messageId,
-            @RequestBody MessageRequestDto requestDto) {
-        return messageService.updateMessage(messageId, requestDto.getContent())
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-    // 데이터 삭제
-    @DeleteMapping("/{messageId}/deleteMessage")
-    public Mono<ResponseEntity<Void>> deleteMessage(@PathVariable String messageId) {
-        return messageService.deleteMessage(messageId)
-                .then(Mono.just(ResponseEntity.ok().<Void>build()))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }*/
 
 }

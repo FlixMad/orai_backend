@@ -3,6 +3,7 @@ package com.ovengers.chatservice.mysql.controller;
 import com.ovengers.chatservice.common.auth.TokenUserInfo;
 import com.ovengers.chatservice.common.dto.CommonResDto;
 import com.ovengers.chatservice.mysql.dto.ChatRoomDto;
+import com.ovengers.chatservice.mysql.dto.ChatRoomRequestDto;
 import com.ovengers.chatservice.mysql.dto.UserChatRoomDto;
 import com.ovengers.chatservice.mysql.service.ChatRoomService;
 import com.ovengers.chatservice.mysql.service.UserChatRoomService;
@@ -35,29 +36,38 @@ public class ChatRoomController {
 
     // 새로운 채팅방 생성
     @PostMapping("/createChatRoom")
-    public ResponseEntity<ChatRoomDto> createChatRoom(@AuthenticationPrincipal TokenUserInfo tokenUserInfo,
-                                                      @RequestBody String name) {
-        ChatRoomDto newChatRoom = chatRoomService.createChatRoom(name, tokenUserInfo);
+    public ResponseEntity<ChatRoomDto> createChatRoom(
+            @AuthenticationPrincipal TokenUserInfo tokenUserInfo,
+            @RequestBody ChatRoomRequestDto chatRoomRequestDto) {
 
-        // 채팅방 생성자 정보를 저장
-        userChatRoomService.subscribeToChatRoom(
-                UserChatRoomDto.builder()
-                        .chatRoomId(newChatRoom.getChatRoomId())
-                        .userId(tokenUserInfo.getId())
-                        .build()
+        ChatRoomDto newChatRoom = chatRoomService.createChatRoomWithInvites(
+                chatRoomRequestDto.getName(),
+                chatRoomRequestDto.getImage(),
+                chatRoomRequestDto.getInviteUserIds(),
+                tokenUserInfo
         );
 
-        CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "새로운 채팅방 생성 완료", newChatRoom);
+        CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "새로운 채팅방 생성 및 초대 완료", newChatRoom);
         return new ResponseEntity(commonResDto, HttpStatus.OK);
     }
 
     // 채팅방 이름 수정
-    @PutMapping("/{chatRoomId}/updateChatRoom")
-    public ResponseEntity<ChatRoomDto> updateChatRoom(@AuthenticationPrincipal TokenUserInfo tokenUserInfo,
+    @PutMapping("/{chatRoomId}/updateChatRoomName")
+    public ResponseEntity<ChatRoomDto> updateChatRoomName(@AuthenticationPrincipal TokenUserInfo tokenUserInfo,
                                                       @PathVariable Long chatRoomId,
                                                       @RequestBody String newName) {
-        ChatRoomDto updatedChatRoom = chatRoomService.updateChatRoom(chatRoomId, newName, tokenUserInfo);
+        ChatRoomDto updatedChatRoom = chatRoomService.updateChatRoomName(chatRoomId, newName, tokenUserInfo);
         CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "채팅방 이름 수정 완료", updatedChatRoom);
+        return new ResponseEntity(commonResDto, HttpStatus.OK);
+    }
+
+    // 채팅방 이미지 수정
+    @PutMapping("/{chatRoomId}/updateChatRoomImage")
+    public ResponseEntity<ChatRoomDto> updateChatRoomImage(@AuthenticationPrincipal TokenUserInfo tokenUserInfo,
+                                                      @PathVariable Long chatRoomId,
+                                                      @RequestBody String newImage) {
+        ChatRoomDto updatedChatRoom = chatRoomService.updateChatRoomImage(chatRoomId, newImage, tokenUserInfo);
+        CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "채팅방 이미지 수정 완료", updatedChatRoom);
         return new ResponseEntity(commonResDto, HttpStatus.OK);
     }
 

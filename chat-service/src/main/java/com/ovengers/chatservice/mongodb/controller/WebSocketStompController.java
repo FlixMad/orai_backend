@@ -14,11 +14,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.security.Principal;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,6 +30,7 @@ public class WebSocketStompController {
 
     private final WebSocketStompService webSocketStompService;
     private final UserChatRoomService userChatRoomService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public String cleanInput(String input) {
         if (input == null) {
@@ -45,7 +49,7 @@ public class WebSocketStompController {
     @SendTo("/sub/{chatRoomId}/chat")
     public Mono<MessageDto> sendMessage(@DestinationVariable Long chatRoomId,
                                         @RequestBody String content,
-                                        @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
+                                        Principal principal) {
 
         String cleanedContent = cleanInput(content);
 
@@ -53,13 +57,13 @@ public class WebSocketStompController {
             Message message = new Message();
             message.setContent(cleanedContent);
             message.setChatRoomId(chatRoomId);
-            message.setSenderId(tokenUserInfo.getId());
+            message.setSenderId(principal.getName());
 
             // 채팅방 구독 정보 저장
             userChatRoomService.subscribeToChatRoom(
                     UserChatRoomDto.builder()
                             .chatRoomId(chatRoomId)
-                            .userId(tokenUserInfo.getId())
+                            .userId(principal.getName())
                             .build()
             );
 
@@ -67,6 +71,25 @@ public class WebSocketStompController {
         } catch (IllegalArgumentException ex) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
         }
+    }
+
+
+    /**
+     * 1:1 채팅 메시지 처리 (특정 사용자에게 메시지 전달)
+     */
+    @MessageMapping("/chat/one-on-one/{receiverId}") // /pub/chat/one-on-one/{receiverId}
+    public void sendOneOnOneMessage(MessageDto messageDto, @DestinationVariable String receiverId) {
+        // 메시지 수신 후, 대상에게 메시지 전달
+        messagingTemplate.convertAndSend("/sub/chat/one-on-one/" + receiverId, messageDto);
+    }
+
+    /**
+     * 그룹 채팅 메시지 처리 (그룹에 속한 모든 사용자에게 메시지 전달)
+     */
+    @MessageMapping("/chat/group/{chatRoomId}") // /pub/chat/group/{chatRoomId}
+    public void sendGroupMessage(MessageDto messageDto, @DestinationVariable String chatRoomId) {
+        // 그룹 채팅방에 있는 사용자들에게 메시지 전달
+        messagingTemplate.convertAndSend("/sub/chat/group/" + chatRoomId, messageDto);
     }
 
     /**

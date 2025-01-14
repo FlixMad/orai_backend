@@ -2,6 +2,7 @@ package com.ovengers.chatservice.mongodb.document;
 
 import com.ovengers.chatservice.mongodb.dto.MessageDto;
 import lombok.*;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -25,6 +26,9 @@ public class Message {
     @CreatedDate
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+
     private Long chatRoomId;
 
     private String senderId;
@@ -35,6 +39,7 @@ public class Message {
                 .messageId(getMessageId())
                 .content(getContent())
                 .createdAt(getCreatedAt() != null ? getCreatedAt().format(formatter) : "비어있음")
+                .updatedAt(getUpdatedAt() != null ? getUpdatedAt().format(formatter) : "비어있음")
                 .chatRoomId(getChatRoomId())
                 .senderId(getSenderId())
                 .build();

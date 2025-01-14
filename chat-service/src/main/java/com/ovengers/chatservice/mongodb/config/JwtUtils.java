@@ -77,4 +77,13 @@ public class JwtUtils {
             return false; // 유효하지 않은 토큰
         }
     }
+
+    public String extractUserIdFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(secretKey) // 시크릿 키 설정
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.get("id", String.class); // ID 추출
+    }
 }

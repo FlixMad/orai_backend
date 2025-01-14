@@ -22,6 +22,9 @@ public class ChatRoom {
     @Column(name = "chat_room_id")
     private Long chatRoomId;
 
+    @Column(name = "image")
+    private String image;
+
     @Column(name = "name",  length = 100, nullable = false)
     private String name;
 
