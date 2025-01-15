@@ -6,7 +6,7 @@ pipeline {
     agent any // 어느 젠킨스 서버에서도 실행이 가능
     environment {
         REGION = "ap-northeast-2"
-        ECR_URL = "054037133599.dkr.ecr.ap-northeast-2.amazonaws.com/my-app-image"
+        ECR_URL = "054037133599.dkr.ecr.ap-northeast-2.amazonaws.com"
         SERVICE_DIRS = "config-service,gateway-service,user-service,calendar-service,chat-service"
         K8S_REPO_URL = "https://github.com/FlixMad/orai_kubenetes.git"
         K8S_REPO_CRED = "github-k8s-repo-token" // 여기다 토큰 넣는건가봐!
