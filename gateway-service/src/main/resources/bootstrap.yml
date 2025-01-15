@@ -3,3 +3,5 @@ spring:
     config:
       uri: http://localhost:8888
       name: orai
+  profiles:
+    active: prod

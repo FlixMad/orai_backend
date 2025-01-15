@@ -10,6 +10,8 @@ spring:
   application:
     name: user-service
   cloud:
+    refresh:
+      extra-refreshable: com.zaxxer.hikari.HikariDataSource
     client:
       hostname: localhost
   datasource:

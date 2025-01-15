@@ -5,4 +5,6 @@ spring:
   cloud:
     config:
       uri: http://localhost:8888
-      name: orai
+      name: user-service
+  profiles:
+    active: default

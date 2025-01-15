@@ -2,8 +2,8 @@ server:
   port: 8888
 
 spring:
-  profiles:
-      active: native
+#  profiles:
+#      active: native
   application:
     name: config-service
   cloud:
@@ -11,13 +11,10 @@ spring:
       server:
         native:
           search-locations: file:///C:\\devlop\\git-local-repo
-#        git:
-#          uri: git@github.com:jh080724/traplan-config.git
-#          default-label: main
-#          host-key: ""
-#          host-key-algorithm: "ssh-rsa"
-#          private-key: |
-#            ${GIT_PRIVATE_KEY}
+        git:
+          uri: https://github.com/CodeName-maru/cloud-config-setting.git
+          username: CodeName-maru
+          password: ${GITHUB_PRIVATE_KEY}
 management:
   endpoints:
     web:
