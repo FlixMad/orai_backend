@@ -15,7 +15,8 @@ spring:
         cors-configurations:
           "[/**]": # 모든 경로에 대한 CORS 설정
             allowed-origins:
-              - "https://jiangxy.github.io"
+              - "https://orai.store"
+              - "http://orai.store"
               - "http://localhost:3000"
               - "http://localhost:8181"
             allowed-methods:
