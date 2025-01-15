@@ -55,6 +55,8 @@ pipeline {
                             // 여기서 원하는 버전을 정하거나, 커밋 태그를 붙여보자.
                             def newTag = "0.0.0"
                             sh """
+                            mkdir -p ~/.docker
+
                             curl -O https://amazon-ecr-credential-helper-releases.s3.us-east-2.amazonaws.com/0.4.0/linux-amd64/${ecrLoginHelper}
                             chmod +x ${ecrLoginHelper}
                             mv ${ecrLoginHelper} /usr/local/bin/
