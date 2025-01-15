@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
-    // 최신순으로 전체 채팅방 조회
-    List<ChatRoom> findAllByOrderByCreatedAtDesc();
+
+    List<ChatRoom> findAllById(Iterable<Long> ids); // 특정 ID 목록에 해당하는 채팅방 조회
+
 }

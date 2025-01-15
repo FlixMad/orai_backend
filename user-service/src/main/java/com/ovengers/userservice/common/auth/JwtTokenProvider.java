@@ -28,15 +28,17 @@ public class JwtTokenProvider {
     /**
      * 액세스 토큰 생성
      */
-    public String createToken(String id, String departmentId) {
-        Claims claims = Jwts.claims().setSubject(id); // 사용자 ID를 subject로 설정
+    public String createToken(String userId, String departmentId) {
+        Claims claims = Jwts.claims().setSubject(userId); // 사용자 ID를 subject로 설정
         claims.put("departmentId", departmentId); // 부서 ID 추가
+//        claims.get("departmentId", String.class);
+
         Date now = new Date();
 
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now) // 발급 시간
-                .setExpiration(new Date(now.getTime() + expiration * 60 * 1000L)) // 만료 시간
+                .setExpiration(new Date(now.getTime() + expiration * 600 * 1000L)) // 만료 시간 (개발할 때 로그인 다시하기 귀찮으니까 10배 늘려놓음)
                 .signWith(SignatureAlgorithm.HS256, secretKey) // 서명 알고리즘과 비밀 키 설정
                 .compact();
     }
@@ -44,35 +46,52 @@ public class JwtTokenProvider {
     /**
      * 리프레시 토큰 생성
      */
-    public String createRefreshToken(String id, String departmentId) {
-        Claims claims = Jwts.claims().setSubject(id); // 사용자 ID를 subject로 설정
+    public String createRefreshToken(String userId, String departmentId) {
+        Claims claims = Jwts.claims().setSubject(userId); // 사용자 ID를 subject로 설정
         claims.put("departmentId", departmentId); // 부서 ID 추가
         Date now = new Date();
 
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now) // 발급 시간
-                .setExpiration(new Date(now.getTime() + expirationRt * 60 * 1000L)) // 만료 시간
+                .setExpiration(new Date(now.getTime() + expirationRt * 600 * 1000L)) // 만료 시간
                 .signWith(SignatureAlgorithm.HS256, secretKeyRt) // 서명 알고리즘과 리프레시 비밀 키 설정
                 .compact();
     }
 
     /**
-     * 토큰 검증 및 사용자 정보 반환
+     * 토큰에서 userId 추출
      */
-    public TokenUserInfo validateAndGetTokenUserInfo(String token) throws Exception {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(secretKey) // 액세스 토큰의 비밀 키로 파싱
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        log.info("Parsed claims: {}", claims);
-
-        return TokenUserInfo.builder()
-                .id(claims.getSubject()) // 사용자 ID
-                .departmentId(claims.get("departmentId", String.class)) // 부서 ID
-                .build();
+    public String getUserIdFromToken(String token) {
+        Claims claims = parseClaims(token); // JWT 토큰에서 클레임을 파싱
+        return claims.getSubject(); // subject로 저장된 userId 반환
     }
 
+    /**
+     * 토큰에서 클레임 추출
+     */
+    private Claims parseClaims(String token) {
+        return Jwts.parser()
+                .setSigningKey(secretKey) // 액세스 토큰의 비밀 키
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    /**
+     * 리프레시 토큰에서 userId 추출
+     */
+    public String getUserIdFromRefreshToken(String token) {
+        Claims claims = parseClaimsForRefreshToken(token); // 리프레시 토큰에서 클레임을 파싱
+        return claims.getSubject(); // subject로 저장된 userId 반환
+    }
+
+    /**
+     * 리프레시 토큰에서 클레임 추출
+     */
+    private Claims parseClaimsForRefreshToken(String token) {
+        return Jwts.parser()
+                .setSigningKey(secretKeyRt) // 리프레시 토큰의 비밀 키
+                .parseClaimsJws(token)
+                .getBody();
+    }
 }

@@ -6,17 +6,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -24,38 +23,34 @@ import java.util.Collections;
 // 클라이언트가 전송한 토큰을 검사하는 필터
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private final JwtTokenProvider jwtTokenProvider;
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Authorization 헤더에서 JWT 토큰 가져오기
-        String token = request.getHeader("Authorization");
+        // 게이트웨이가 토큰 내에 클레임을 헤더에 담아서 보내준다.
+        String userId = request.getHeader("X-User-Id");
+        log.info("user id is {}", userId);
+        String departmentId = request.getHeader("X-User-DepartmentId") == null ? "" : request.getHeader("X-User-DepartmentId");
+        log.info("departmentId:{}",departmentId);
+        String userRole = departmentId.contains("team9") ? "ADMIN" : "USER";
+        log.info("userRole: {}", userRole);
 
-        if (StringUtils.hasText(token) && token.startsWith("Bearer ")) {
-            token = token.substring(7);  // "Bearer " 부분 제거
+        log.info("request Url: {}", request.getRequestURI());
+        // 토큰 위조검사 및 인증 완료
+        if (userId != null){
+            // 인증 완료 처리
+            // spring security에게 인증 정보를 전달해서 전역적으로 어플리케이션 내에서
+            // 인증 정보를 활용할 수 있도록 설정.
+            List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+            authorities.add(new SimpleGrantedAuthority("ROLE_"+userRole));
+            Authentication auth = new UsernamePasswordAuthenticationToken(
+                    new TokenUserInfo(userId,departmentId,userRole),// 컨트롤러 등에서 활용할 유저 정보
+                    "" // 인증된 사용자 비밀번호: 보통 null 혹은 빈 문자열로 선언.
+                    ,authorities
+            );
 
-            try {
-                // JWT 토큰을 검증하고 사용자 정보를 설정
-                TokenUserInfo userInfo = jwtTokenProvider.validateAndGetTokenUserInfo(token);
-
-                // 사용자 인증 정보를 SecurityContext에 설정
-                Authentication auth = new UsernamePasswordAuthenticationToken(
-                        userInfo, // 사용자 정보
-                        null, // 비밀번호는 null
-                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
-                );
-
-                // 인증 정보 설정
-                SecurityContextHolder.getContext().setAuthentication(auth);
-                log.info("User authenticated: {}", userInfo.getId());
-            } catch (Exception e) {
-                log.error("JWT token validation failed", e);
-                response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                response.getWriter().write("Invalid or expired JWT token.");
-                return;  // 인증 실패 시 후속 필터 실행 중단
-            }
+            // 시큐리티 컨테이너에 인증 정보 객체 등록
+            SecurityContextHolder.getContext().setAuthentication(auth);
         }
 
         // 필터 체인 진행

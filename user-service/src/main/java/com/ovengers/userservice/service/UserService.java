@@ -10,11 +10,13 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Transactional
@@ -26,6 +28,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder encoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     /**
      * 사용자 등록
@@ -54,8 +57,20 @@ public class UserService {
         }
 
         // JWT 토큰 발급 (부서 ID만 전달, 역할은 부서 정보로 대체)
-        String token = jwtTokenProvider.createToken(user.getEmail(), user.getDepartmentId());
+        String token = jwtTokenProvider.createToken(user.getUserId(), user.getDepartmentId());
+
+        // Refresh Token을 생성해 주겠다.
+        // Access Token의 수명이 만료되었을 경우 Refresh Token을 확인해서 리프레시가 유효한 경우
+        // 로그인 없이 Access Token을 재발급 해주는 용도로 사용.
+        String refreshToken
+                = jwtTokenProvider.createRefreshToken(user.getUserId(), user.getDepartmentId());
+
+        // refresh Token을 DB에 저장하자. -> redis에 저장.
+        redisTemplate.opsForValue().set(user.getEmail(), refreshToken, 240, TimeUnit.HOURS);
+
         return new UserResponseDto(user, token);
+
+
     }
 
     /**
@@ -70,7 +85,7 @@ public class UserService {
         }
 
         TokenUserInfo userInfo = (TokenUserInfo) principal;
-        User user = userRepository.findByEmail(userInfo.getEmail())
+        User user = userRepository.findById(userInfo.getId())
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
         return new UserResponseDto(user);
@@ -88,12 +103,24 @@ public class UserService {
 
     /**
      * 특정 ID로 사용자 조회
+     * dto 로 리턴
      */
     public UserResponseDto getUserById(String userId) {  // 파라미터를 String으로 수정
         User user = userRepository.findByUserId(userId)  // findById 대신 findByUserId로 변경
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
         return new UserResponseDto(user);
+    }
+
+    /**
+     *
+     * @param userId 로 사용자 조회
+     * @return user 엔티티로 리턴
+     */
+    public User findUserById(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("그런 아이디의 사용자 없음"));
+        return user;
     }
 
 
