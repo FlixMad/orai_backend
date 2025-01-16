@@ -22,9 +22,9 @@ import java.util.List;
 public class ChatRoomController {
     private final ChatRoomService chatRoomService;
 
-    @GetMapping("/profile")
-    public ResponseEntity<UserResponseDto> getUserProfile(@AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
-        UserResponseDto userProfile = chatRoomService.getUserProfile(tokenUserInfo.getId());
+    @GetMapping("/{userId}/profile")
+    public ResponseEntity<UserResponseDto> getUserProfile(@PathVariable String userId) {
+        UserResponseDto userProfile = chatRoomService.getUserProfile(userId);
         return ResponseEntity.ok(userProfile);
     }
 
