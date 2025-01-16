@@ -8,7 +8,5 @@ import reactor.core.publisher.Mono;
 public interface MessageRepository extends ReactiveMongoRepository<Message, String> {
     Flux<Message> findAllByChatRoomId(Long chatRoomId);
 
-    Mono<Message> existsByMessageId(String messageId);
-
     Mono<Message> findByMessageId(String messageId);
 }
