@@ -19,7 +19,7 @@ public interface UserServiceClient {
      * @return userResoponseDto로 정보 받아옴
      */
     @GetMapping("api/users/{userId}")
-    CommonResDto<UserResponseDto> getUser(@PathVariable("userId") String userId);
+    UserResponseDto getUserById(@PathVariable("userId") String userId);
 
     /**
      *

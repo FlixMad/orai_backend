@@ -23,9 +23,9 @@ public class ChatRoomController {
     private final ChatRoomService chatRoomService;
 
     @GetMapping("/{userId}/profile")
-    public ResponseEntity<UserResponseDto> getUserProfile(@PathVariable String userId) {
-        UserResponseDto userProfile = chatRoomService.getUserProfile(userId);
-        return ResponseEntity.ok(userProfile);
+    public ResponseEntity<UserResponseDto> getUserFromUserService(@PathVariable String userId) {
+        UserResponseDto userResponse = chatRoomService.getUserInfo(userId);
+        return ResponseEntity.ok(userResponse);
     }
 
     @PostMapping("/createChatRoom")

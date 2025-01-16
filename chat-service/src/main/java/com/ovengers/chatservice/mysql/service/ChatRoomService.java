@@ -33,17 +33,14 @@ public class ChatRoomService {
     private final UserChatRoomRepository userChatRoomRepository;
     private final UserServiceClient userServiceClient;
 
-    public UserResponseDto getUserProfile(String userId) {
-        // Feign 클라이언트를 통해 사용자 정보 조회
-        CommonResDto<?> response = userServiceClient.getUser(userId);
+    public UserResponseDto getUserInfo(String userId) {
+        UserResponseDto userById = userServiceClient.getUserById(userId);
 
-        // 성공 여부 검증 및 데이터 반환
-        if (response == null || response.getStatusCode() != HttpStatus.OK.value() || response.getResult() == null) {
+        if (userById == null) {
             throw new RuntimeException("사용자 정보를 가져오는 데 실패했습니다: " + userId);
         }
 
-        // 결과를 UserResponseDto로 변환
-        return (UserResponseDto) response.getResult();
+        return userById;
     }
 
     // 유효성 검사 메서드
