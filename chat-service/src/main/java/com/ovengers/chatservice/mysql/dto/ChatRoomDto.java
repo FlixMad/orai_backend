@@ -2,8 +2,6 @@ package com.ovengers.chatservice.mysql.dto;
 
 import lombok.*;
 
-import java.util.List;
-
 @Getter
 @ToString
 @NoArgsConstructor

@@ -2,10 +2,8 @@ package com.ovengers.chatservice.mysql.service;
 
 import com.ovengers.chatservice.client.UserResponseDto;
 import com.ovengers.chatservice.client.UserServiceClient;
-import com.ovengers.chatservice.common.auth.TokenUserInfo;
 import com.ovengers.chatservice.common.dto.CommonResDto;
 import com.ovengers.chatservice.mysql.dto.ChatRoomDto;
-import com.ovengers.chatservice.mysql.dto.ChatRoomRequestDto;
 import com.ovengers.chatservice.mysql.dto.CompositeChatRoomDto;
 import com.ovengers.chatservice.mysql.entity.ChatRoom;
 import com.ovengers.chatservice.mysql.entity.UserChatRoom;
