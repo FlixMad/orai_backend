@@ -149,4 +149,11 @@ public class UserService {
     public boolean isEmailDuplicate(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
+
+    public List<UserResponseDto> getUsersByIds(List<String> userIds) {
+        List<User> users = userRepository.findAllById(userIds);
+        return users.stream()
+                .map(UserResponseDto::new)
+                .collect(Collectors.toList());
+    }
 }

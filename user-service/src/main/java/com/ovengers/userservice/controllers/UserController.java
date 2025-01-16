@@ -125,4 +125,10 @@ public class UserController {
         boolean isDuplicate = userService.isEmailDuplicate(email);
         return new ResponseEntity<>(isDuplicate, HttpStatus.OK);
     }
+
+    @PostMapping("/list")
+    public ResponseEntity<List<UserResponseDto>> getUsersByIds(@RequestBody List<String> userIds) {
+        List<UserResponseDto> users = userService.getUsersByIds(userIds);
+        return ResponseEntity.ok(users);
+    }
 }
