@@ -77,7 +77,7 @@ public class ChatRoomService {
                 .chatRoomId(savedChatRoom.getChatRoomId())
                 .userId(savedChatRoom.getCreatorId())
                 .build();
-        UserChatRoom savedUserChatRoom = userChatRoomRepository.save(userChatRoom);
+        userChatRoomRepository.save(userChatRoom);
 
         // 초대할 유저들을 UserChatRoom에 저장
         List<UserChatRoom> userChatRooms = userIds.stream()

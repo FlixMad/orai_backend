@@ -1,7 +1,6 @@
 package com.ovengers.chatservice.client;
 
 import com.ovengers.chatservice.common.dto.CommonResDto;
-import org.apache.catalina.User;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
