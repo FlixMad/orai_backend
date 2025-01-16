@@ -51,8 +51,15 @@ public class ChatRoomController {
 
     @DeleteMapping("/{chatRoomId}/deleteChatRoom")
     public ResponseEntity<Void> deleteChatRoom (@PathVariable Long chatRoomId,
-                                        @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
+                                                @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
         chatRoomService.deleteChatRoom(chatRoomId, tokenUserInfo.getId());
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{chatRoomId}/disconnect")
+    public ResponseEntity<Void> disconnect (@PathVariable Long chatRoomId,
+                                            @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
+        chatRoomService.disconnectChatRoom(chatRoomId, tokenUserInfo.getId());
         return ResponseEntity.noContent().build();
     }
 }

@@ -142,6 +142,22 @@ public class ChatRoomService {
         userChatRoomRepository.deleteByChatRoomId(chatRoom.getChatRoomId());
     }
 
+    // 채팅방 나가기(채팅방 생성자는 불가능)
+    public void disconnectChatRoom(Long chatRoomId, String userId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new EntityNotFoundException(chatRoomId + "번 채팅방은 존재하지 않습니다."));
+
+        if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userId)) {
+            throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
+        }
+
+        if (chatRoom.getCreatorId().equals(userId)) {
+            throw new SecurityException("채팅방 생성자는 채팅방을 나갈 수 없습니다.");
+        }
+
+        userChatRoomRepository.deleteByChatRoomIdAndUserId(chatRoomId, userId);
+    }
+
 
 //    private void validateInvitedUsers(List<String> inviteUserIds) {
 //        inviteUserIds.forEach(userId -> {
