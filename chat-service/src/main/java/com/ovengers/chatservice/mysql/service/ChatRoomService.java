@@ -93,6 +93,25 @@ public class ChatRoomService {
                 .collect(Collectors.toList());
     }
 
+    public List<UserResponseDto> getSubUsers(Long chatRoomId, String userId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new EntityNotFoundException(chatRoomId + "번 채팅방은 존재하지 않습니다."));
+
+        if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userId)) {
+            throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
+        }
+
+        // UserChatRoom에서 해당 chatRoomId의 유저 리스트 가져오기
+        List<String> userIds = userChatRoomRepository.findAllByChatRoomId(chatRoom.getChatRoomId())
+                .stream()
+                .map(UserChatRoom::getUserId) // userId 추출
+                .toList();
+
+        return userIds.stream()
+                .map(userServiceClient::getUserById) // UserClient 호출
+                .collect(Collectors.toList());
+    }
+
     // 채팅방 생성자만 채팅방 이미지 및 이름 수정
     public ChatRoomDto updateChatRoom(Long chatRoomId, String newImage, String newName, String userId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)

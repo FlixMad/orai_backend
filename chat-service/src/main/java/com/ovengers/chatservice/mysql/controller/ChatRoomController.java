@@ -41,6 +41,14 @@ public class ChatRoomController {
         return ResponseEntity.ok(chatRoomList);
     }
 
+    @GetMapping("/{chatRoomId}/users")
+    public ResponseEntity<List<UserResponseDto>> getSubscribedUsers(
+            @PathVariable Long chatRoomId,
+            @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
+        List<UserResponseDto> subUsers = chatRoomService.getSubUsers(chatRoomId, tokenUserInfo.getId());
+        return ResponseEntity.ok(subUsers);
+    }
+
     @PutMapping("/{chatRoomId}/updateChatRoom")
     public ResponseEntity<ChatRoomDto> updateChatRoom(@PathVariable Long chatRoomId,
                                                       @RequestBody ChatRoomRequestDto chatRoomRequestDto,
