@@ -31,7 +31,12 @@ public class ChatRoomController {
     @PostMapping("/createChatRoom")
     public ResponseEntity<CompositeChatRoomDto> createChatRoom(@RequestBody ChatRoomRequestDto chatRoomRequestDto,
                                                                @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
-        CompositeChatRoomDto createdChatRoom = chatRoomService.createChatRoom(chatRoomRequestDto.getImage(), chatRoomRequestDto.getName(), tokenUserInfo.getId());
+        CompositeChatRoomDto createdChatRoom = chatRoomService.createChatRoom(
+                chatRoomRequestDto.getImage(),
+                chatRoomRequestDto.getName(),
+                tokenUserInfo.getId(),
+                chatRoomRequestDto.getUserIds() // 초대할 유저 ID 목록 전달
+        );
         return ResponseEntity.ok(createdChatRoom);
     }
 
@@ -58,15 +63,15 @@ public class ChatRoomController {
     }
 
     @DeleteMapping("/{chatRoomId}/deleteChatRoom")
-    public ResponseEntity<Void> deleteChatRoom (@PathVariable Long chatRoomId,
-                                                @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
+    public ResponseEntity<Void> deleteChatRoom(@PathVariable Long chatRoomId,
+                                               @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
         chatRoomService.deleteChatRoom(chatRoomId, tokenUserInfo.getId());
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{chatRoomId}/disconnect")
-    public ResponseEntity<Void> disconnect (@PathVariable Long chatRoomId,
-                                            @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
+    public ResponseEntity<Void> disconnect(@PathVariable Long chatRoomId,
+                                           @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
         chatRoomService.disconnectChatRoom(chatRoomId, tokenUserInfo.getId());
         return ResponseEntity.noContent().build();
     }

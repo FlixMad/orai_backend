@@ -14,5 +14,5 @@ import java.util.List;
 public class ChatRoomRequestDto {
     private String image;
     private String name;
-//    private List<String> inviteUserIds; // 초대할 사용자 ID 리스트
+    private List<String> userIds; // 초대할 유저 ID 목록
 }

@@ -2,6 +2,8 @@ package com.ovengers.chatservice.mysql.dto;
 
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @ToString
 @NoArgsConstructor
@@ -9,5 +11,5 @@ import lombok.*;
 @Builder
 public class CompositeChatRoomDto {
     private ChatRoomDto chatRoomDto;
-    private UserChatRoomDto userChatRoomDto;
+    private List<UserChatRoomDto> userChatRoomDto; // 초대된 유저 목록
 }

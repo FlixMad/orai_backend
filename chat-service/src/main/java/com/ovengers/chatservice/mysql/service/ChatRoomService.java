@@ -49,8 +49,22 @@ public class ChatRoomService {
     }
 
     // ChatRoom 및 UserChatRoom 생성
-    public CompositeChatRoomDto createChatRoom(String image, String name, String userId) {
+    public CompositeChatRoomDto createChatRoom(String image, String name, String userId, List<String> userIds) {
         validateChatRoomName(name.trim());
+
+        // 유저 목록을 FeignClient를 통해 확인
+        List<UserResponseDto> validUsers = userServiceClient.getUsersByIds(userIds);
+
+        // 유저 ID가 유효한지 확인 (존재하지 않는 유저 ID가 있으면 예외 처리)
+        List<String> validUserIds = validUsers.stream()
+                .map(UserResponseDto::getUserId)
+                .toList();
+
+        for (String user : userIds) {
+            if (!validUserIds.contains(user)) {
+                throw new IllegalArgumentException("유효하지 않은 유저 ID: " + user);
+            }
+        }
 
         ChatRoom chatRoom = ChatRoom.builder()
                 .name(name)
@@ -65,13 +79,26 @@ public class ChatRoomService {
                 .build();
         UserChatRoom savedUserChatRoom = userChatRoomRepository.save(userChatRoom);
 
+        // 초대할 유저들을 UserChatRoom에 저장
+        List<UserChatRoom> userChatRooms = userIds.stream()
+                .map(user -> UserChatRoom.builder()
+                        .chatRoomId(savedChatRoom.getChatRoomId())
+                        .userId(user)
+                        .build())
+                .collect(Collectors.toList());
+        userChatRoomRepository.saveAll(userChatRooms);
+
         return CompositeChatRoomDto.builder()
                 .chatRoomDto(savedChatRoom.toDto())
-                .userChatRoomDto(savedUserChatRoom.toDto())
+                .userChatRoomDto(
+                        userChatRooms.stream()
+                                .map(UserChatRoom::toDto)
+                                .collect(Collectors.toList())
+                )
                 .build();
     }
 
-    // UserId 별 ChatRoom 조회
+    // UserId 별 ChatRoomList 조회
     public List<ChatRoomDto> getChatRooms(String userId) {
         // UserChatRoom에서 해당 사용자의 ChatRoomId 리스트 가져오기
         List<Long> chatRoomIds = userChatRoomRepository.findAllByUserId(userId)
@@ -91,6 +118,7 @@ public class ChatRoomService {
                 .collect(Collectors.toList());
     }
 
+    // chatRoomId 별 userList 조회
     public List<UserResponseDto> getSubUsers(Long chatRoomId, String userId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new EntityNotFoundException(chatRoomId + "번 채팅방은 존재하지 않습니다."));
