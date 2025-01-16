@@ -3,6 +3,7 @@ package com.ovengers.chatservice.mongodb.controller;
 import com.ovengers.chatservice.mongodb.dto.MessageDto;
 import com.ovengers.chatservice.mongodb.dto.MessageRequestDto;
 import com.ovengers.chatservice.mongodb.service.MessageService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +38,7 @@ public class MessageController {
         }
     }
 
+    @Operation(summary = "메시지 저장", description = "채팅방ID, 콘텐츠")
     @PostMapping("/{chatRoomId}/saveMessage")
     public Mono<MessageDto> saveMessage(@PathVariable Long chatRoomId,
                                         @RequestBody MessageRequestDto messageRequestDto,
@@ -47,6 +49,7 @@ public class MessageController {
         return messageService.sendMessage(chatRoomId, messageRequestDto.getContent(), senderId);
     }
 
+    @Operation(summary = "채팅방의 메시지 조회", description = "채팅방ID")
     @GetMapping("/{chatRoomId}/messages")
     public Flux<MessageDto> getMessages(@PathVariable Long chatRoomId,
                                         Principal principal) {
@@ -56,6 +59,7 @@ public class MessageController {
         return messageService.getMessages(chatRoomId, senderId);
     }
 
+    @Operation(summary = "메시지 수정", description = "메시지ID")
     @PutMapping("/{messageId}/updateMessage")
     public Mono<MessageDto> updateMessage(@PathVariable String messageId,
                                           @RequestBody MessageRequestDto messageRequestDto,
@@ -66,6 +70,7 @@ public class MessageController {
         return messageService.updateMessage(messageId, messageRequestDto.getContent(), senderId);
     }
 
+    @Operation(summary = "메시지 삭제", description = "메시지ID")
     @DeleteMapping("/{messageId}/deleteMessage")
     public Mono<Void> deleteMessage(@PathVariable String messageId,
                                     Principal principal) {

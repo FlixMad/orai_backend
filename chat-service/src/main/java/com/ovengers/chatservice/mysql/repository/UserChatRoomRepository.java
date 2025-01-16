@@ -4,6 +4,7 @@ import com.ovengers.chatservice.mysql.entity.UserChatRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserChatRoomRepository extends JpaRepository<UserChatRoom, Long> {
 
@@ -16,4 +17,6 @@ public interface UserChatRoomRepository extends JpaRepository<UserChatRoom, Long
     List<UserChatRoom> findAllByChatRoomId(Long chatRoomId); // 특정 채팅방을 구독 중인 사용자 목록 조회
 
     void deleteByChatRoomIdAndUserId(Long chatRoomId, String userId); // 특정 채팅방과 사용자의 구독 삭제
+
+    Optional<UserChatRoom> findByChatRoomIdAndUserId(Long chatRoomId, String userId);
 }
