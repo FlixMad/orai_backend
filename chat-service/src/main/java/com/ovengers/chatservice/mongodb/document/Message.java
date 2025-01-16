@@ -23,30 +23,30 @@ public class Message {
     private String messageId;
 
     @Setter
+    private Long chatRoomId;
+
+    @Setter
+    private String senderId;
+
+    @Setter
     private String content;
 
     @CreatedDate
     @Field("created_at")
     private LocalDateTime createdAt;
 
-    @Setter
-    private Long chatRoomId;
-
-    @Setter
-    private String senderId;
-
-    @Field("unread_user_ids")
-    private List<String> unreadUserIds = new ArrayList<>();
+//    @Field("unread_user_ids")
+//    private List<String> unreadUserIds = new ArrayList<>();
 
     public MessageDto toDto() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         return MessageDto.builder()
                 .messageId(messageId)
-                .content(content)
-                .createdAt(createdAt != null ? createdAt.format(formatter) : "메시지생성시간없음")
                 .chatRoomId(chatRoomId)
                 .senderId(senderId)
-                .unreadUserIds(unreadUserIds)
+                .content(content)
+                .createdAt(createdAt != null ? createdAt.format(formatter) : "메시지생성시간없음")
+//                .unreadUserIds(unreadUserIds)
                 .build();
     }
 

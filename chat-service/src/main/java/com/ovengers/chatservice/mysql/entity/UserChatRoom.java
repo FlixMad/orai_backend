@@ -20,24 +20,28 @@ public class UserChatRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+//    @ManyToOne
+//    @JoinColumn(name = "chat_room_id", referencedColumnName = "chat_room_id")
+//    private ChatRoom chatRoom;
+
+    @JoinColumn(name = "chat_room_id", nullable = false)
+    private Long chatRoomId;
+
+    @JoinColumn(name = "user_id", nullable = false)
+    private String userId;
+
     @CreationTimestamp
     @Column(name = "sub_at")
     private LocalDateTime subAt;
-
-    @ManyToOne
-    @JoinColumn(name = "chat_room_id", referencedColumnName = "chat_room_id")
-    private ChatRoom chatRoom;
-
-    @Column(name = "user_id", nullable = false)
-    private String userId;
 
     public UserChatRoomDto toDto() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         return UserChatRoomDto.builder()
                 .id(id)
-                .subAt(subAt!= null ? subAt.format(formatter) : "채팅방구독시간없음")
+                .chatRoomId(chatRoomId)
                 .userId(userId)
-                .chatRoomId(chatRoom.getChatRoomId())
+//                .chatRoomId(chatRoom.getChatRoomId())
+                .subAt(subAt!= null ? subAt.format(formatter) : "채팅방구독시간없음")
                 .build();
     }
 }

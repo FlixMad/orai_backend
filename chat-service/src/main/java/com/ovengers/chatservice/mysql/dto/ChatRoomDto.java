@@ -17,12 +17,12 @@ public class ChatRoomDto {
 
     private String name;
 
+    private String creatorId;
+
     private String createdAt;
 
     private String updatedAt;
 
-    private String creatorId;
-
-    private List<String> userIds; // 채팅방에 참여한 사용자 ID 목록
+//    private List<String> userIds; // 채팅방에 참여한 사용자 ID 목록
 
 }

@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatRoomRequestDto {
-    private String name;
     private String image;
-    private List<String> inviteUserIds; // 초대할 사용자 ID 리스트
+    private String name;
+//    private List<String> inviteUserIds; // 초대할 사용자 ID 리스트
 }

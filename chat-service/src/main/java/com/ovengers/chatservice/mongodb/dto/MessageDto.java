@@ -11,9 +11,9 @@ import java.util.List;
 @Builder
 public class MessageDto {
     private String messageId;
-    private String content;
-    private String createdAt;
     private Long chatRoomId;
     private String senderId;
-    private List<String> unreadUserIds; // 읽지 않은 사용자 ID 목록
+    private String content;
+    private String createdAt;
+//    private List<String> unreadUserIds; // 읽지 않은 사용자 ID 목록
 }
