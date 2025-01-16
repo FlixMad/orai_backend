@@ -10,6 +10,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.security.Principal;
@@ -21,9 +22,8 @@ import java.util.regex.Pattern;
 @Tag(name = "MessageController", description = "단순히 MongoDB에 데이터를 저장하는 컨트롤러")
 public class MessageController {
     private final MessageService messageService;
-    private final SimpMessagingTemplate messagingTemplate;
 
-        /**
+    /**
      * Principal에서 id를 추출하는 유틸리티 메서드
      *
      * @param principalName Principal에서 가져온 name 값
@@ -41,17 +41,42 @@ public class MessageController {
         }
     }
 
-    @MessageMapping("/send")
-    @SendTo("/sub/{chatRoomId}/chat")
-    public Mono<MessageDto> sendMessage(@DestinationVariable Long chatRoomId,
+    @PostMapping("/{chatRoomId}/saveMessage")
+    public Mono<MessageDto> saveMessage(@PathVariable Long chatRoomId,
                                         @RequestBody MessageRequestDto messageRequestDto,
                                         Principal principal) {
         String principalId = principal.getName();
         String senderId = extractIdFromPrincipal(principalId);
 
-        // 메시지 전송을 비동기적으로 처리
-        return messageService.sendMessage(chatRoomId, messageRequestDto.getContent(), senderId)
-                .onErrorResume(e -> Mono.error(new IllegalStateException("메시지 전송에 실패했습니다.", e)));
+        return messageService.sendMessage(chatRoomId, messageRequestDto.getContent(), senderId);
+    }
+
+    @GetMapping("/{chatRoomId}/messages")
+    public Flux<MessageDto> getMessages(@PathVariable Long chatRoomId,
+                                        Principal principal) {
+        String principalId = principal.getName();
+        String senderId = extractIdFromPrincipal(principalId);
+
+        return messageService.getMessages(chatRoomId, senderId);
+    }
+
+    @PutMapping("/{messageId}/updateMessage")
+    public Mono<MessageDto> updateMessage(@PathVariable String messageId,
+                                          @RequestBody MessageRequestDto messageRequestDto,
+                                          Principal principal) {
+        String principalId = principal.getName();
+        String senderId = extractIdFromPrincipal(principalId);
+
+        return messageService.updateMessage(messageId, messageRequestDto.getContent(), senderId);
+    }
+
+    @DeleteMapping("/{messageId}/deleteMessage")
+    public Mono<Void> deleteMessage(@PathVariable String messageId,
+                                    Principal principal) {
+        String principalId = principal.getName();
+        String senderId = extractIdFromPrincipal(principalId);
+
+        return messageService.deleteMessage(messageId, senderId);
     }
 
 //    public String cleanInput(String input) {
@@ -62,38 +87,6 @@ public class MessageController {
 //        return input.startsWith("\"") && input.endsWith("\"")
 //                ? input.substring(1, input.length() - 1)
 //                : input;
-//    }
-//
-//    /**
-//     * 데이터 저장
-//     */
-//    @PostMapping("/{chatRoomId}/createMessage")
-//    @ResponseStatus(HttpStatus.CREATED)
-//    public Mono<MessageDto> createMessage(
-//            @PathVariable Long chatRoomId,
-//            @RequestBody String content,
-//            Principal principal
-//    ) {
-//        String cleanedContent = cleanInput(content);
-//
-//        try {
-//            // principal.getName()에서 id 파싱
-//            String principalName = principal.getName();
-//            String senderId = extractIdFromPrincipal(principalName);
-//
-//            // Message 객체 생성
-//            Message message = new Message();
-//            message.setChatRoomId(chatRoomId);
-//            message.setContent(cleanedContent);
-//            message.setSenderId(senderId);
-//
-//            return messageService.createMessage(message);
-//        } catch (IllegalArgumentException ex) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
-//        }
-//    }
-//
-
 //    }
 
 }

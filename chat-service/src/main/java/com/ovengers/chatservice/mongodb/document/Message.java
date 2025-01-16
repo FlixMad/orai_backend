@@ -9,8 +9,6 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 
 @Document(collection = "message")
 @Getter
@@ -35,6 +33,10 @@ public class Message {
     @Field("created_at")
     private LocalDateTime createdAt;
 
+    @Setter
+    @Field("updated_at")
+    private LocalDateTime updatedAt;
+
 //    @Field("unread_user_ids")
 //    private List<String> unreadUserIds = new ArrayList<>();
 
@@ -46,8 +48,8 @@ public class Message {
                 .senderId(senderId)
                 .content(content)
                 .createdAt(createdAt != null ? createdAt.format(formatter) : "메시지생성시간없음")
+                .updatedAt(updatedAt != null ? updatedAt.format(formatter) : "메시지수정시간없음")
 //                .unreadUserIds(unreadUserIds)
                 .build();
     }
-
 }

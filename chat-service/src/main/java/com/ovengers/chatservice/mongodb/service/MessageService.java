@@ -7,7 +7,10 @@ import com.ovengers.chatservice.mysql.repository.ChatRoomRepository;
 import com.ovengers.chatservice.mysql.repository.UserChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -18,7 +21,6 @@ public class MessageService {
 
     // 메시지 전송
     public Mono<MessageDto> sendMessage(Long chatRoomId, String content, String userId) {
-        // 채팅방이 존재하는지 확인
         if (!chatRoomRepository.existsById(chatRoomId)) {
             throw new IllegalArgumentException(chatRoomId + "번 채팅방은 존재하지 않습니다.");
         }
@@ -37,29 +39,42 @@ public class MessageService {
         return messageRepository.save(message).map(Message::toDto);
     }
 
-/*
-    // MongoDB에 저장된 chatRoomId 마다의 모든 데이터 조회
-    public Flux<MessageDto> getMessages(Long chatRoomId) {
+    // 메시지 조회
+    public Flux<MessageDto> getMessages(Long chatRoomId, String userId) {
         if (!chatRoomRepository.existsById(chatRoomId)) {
             throw new IllegalArgumentException(chatRoomId + "번 채팅방은 존재하지 않습니다.");
         }
-        Flux<Message> messages = messageRepository.findAllByChatRoomId(chatRoomId);
-        return messages.map(Message::toDto);
-    }
 
-    // MongoDB에 저장된 데이터 중 해당 messageId를 가진 content 수정
-    public Mono<MessageDto> updateMessage(String messageId, String newContent) {
-        return messageRepository.findById(messageId)
-                .flatMap(existingMessage -> {
-                    existingMessage.setContent(newContent);
-                    return messageRepository.save(existingMessage);
-                })
+        if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userId)) {
+            throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
+        }
+
+        // 메시지 조회
+        return messageRepository.findAllByChatRoomId(chatRoomId)
                 .map(Message::toDto);
     }
 
-    // MongoDB에 저장된 데이터 중 해당 messageId를 가진 데이터 삭제
-    public Mono<Void> deleteMessage(String messageId) {
-        return messageRepository.deleteById(messageId);
-    }*/
+    // 메시지 수정
+    public Mono<MessageDto> updateMessage(String messageId, String newContent, String userId) {
+        return messageRepository.findByMessageId(messageId)
+                .flatMap(newMessage -> {
+                    if (!newMessage.getSenderId().equals(userId)) {
+                        return Mono.error(new IllegalAccessException("메시지를 수정할 권한이 없습니다."));
+                    }
+                    newMessage.setContent(newContent);
+                    newMessage.setUpdatedAt(LocalDateTime.now());
+                    return messageRepository.save(newMessage).map(Message::toDto);
+                });
+    }
 
+    // 메시지 삭제
+    public Mono<Void> deleteMessage(String messageId, String userId) {
+        return messageRepository.findByMessageId(messageId)
+                .flatMap(delete -> {
+                    if (!delete.getSenderId().equals(userId)) {
+                        return Mono.error(new IllegalAccessException("메시지를 삭제할 권한이 없습니다."));
+                    }
+                    return messageRepository.delete(delete);
+                });
+    }
 }
