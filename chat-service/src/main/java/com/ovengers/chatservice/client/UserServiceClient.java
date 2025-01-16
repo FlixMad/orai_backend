@@ -21,6 +21,8 @@ public interface UserServiceClient {
     @GetMapping("api/users/{userId}")
     UserResponseDto getUserById(@PathVariable("userId") String userId);
 
+    @
+
     /**
      *
      * @param params 검색 조건들, ex) ?name=charie&Position=CEO

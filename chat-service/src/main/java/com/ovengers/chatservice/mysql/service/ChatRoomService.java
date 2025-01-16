@@ -2,7 +2,6 @@ package com.ovengers.chatservice.mysql.service;
 
 import com.ovengers.chatservice.client.UserResponseDto;
 import com.ovengers.chatservice.client.UserServiceClient;
-import com.ovengers.chatservice.common.dto.CommonResDto;
 import com.ovengers.chatservice.mysql.dto.ChatRoomDto;
 import com.ovengers.chatservice.mysql.dto.CompositeChatRoomDto;
 import com.ovengers.chatservice.mysql.entity.ChatRoom;
@@ -16,7 +15,6 @@ import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;

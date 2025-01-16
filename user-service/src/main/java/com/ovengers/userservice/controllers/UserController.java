@@ -5,7 +5,6 @@ import com.ovengers.userservice.common.dto.CommonErrorDto;
 import com.ovengers.userservice.common.dto.CommonResDto;
 import com.ovengers.userservice.dto.UserRequestDto;
 import com.ovengers.userservice.dto.UserResponseDto;
-import com.ovengers.userservice.entity.User;
 import com.ovengers.userservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
