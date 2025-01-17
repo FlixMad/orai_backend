@@ -47,7 +47,6 @@ public class AdminController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(value = "/admin/users/list")
     public ResponseEntity<CommonResDto> getUsers(@RequestParam Map<String, String> params) {
         log.info("Search params: {}", params);
@@ -65,7 +64,6 @@ public class AdminController {
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @PageableAsQueryParam
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(value = "/admin/users/page")
     public ResponseEntity<?> getUsers(@RequestParam Map<String,String> params,
                                       Pageable pageable) {
