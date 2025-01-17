@@ -28,7 +28,8 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())  // CSRF 비활성화
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // 상태 비저장
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/**","api/admin/**","/v3/api-docs/**","/api/users/create", "/api/users/login", "/refresh", "/", "/findByEmail", "/users/email"
+                        .requestMatchers("/api/users/**","/v3/api-docs/**","/api/users/create", "/api/users/login", "/refresh", "/", "/findByEmail", "/users/email","/api/users/validate-mfa",
+                                        "/api/users/mfa/validate-code/**"
                                 )  // 인증 없이 접근할 수 있는 URL들
                         .permitAll()  // 해당 URL들은 인증 없이 접근 가능
                         .anyRequest().authenticated())  // 나머지 요청은 인증 필요

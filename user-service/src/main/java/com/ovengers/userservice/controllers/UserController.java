@@ -3,10 +3,12 @@ package com.ovengers.userservice.controllers;
 import com.ovengers.userservice.common.auth.JwtTokenProvider;
 import com.ovengers.userservice.common.dto.CommonErrorDto;
 import com.ovengers.userservice.common.dto.CommonResDto;
+import com.ovengers.userservice.common.util.MfaSecretGenerator;
 import com.ovengers.userservice.dto.UserRequestDto;
 import com.ovengers.userservice.dto.UserResponseDto;
-import com.ovengers.userservice.entity.User;
 import com.ovengers.userservice.service.UserService;
+import com.warrenstrange.googleauth.GoogleAuthenticator;
+import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -27,56 +28,118 @@ public class UserController {
 
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final RedisTemplate<String , Object> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final GoogleAuthenticator gAuth = new GoogleAuthenticator();
 
 
-    /**
-     * 사용자 등록
-     */
+    //회원가입하면서 mfa시크릿 키 생성
 
     @PostMapping("/create")
     public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody UserRequestDto userRequestDto) {
+        // 1. MFA 시크릿 키 생성
+        String mfaSecret = MfaSecretGenerator.generateSecret();
+        log.info("Generated MFA secret for user {}: {}", userRequestDto.getEmail(), mfaSecret);
+
+        // 2. UserRequestDto에 MFA 시크릿 키 설정
+        userRequestDto.setMfaSecret(mfaSecret);
+
+        // 3. User 생성 및 저장
         UserResponseDto responseDto = userService.createUser(userRequestDto);
+
+        // 4. 클라이언트로 응답 반환
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
+
     /**
-     * 로그인 처리 (JWT 토큰 발급)
+     * 로그인 처리 (JWT 토큰 발급 및 Mfa 데이터 반환)
      */
     @PostMapping("/login")
-    public ResponseEntity<UserResponseDto> login(@Valid @RequestBody UserRequestDto userRequestDto) {
+    public ResponseEntity<CommonResDto<Map<String, Object>>> login(@Valid @RequestBody UserRequestDto userRequestDto) {
         UserResponseDto responseDto = userService.login(userRequestDto);
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+
+        // MFA 시크릿 키 조회
+        String secret = userService.getUserSecret(userRequestDto.getEmail());
+        Map<String, Object> result = new HashMap<>();
+        result.put("secret", secret);
+
+        return new ResponseEntity<>(
+                new CommonResDto<>(HttpStatus.OK, "Login successful, Mfa required.", result),
+                HttpStatus.OK
+        );
     }
 
+    /**
+     * Mfa 인증 코드 검증 및 JWT 토큰 발급
+     * 'email' -> 'secret'로 변경
+     */
+    @PostMapping("/validate-mfa")
+    public ResponseEntity<CommonResDto<Map<String, Object>>> validateMfa(
+            @RequestParam String secret,  // 'email' -> 'secret'
+            @RequestParam String code) {  // 'code'를 String으로 변경
+        boolean isValid = gAuth.authorize(secret, Integer.parseInt(code));  // 코드 값은 Integer로 변환
+
+        if (isValid) {
+            // secret으로 사용자 조회
+            UserResponseDto user = userService.getUserBySecret(secret);
+            String token = jwtTokenProvider.createToken(user.getUserId(), user.getDepartmentId());
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("accessToken", token);
+
+            return new ResponseEntity<>(
+                    new CommonResDto<>(HttpStatus.OK, "Mfa validated successfully.", result),
+                    HttpStatus.OK
+            );
+        } else {
+            return new ResponseEntity<>(
+                    new CommonResDto<>(HttpStatus.UNAUTHORIZED, "Invalid Mfa code.", null),
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+    }
+
+
+
+
+    /**
+     * Mfa 인증 코드 검증
+     */
+    @PostMapping("/mfa/validate-code")
+    public ResponseEntity<CommonResDto<String>> validateCode(@RequestParam String secret, @RequestParam int code) {
+        boolean isValid = gAuth.authorize(secret, code);
+
+        if (isValid) {
+            log.info("Mfa code validated successfully.");
+            return new ResponseEntity<>(new CommonResDto<>(HttpStatus.OK, "Code is valid.", null), HttpStatus.OK);
+        } else {
+            log.warn("Invalid Mfa code provided.");
+            return new ResponseEntity<>(new CommonResDto<>(HttpStatus.UNAUTHORIZED, "Invalid code.", null), HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    /**
+     * 토큰 갱신
+     */
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> id) {
         log.info("/api/users/refresh: POST, id : {}", id.get("id"));
         UserResponseDto user = userService.getUserById(id.get("id"));
-        // email로 redis를 조회해서 refresh token을 가져오자
+
         Object obj = redisTemplate.opsForValue().get(user.getUserId());
         log.info("레디스에서 조회한 데이터: {}", obj);
-        if (obj == null) { // refresh token의 수명이 다됨.
-            log.info("refresh 만료!");
 
-            return new ResponseEntity<>(new CommonErrorDto(
-                    HttpStatus.UNAUTHORIZED,
-                    "EXPIRED_RT"
-            ), HttpStatus.UNAUTHORIZED);
-
+        if (obj == null) {
+            log.info("Refresh token expired.");
+            return new ResponseEntity<>(new CommonErrorDto(HttpStatus.UNAUTHORIZED, "EXPIRED_RT"), HttpStatus.UNAUTHORIZED);
         }
-        // 새로운 access token을 발급하자.
-        String newAccessToken
-                = jwtTokenProvider.createToken(user.getUserId(),user.getDepartmentId());
 
-        Map<String, Object> info = new HashMap<>();
-        info.put("token", newAccessToken);
+        String newAccessToken = jwtTokenProvider.createToken(user.getUserId(), user.getDepartmentId());
 
-        CommonResDto resDto
-                = new CommonResDto(HttpStatus.OK, "새 토큰 발급됨!", info);
+        Map<String, Object> result = new HashMap<>();
+        result.put("token", newAccessToken);
 
-        return new ResponseEntity<>(resDto, HttpStatus.OK);
-
+        return new ResponseEntity<>(new CommonResDto<>(HttpStatus.OK, "New token issued.", result), HttpStatus.OK);
     }
 
     /**
@@ -88,20 +151,11 @@ public class UserController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
-//    /**
-//     * 모든 사용자 조회
-//     */
-//    @GetMapping
-//    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
-//        List<UserResponseDto> users = userService.getAllUsers();
-//        return new ResponseEntity<>(users, HttpStatus.OK);
-//    }
-
-    /**http://localhost:8181/api/attitude/checkin
+    /**
      * 특정 사용자 조회
      */
     @GetMapping("/{userId}")
-    public ResponseEntity<UserResponseDto> getUserById(@PathVariable String userId) {  // 파라미터를 String으로 수정
+    public ResponseEntity<UserResponseDto> getUserById(@PathVariable String userId) {
         UserResponseDto responseDto = userService.getUserById(userId);
         log.info("user:"+responseDto);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
@@ -110,14 +164,15 @@ public class UserController {
     /**
      * 비밀번호 변경
      */
-
     @PutMapping("/change-password")
-    public ResponseEntity<String> changePassword(@RequestParam String userId,  // 파라미터를 String으로 수정
-                                                 @RequestParam String currentPassword,
-                                                 @RequestParam String newPassword) {
+    public ResponseEntity<String> changePassword(
+            @RequestParam String userId,
+            @RequestParam String currentPassword,
+            @RequestParam String newPassword) {
         userService.changePassword(userId, currentPassword, newPassword);
-        return new ResponseEntity<>("비밀번호가 변경되었습니다.", HttpStatus.OK);
+        return new ResponseEntity<>("Password changed successfully.", HttpStatus.OK);
     }
+
     /**
      * 이메일 중복 체크
      */
