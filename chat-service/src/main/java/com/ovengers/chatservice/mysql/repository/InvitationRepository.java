@@ -9,4 +9,5 @@ public interface InvitationRepository extends JpaRepository<Invitation, Long> {
     Optional<Invitation> findByChatRoomIdAndUserId(Long chatRoomId, String userId);
     boolean existsByChatRoomIdAndUserIdAndAcceptedFalse(Long chatRoomId, String userId);
     void deleteByChatRoomId(Long chatRoomId);
+    void deleteByChatRoomIdAndUserId(Long chatRoomId, String userId);
 }

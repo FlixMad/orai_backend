@@ -24,14 +24,14 @@ import java.util.List;
 public class ChatRoomController {
     private final ChatRoomService chatRoomService;
 
-    @Operation(summary = "유저 프로필 조회", description = "유저ID")
+    @Operation(summary = "유저 프로필 조회", description = "유저Id")
     @GetMapping("/{userId}/profile")
     public ResponseEntity<UserResponseDto> getUserFromUserService(@PathVariable String userId) {
         UserResponseDto userResponse = chatRoomService.getUserInfo(userId);
         return ResponseEntity.ok(userResponse);
     }
 
-    @Operation(summary = "채팅방 생성", description = "이미지, 제목, 유저ID")
+    @Operation(summary = "채팅방 생성", description = "이미지, 제목, 유저Ids")
     @PostMapping("/createChatRoom")
     public ResponseEntity<CompositeChatRoomDto> createChatRoom(@RequestBody ChatRoomRequestDto chatRoomRequestDto,
                                                                @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
@@ -51,7 +51,7 @@ public class ChatRoomController {
         return ResponseEntity.ok(chatRoomList);
     }
 
-    @Operation(summary = "채팅방을 구독한 유저 목록", description = "채팅방ID")
+    @Operation(summary = "채팅방을 구독한 유저 목록", description = "채팅방Id")
     @GetMapping("/{chatRoomId}/users")
     public ResponseEntity<List<UserResponseDto>> getSubscribedUsers(
             @PathVariable Long chatRoomId,
@@ -60,7 +60,7 @@ public class ChatRoomController {
         return ResponseEntity.ok(subUsers);
     }
 
-    @Operation(summary = "채팅방에 유저 초대", description = "채팅방ID, 유저ID")
+    @Operation(summary = "채팅방에 유저 초대", description = "채팅방Id, 유저Id")
     @PostMapping("/{chatRoomId}/invite")
     public ResponseEntity<Void> inviteUsers(
             @PathVariable Long chatRoomId,
@@ -71,7 +71,7 @@ public class ChatRoomController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "초대 수락", description = "채팅방ID - 수락을 해야 채팅방에 구독됨")
+    @Operation(summary = "초대 수락", description = "채팅방Id - 수락을 하면 채팅방에 구독됨")
     @PostMapping("/{chatRoomId}/accept")
     public ResponseEntity<Void> acceptInvitation(
             @PathVariable Long chatRoomId,
@@ -81,7 +81,17 @@ public class ChatRoomController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "채팅방 수정", description = "이미지/제목")
+    @Operation(summary = "초대 거절", description = "채팅방Id - 거절을 하면 초대 이력 삭제됨")
+    @PostMapping("/{chatRoomId}/refusal")
+    public ResponseEntity<Void> refusalInvitation(
+            @PathVariable Long chatRoomId,
+            @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
+
+        chatRoomService.refusalInvitation(chatRoomId, tokenUserInfo.getId());
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "채팅방 수정", description = "채팅방Id, 이미지/제목 - 이미지나 제목 중 하나만 수정해도 됨")
     @PutMapping("/{chatRoomId}/updateChatRoom")
     public ResponseEntity<ChatRoomDto> updateChatRoom(@PathVariable Long chatRoomId,
                                                       @RequestBody ChatRoomUpdateDto chatRoomUpdateDto,
@@ -90,7 +100,7 @@ public class ChatRoomController {
         return ResponseEntity.ok(updateChatRoom);
     }
 
-    @Operation(summary = "채팅방 삭제", description = "채팅방ID - chatRoom, userChatRoom, invitation에서 삭제됨")
+    @Operation(summary = "채팅방 삭제", description = "채팅방Id - chatRoom, userChatRoom, invitation에서 삭제됨")
     @DeleteMapping("/{chatRoomId}/deleteChatRoom")
     public ResponseEntity<Void> deleteChatRoom(@PathVariable Long chatRoomId,
                                                @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
@@ -98,7 +108,7 @@ public class ChatRoomController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "채팅방 나가기", description = "채팅방ID - userChatRoom, invitation에서 삭제됨")
+    @Operation(summary = "채팅방 나가기", description = "채팅방Id - userChatRoom, invitation에서 삭제됨")
     @DeleteMapping("/{chatRoomId}/disconnect")
     public ResponseEntity<Void> disconnect(@PathVariable Long chatRoomId,
                                            @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
@@ -106,7 +116,7 @@ public class ChatRoomController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "채팅방 내보내기", description = "채팅방ID, 유저ID - userChatRoom, invitation에서 삭제됨")
+    @Operation(summary = "채팅방 내보내기", description = "채팅방Id, 유저Id - userChatRoom, invitation에서 삭제됨")
     @DeleteMapping("/{chatRoomId}/{userId}/deleteUser")
     public ResponseEntity<Void> removeUserFromChatRoom(
             @PathVariable Long chatRoomId,

@@ -226,6 +226,21 @@ public class ChatRoomService {
         userChatRoomRepository.save(userChatRoom);
     }
 
+    // 초대 거절 시 Invitation 삭제
+    @Transactional
+    public void refusalInvitation(Long chatRoomId, String userId) {
+        // 초대받은 유저인지 확인
+        Invitation invitation = invitationRepository.findByChatRoomIdAndUserId(chatRoomId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 채팅방에 초대받은 기록이 없습니다."));
+
+        // 이미 초대를 수락한 경우 예외 처리
+        if (invitation.isAccepted()) {
+            throw new IllegalArgumentException("이미 초대를 수락했습니다.");
+        }
+
+        invitationRepository.deleteByChatRoomIdAndUserId(chatRoomId, userId);
+    }
+
     // 채팅방 생성자만 채팅방 이미지 및 이름 수정
     public ChatRoomDto updateChatRoom(Long chatRoomId, String newImage, String newName, String userId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
@@ -294,6 +309,7 @@ public class ChatRoomService {
                 .ifPresent(invitationRepository::delete);
     }
 
+    // 유저 내보내기(강퇴)
     @Transactional
     public void removeUserFromChatRoom(Long chatRoomId, String userIdToRemove, String userId) {
         // 채팅방 존재 여부 확인
