@@ -38,7 +38,7 @@ public class MessageController {
         }
     }
 
-    @Operation(summary = "메시지 저장", description = "채팅방ID, 콘텐츠")
+    @Operation(summary = "메시지 저장", description = "채팅방Id, 콘텐츠")
     @PostMapping("/{chatRoomId}/saveMessage")
     public Mono<MessageDto> saveMessage(@PathVariable Long chatRoomId,
                                         @RequestBody MessageRequestDto messageRequestDto,
@@ -49,7 +49,7 @@ public class MessageController {
         return messageService.sendMessage(chatRoomId, messageRequestDto.getContent(), senderId);
     }
 
-    @Operation(summary = "채팅방의 메시지 조회", description = "채팅방ID")
+    @Operation(summary = "채팅방의 메시지 조회", description = "채팅방Id")
     @GetMapping("/{chatRoomId}/messages")
     public Flux<MessageDto> getMessages(@PathVariable Long chatRoomId,
                                         Principal principal) {
@@ -59,25 +59,27 @@ public class MessageController {
         return messageService.getMessages(chatRoomId, senderId);
     }
 
-    @Operation(summary = "메시지 수정", description = "메시지ID")
-    @PutMapping("/{messageId}/updateMessage")
-    public Mono<MessageDto> updateMessage(@PathVariable String messageId,
+    @Operation(summary = "메시지 수정", description = "채팅방Id, 메시지Id, 콘텐츠")
+    @PutMapping("/{chatRoomId}/{messageId}/updateMessage")
+    public Mono<MessageDto> updateMessage(@PathVariable Long chatRoomId,
+                                          @PathVariable String messageId,
                                           @RequestBody MessageRequestDto messageRequestDto,
                                           Principal principal) {
         String principalId = principal.getName();
         String senderId = extractIdFromPrincipal(principalId);
 
-        return messageService.updateMessage(messageId, messageRequestDto.getContent(), senderId);
+        return messageService.updateMessage(chatRoomId, messageId, messageRequestDto.getContent(), senderId);
     }
 
-    @Operation(summary = "메시지 삭제", description = "메시지ID")
-    @DeleteMapping("/{messageId}/deleteMessage")
-    public Mono<Void> deleteMessage(@PathVariable String messageId,
+    @Operation(summary = "메시지 삭제", description = "채팅방Id, 메시지Id")
+    @DeleteMapping("/{chatRoomId}/{messageId}/deleteMessage")
+    public Mono<Void> deleteMessage(@PathVariable Long chatRoomId,
+                                    @PathVariable String messageId,
                                     Principal principal) {
         String principalId = principal.getName();
         String senderId = extractIdFromPrincipal(principalId);
 
-        return messageService.deleteMessage(messageId, senderId);
+        return messageService.deleteMessage(chatRoomId, messageId, senderId);
     }
 
 //    public String cleanInput(String input) {

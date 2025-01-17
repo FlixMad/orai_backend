@@ -2,6 +2,7 @@ package com.ovengers.chatservice.mongodb.controller;
 
 import com.ovengers.chatservice.mongodb.dto.ChatMessageRequest;
 import com.ovengers.chatservice.mongodb.dto.ChatMessageResponse;
+import com.ovengers.chatservice.mongodb.service.MessageService;
 import com.ovengers.chatservice.mongodb.service.WebSocketStompService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
