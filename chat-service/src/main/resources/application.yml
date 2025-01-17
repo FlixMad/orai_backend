@@ -6,6 +6,8 @@ logging:
 spring:
   application:
     name: chat-service
+  profiles:
+    include: secret
   cloud:
     client:
       hostname: localhost
