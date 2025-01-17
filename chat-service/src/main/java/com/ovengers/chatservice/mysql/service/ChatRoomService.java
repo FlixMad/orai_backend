@@ -3,6 +3,8 @@ package com.ovengers.chatservice.mysql.service;
 import com.ovengers.chatservice.client.UserResponseDto;
 import com.ovengers.chatservice.client.UserServiceClient;
 import com.ovengers.chatservice.mysql.dto.ChatRoomDto;
+import com.ovengers.chatservice.mysql.dto.ChatRoomInvitationDto;
+import com.ovengers.chatservice.mysql.dto.ChatRoomNotificationDto;
 import com.ovengers.chatservice.mysql.dto.CompositeChatRoomDto;
 import com.ovengers.chatservice.mysql.entity.ChatRoom;
 import com.ovengers.chatservice.mysql.entity.Invitation;
@@ -17,6 +19,7 @@ import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -33,6 +36,7 @@ public class ChatRoomService {
     private final UserChatRoomRepository userChatRoomRepository;
     private final InvitationRepository invitationRepository;
     private final UserServiceClient userServiceClient;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     public UserResponseDto getUserInfo(String userId) {
         UserResponseDto userById = userServiceClient.getUserById(userId);
@@ -49,6 +53,127 @@ public class ChatRoomService {
         if (StringUtils.isBlank(name)) { // Apache Commons Lang 사용 (공백 또는 null 확인)
             throw new InvalidChatRoomNameException("채팅방 이름은 공백만으로 지정할 수 없습니다.");
         }
+    }
+
+    // 생성자에게 채팅방 생성 알림
+    private void sendChatRoomCreatedNotification(String userId, ChatRoom chatRoom) {
+        // STOMP 메시지를 생성자에게 전송
+        simpMessagingTemplate.convertAndSendToUser(
+                userId,                // 대상 사용자
+                "/queue/chat-room",    // 개인 큐 경로
+                ChatRoomNotificationDto.builder()
+                        .chatRoomId(chatRoom.getChatRoomId())
+                        .name(chatRoom.getName())
+                        .message(chatRoom.getName() + "채팅방이 생성되었습니다.")
+                        .build()
+        );
+    }
+
+    // 초대 유저들에게 알림을 보내는 메서드
+    private void sendInvitationsToUsers(List<String> userIds, ChatRoom chatRoom, String inviterId) {
+        // 초대한 사람의 정보를 가져옴
+        UserResponseDto inviterInfo = getUserInfo(inviterId);
+        String inviterName = inviterInfo.getName(); // 초대한 사람의 이름 추출
+
+        // 초대받은 사용자들에게 초대 메시지 전송
+        userIds.forEach(userId -> simpMessagingTemplate.convertAndSendToUser(
+                userId,                // 대상 사용자
+                "/queue/invitations",  // 개인 큐 경로
+                ChatRoomInvitationDto.builder()
+                        .chatRoomId(chatRoom.getChatRoomId())
+                        .name(chatRoom.getName())
+                        .message(inviterName + "님이 " + chatRoom.getName() + " 채팅방에 초대했습니다.")
+                        .build()
+        ));
+    }
+
+    private void sendChatRoomDeletedNotification(List<String> userIds, ChatRoom chatRoom, String removerId) {
+        UserResponseDto removerInfo = getUserInfo(removerId);
+        String removerName = removerInfo.getName();
+
+        userIds.forEach(userId -> simpMessagingTemplate.convertAndSendToUser(
+                userId,
+                "/queue/invitations",
+                ChatRoomInvitationDto.builder()
+                        .chatRoomId(chatRoom.getChatRoomId())
+                        .name(chatRoom.getName())
+                        .message(removerName + "님이 " + chatRoom.getName() + " 채팅방을 삭제하였습니다.")
+                        .build()
+        ));
+    }
+
+    // 채팅방 입장 알림(채팅방 생성 또는 초대 수락 시)
+    private void sendEnterChatRoom(Long chatRoomId, String userId) {
+        // 유저의 이름 가져오기
+        UserResponseDto userInfo = getUserInfo(userId);
+        String userName = userInfo.getName(); // 유저의 이름
+
+        ChatRoomDto chatRoomInfo = chatRoomRepository.findByChatRoomId(chatRoomId).toDto();
+
+        // 채팅방에 속한 모든 유저에게 메시지 전송
+        simpMessagingTemplate.convertAndSend(
+                "/sub/" + chatRoomId + "/chat",  // 채팅방 구독 경로
+                userName + "님이 " + chatRoomInfo.getName() + " 채팅방에 입장했습니다."
+        );
+    }
+
+    // 채팅방 수정 알림
+    private void sendChatRoomUpdatedNotification(Long chatRoomId, String newImage, String newName) {
+        // 채팅방에 속한 유저들이 아닌, 해당 채팅방을 구독한 유저들에게만 알림을 전송
+        // "/sub/{chatRoomId}/chat"으로 구독한 유저에게 메시지를 전송
+        ChatRoom chatRoom = chatRoomRepository.findByChatRoomId(chatRoomId);
+
+        // 이름이 변경되었을 때
+        if (newName != null && !newName.equals(chatRoom.getName())) {
+            String nameUpdateMessage = chatRoom.getName() + "에서 " + newName + "으로 변경되었습니다.";
+            simpMessagingTemplate.convertAndSend(
+                    "/sub/" + chatRoomId + "/chat",  // 채팅방 구독 경로
+                    nameUpdateMessage
+            );
+        }
+
+        // 이미지가 변경되었을 때
+        if (!newImage.equals(chatRoom.getImage())) {
+            String imageUpdateMessage = "이미지가 변경되었습니다.";
+            simpMessagingTemplate.convertAndSend(
+                    "/sub/" + chatRoomId + "/chat",  // 채팅방 구독 경로
+                    imageUpdateMessage
+            );
+        }
+    }
+
+    // 채팅방 퇴장 알림(채팅방 나가기)
+    private void sendExitChatRoom(Long chatRoomId, String userId) {
+        // 유저의 이름 가져오기
+        UserResponseDto userInfo = getUserInfo(userId);
+        String userName = userInfo.getName(); // 유저의 이름
+
+        ChatRoomDto chatRoomInfo = chatRoomRepository.findByChatRoomId(chatRoomId).toDto();
+
+        // 채팅방에 속한 모든 유저에게 메시지 전송
+        simpMessagingTemplate.convertAndSend(
+                "/sub/" + chatRoomId + "/chat",  // 채팅방 구독 경로
+                userName + "님이 " + chatRoomInfo.getName() + " 채팅방에서 퇴장했습니다."
+        );
+    }
+
+    // 채팅방 강퇴 알림(채팅방 내보내기)
+    private void sendExportChatRoom(Long chatRoomId, String userId, String creatorId) {
+        // 유저의 이름 가져오기
+        UserResponseDto userInfo = getUserInfo(userId);
+        String userName = userInfo.getName();
+
+        // 생성자 이름 가져오기
+        UserResponseDto creatorInfo = getUserInfo(creatorId);
+        String creatorName = creatorInfo.getName();
+
+        ChatRoomDto chatRoomInfo = chatRoomRepository.findByChatRoomId(chatRoomId).toDto();
+
+        // 채팅방에 속한 모든 유저에게 메시지 전송
+        simpMessagingTemplate.convertAndSend(
+                "/sub/" + chatRoomId + "/chat",  // 채팅방 구독 경로
+                creatorName + "님이 " + userName + "님을 " + chatRoomInfo.getName() + " 채팅방에서 내보냈습니다."
+        );
     }
 
     // ChatRoom 및 UserChatRoom 생성
@@ -90,12 +215,20 @@ public class ChatRoomService {
         // 초대할 유저에 대한 초대 처리 (Invitation 생성)
         List<Invitation> invitations = inviteeIds.stream()
                 .map(getUserId -> Invitation.builder()
+                        .inviterId(savedChatRoom.getCreatorId())
                         .chatRoomId(savedChatRoom.getChatRoomId())
                         .userId(getUserId)
                         .accepted(false)
                         .build())
                 .toList();
         invitationRepository.saveAll(invitations);
+
+        // **WebSocket 알림 처리 추가**
+        sendChatRoomCreatedNotification(userId, savedChatRoom); // 생성자에게 알림
+        sendInvitationsToUsers(inviteeIds, chatRoom, userId); // 초대 유저들에게 알림
+
+        // 생성자가 채팅방에 입장했을 때 입장 메시지 전송
+        sendEnterChatRoom(savedChatRoom.getChatRoomId(), userId);  // 생성자가 입장했음을 알림
 
         return CompositeChatRoomDto.builder()
                 .chatRoomDto(savedChatRoom.toDto())
@@ -192,6 +325,7 @@ public class ChatRoomService {
                     return !alreadyInvited;
                 })
                 .map(inviteeId -> Invitation.builder()
+                        .inviterId(inviterId)
                         .chatRoomId(chatRoom.getChatRoomId())
                         .userId(inviteeId)
                         .accepted(false)
@@ -200,6 +334,7 @@ public class ChatRoomService {
 
         // 아직 초대만
         invitationRepository.saveAll(invitations);
+        sendInvitationsToUsers(validUserIds, chatRoom, inviterId);       // 초대 유저들에게 알림
     }
 
     // 초대 수락 시 UserChatRoom 저장
@@ -224,6 +359,8 @@ public class ChatRoomService {
                 .userId(userId)
                 .build();
         userChatRoomRepository.save(userChatRoom);
+
+        sendEnterChatRoom(chatRoomId, userId);  // 유저가 입장했음을 알림
     }
 
     // 초대 거절 시 Invitation 삭제
@@ -237,6 +374,21 @@ public class ChatRoomService {
         if (invitation.isAccepted()) {
             throw new IllegalArgumentException("이미 초대를 수락했습니다.");
         }
+
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 채팅방입니다."));
+
+        String inviterId = invitation.getInviterId();
+
+        UserResponseDto inviterInfo = getUserInfo(userId);
+        String refusalName = inviterInfo.getName(); // 초대를 거절한 유저의 이름
+
+        // 초대 거절 알림 메시지 전송
+        simpMessagingTemplate.convertAndSendToUser(
+                inviterId,                // 초대한 유저에게 보냄
+                "/queue/notifications",  // 개인 큐 경로
+                "사용자 " + refusalName + "님이 " + chatRoom.getName() + " 채팅방 초대를 거절했습니다."
+        );
 
         invitationRepository.deleteByChatRoomIdAndUserId(chatRoomId, userId);
     }
@@ -253,8 +405,8 @@ public class ChatRoomService {
 
         boolean isUpdated = false;
 
-        // 이미지가 null이 아니고 공백이 아닌 경우 수정
-        if (newImage != null && !newImage.trim().isEmpty() && !newImage.equals(chatRoom.getImage())) {
+        // 이미지가 공백이 아닌 경우 수정
+        if (!newImage.trim().isEmpty() && !newImage.equals(chatRoom.getImage())) {
             chatRoom.setImage(newImage);
             isUpdated = true;
         }
@@ -271,6 +423,9 @@ public class ChatRoomService {
             throw new IllegalArgumentException("변경된 이미지나 이름이 없습니다.");
         }
 
+        // 수정된 내용에 대해 해당 채팅방에 알림 보내기
+        sendChatRoomUpdatedNotification(chatRoomId, newImage, newName);
+
         return chatRoom.toDto();
     }
 
@@ -282,6 +437,14 @@ public class ChatRoomService {
         if (!chatRoom.getCreatorId().equals(userId)) {
             throw new SecurityException("채팅방 삭제 권한이 없습니다.");
         }
+
+        List<String> existingUserIds = userChatRoomRepository.findAllByChatRoomId(chatRoom.getChatRoomId())
+                .stream()
+                .map(UserChatRoom::getUserId)
+                .toList();
+
+        // 채팅방 삭제 전 구독자에게 알림 전송
+        sendChatRoomDeletedNotification(existingUserIds, chatRoom, userId);
 
         chatRoomRepository.delete(chatRoom);
         userChatRoomRepository.deleteByChatRoomId(chatRoom.getChatRoomId());
@@ -307,6 +470,8 @@ public class ChatRoomService {
         // 초대 기록 삭제
         invitationRepository.findByChatRoomIdAndUserId(chatRoomId, userId)
                 .ifPresent(invitationRepository::delete);
+
+        sendExitChatRoom(chatRoomId, userId);  // 유저가 퇴장했음을 알림
     }
 
     // 유저 내보내기(강퇴)
@@ -336,16 +501,7 @@ public class ChatRoomService {
         // 초대 기록 삭제
         invitationRepository.findByChatRoomIdAndUserId(chatRoomId, userIdToRemove)
                 .ifPresent(invitationRepository::delete);
+
+        sendExportChatRoom(chatRoomId, userIdToRemove, userId);
     }
-
-//    public String cleanInput(String input) {
-//        if (input == null) {
-//            return null;
-//        }
-//        // 문자열 양 끝의 쌍따옴표만 제거
-//        return input.startsWith("\"") && input.endsWith("\"")
-//                ? input.substring(1, input.length() - 1)
-//                : input;
-//    }
-
 }

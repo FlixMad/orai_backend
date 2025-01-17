@@ -50,7 +50,7 @@ public class MessageController {
     }
 
     @Operation(summary = "채팅방의 메시지 조회", description = "채팅방Id")
-    @GetMapping("/{chatRoomId}/messages")
+    @GetMapping("/{chatRoomId}/messageList")
     public Flux<MessageDto> getMessages(@PathVariable Long chatRoomId,
                                         Principal principal) {
         String principalId = principal.getName();

@@ -1,14 +1,10 @@
 package com.ovengers.chatservice.mongodb.controller;
 
-import com.ovengers.chatservice.mongodb.dto.ChatMessageRequest;
-import com.ovengers.chatservice.mongodb.dto.ChatMessageResponse;
+import com.ovengers.chatservice.mongodb.dto.MessageDto;
 import com.ovengers.chatservice.mongodb.service.MessageService;
-import com.ovengers.chatservice.mongodb.service.WebSocketStompService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.handler.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -17,59 +13,80 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @Tag(name = "WebSocketStompController", description = "유튜브 참고")
 public class WebSocketStompController {
-    private final WebSocketStompService webSocketStompService;
+    private final MessageService messageService;
 
-/*    private String extractIdFromPrincipal(String principalName) {
-        // 정규식으로 id 값 추출
-        Pattern pattern = Pattern.compile("id=([a-f0-9-]+)");
-        Matcher matcher = pattern.matcher(principalName);
+//    private String extractIdFromPrincipal(String principalName) {
+//        // 정규식으로 id 값 추출
+//        Pattern pattern = Pattern.compile("id=([a-f0-9-]+)");
+//        Matcher matcher = pattern.matcher(principalName);
+//
+//        if (matcher.find()) {
+//            return matcher.group(1); // 첫 번째 그룹(id 값) 반환
+//        } else {
+//            throw new IllegalArgumentException("Invalid Principal format");
+//        }
+//    }
 
-        if (matcher.find()) {
-            return matcher.group(1); // 첫 번째 그룹(id 값) 반환
-        } else {
-            throw new IllegalArgumentException("Invalid Principal format");
-        }
-    }*/
+    /**
+     * 메시지 전송
+     */
+    @MessageMapping("/{chatRoomId}/send")
+    @SendTo("/sub/{chatRoomId}/chat")
+    public Mono<MessageDto> sendMessage(
+            @DestinationVariable Long chatRoomId,
+            @Payload String content,
+            @Header("userId") String userId) {
 
-    @MessageMapping("/chat.{chatRoomId}")
-    @SendTo("/sub/chat.{chatRoomId}")
-    public ChatMessageResponse sendMessage(@DestinationVariable Long chatRoomId,/* Principal principal,*/ ChatMessageRequest request) {
 //        String principalId = principal.getName();
 //        String senderId = extractIdFromPrincipal(principalId);
 
-        // WebSocket 메시지를 처리한 후 MongoDB에 메시지 저장
-        webSocketStompService.saveMessage(chatRoomId,/* senderId,*/ request.content())
-                .doOnTerminate(() -> {
-                    // 메시지가 저장된 후 어떤 작업을 할 수 있습니다. (예: 로그, 알림 등)
-                }).subscribe(); // 비동기 처리
-
-        return new ChatMessageResponse(request.content());
+        return messageService.sendMessage(chatRoomId, content, userId);
     }
 
-    @MessageMapping("/chat.{chatRoomId}.messages")
-    @SendTo("/sub/chat.{chatRoomId}.messages")
-    public Flux<ChatMessageResponse> getMessages(@DestinationVariable Long chatRoomId) {
-        return webSocketStompService.findMessagesByChatRoomId(chatRoomId)
-                .map(dto -> new ChatMessageResponse(dto.getContent()));
+    /**
+     * 메시지 조회
+     */
+    @MessageMapping("/{chatRoomId}/messages")
+    public Flux<MessageDto> getMessages(
+            @DestinationVariable Long chatRoomId,
+            @Header("userId") String userId) {
+
+//        String principalId = principal.getName();
+//        String userId = extractIdFromPrincipal(principalId);
+
+        return messageService.getMessages(chatRoomId, userId);
     }
 
-    @MessageMapping("/chat.{chatRoomId}.update.{messageId}")
-    @SendTo("/sub/chat.{chatRoomId}")
-    public Mono<ChatMessageResponse> updateMessage(
+    /**
+     * 메시지 수정
+     */
+    @MessageMapping("/{chatRoomId}/{messageId}/update")
+    @SendTo("/sub/{chatRoomId}/chat")
+    public Mono<MessageDto> updateMessage(
             @DestinationVariable Long chatRoomId,
             @DestinationVariable String messageId,
-            ChatMessageRequest request
-    ) {
-        return webSocketStompService.updateMessage(messageId, request.content())
-                .map(dto -> new ChatMessageResponse(dto.getContent()));
+            @Payload String newContent,
+            @Header("userId") String userId) {
+
+//        String principalId = principal.getName();
+//        String senderId = extractIdFromPrincipal(principalId);
+
+        return messageService.updateMessage(chatRoomId, messageId, newContent, userId);
     }
 
-    @MessageMapping("/chat.{chatRoomId}.delete.{messageId}")
-    @SendTo("/sub/chat.{chatRoomId}")
+    /**
+     * 메시지 삭제
+     */
+    @MessageMapping("/{chatRoomId}/{messageId}/delete")
+    @SendTo("/sub/{chatRoomId}/chat")
     public Mono<Void> deleteMessage(
             @DestinationVariable Long chatRoomId,
-            @DestinationVariable String messageId
-    ) {
-        return webSocketStompService.deleteMessage(messageId);
+            @DestinationVariable String messageId,
+            @Header("userId") String userId) {
+
+//        String principalId = principal.getName();
+//        String senderId = extractIdFromPrincipal(principalId);
+
+        return messageService.deleteMessage(chatRoomId, messageId, userId);
     }
 }

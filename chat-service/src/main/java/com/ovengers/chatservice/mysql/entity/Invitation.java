@@ -15,6 +15,9 @@ public class Invitation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "inviter_id", nullable = false)
+    private String inviterId;
+
     @JoinColumn(name = "chat_room_id", nullable = false)
     private Long chatRoomId;
 
