@@ -2,6 +2,8 @@ package com.ovengers.chatservice.mysql.controller;
 
 import com.ovengers.chatservice.client.UserResponseDto;
 import com.ovengers.chatservice.common.auth.TokenUserInfo;
+import com.ovengers.chatservice.common.config.AwsS3Config;
+import com.ovengers.chatservice.common.dto.CommonResDto;
 import com.ovengers.chatservice.mysql.dto.ChatRoomDto;
 import com.ovengers.chatservice.mysql.dto.ChatRoomRequestDto;
 import com.ovengers.chatservice.mysql.dto.ChatRoomUpdateDto;
@@ -11,11 +13,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -23,6 +29,7 @@ import java.util.List;
 @Tag(name = "ChatController", description = "채팅방 관련 controller")
 public class ChatRoomController {
     private final ChatRoomService chatRoomService;
+    private final AwsS3Config s3Config;
 
     @Operation(summary = "유저 프로필 조회", description = "유저Id")
     @GetMapping("/{userId}/profile")
@@ -40,13 +47,22 @@ public class ChatRoomController {
 
     @Operation(summary = "채팅방 생성", description = "이미지, 제목, 유저Ids")
     @PostMapping("/createChatRoom")
-    public ResponseEntity<CompositeChatRoomDto> createChatRoom(@RequestBody ChatRoomRequestDto chatRoomRequestDto,
-                                                               @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
+    public ResponseEntity<CompositeChatRoomDto> createChatRoom(@RequestParam String name,
+                                                               @RequestPart MultipartFile image,
+                                                               @RequestParam List<String> userIds,
+                                                               @AuthenticationPrincipal TokenUserInfo tokenUserInfo) throws IOException {
+        String uniqueFileName;
+        String imageUrl="";
+        if (image != null && !image.isEmpty()) {
+            uniqueFileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
+            imageUrl
+                    = s3Config.uploadToS3Bucket(image.getBytes(), uniqueFileName);
+        }
         CompositeChatRoomDto createdChatRoom = chatRoomService.createChatRoom(
-                chatRoomRequestDto.getImage(),
-                chatRoomRequestDto.getName(),
+                imageUrl,
+                name,
                 tokenUserInfo.getId(),
-                chatRoomRequestDto.getUserIds() // 초대할 유저 ID 목록 전달
+                userIds
         );
         return ResponseEntity.ok(createdChatRoom);
     }
