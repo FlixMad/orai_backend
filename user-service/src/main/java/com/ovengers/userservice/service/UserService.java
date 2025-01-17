@@ -1,10 +1,12 @@
 package com.ovengers.userservice.service;
 
 import com.ovengers.userservice.common.auth.JwtTokenProvider;
+import com.ovengers.userservice.common.auth.TokenUserInfo;
 import com.ovengers.userservice.dto.UserRequestDto;
 import com.ovengers.userservice.dto.UserResponseDto;
 import com.ovengers.userservice.entity.User;
 import com.ovengers.userservice.repository.UserRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
@@ -77,22 +79,20 @@ public class UserService {
         user.setPassword(encoder.encode(newPassword));
         userRepository.save(user);
     }
-
-    public boolean isEmailDuplicate(String email) {
-        return userRepository.findByEmail(email).isPresent();
-    }
-
+    /**
+     * 내 정보 조회
+     */
     public UserResponseDto getMyInfo() {
-        String userId = "인증된 사용자 ID"; // 실제로 인증된 사용자 ID를 가져오는 방식으로 수정해야 합니다.
-        User user = userRepository.findByUserId(userId)
+        // 인증된 사용자 정보
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (!(principal instanceof TokenUserInfo)) {
+            throw new IllegalArgumentException("인증된 사용자 정보를 찾을 수 없습니다.");
+        }
+
+        TokenUserInfo userInfo = (TokenUserInfo) principal;
+        User user = userRepository.findById(userInfo.getId())
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-
-        return new UserResponseDto(user);
-    }
-
-    public UserResponseDto getUserByEmail(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("이메일로 사용자를 찾을 수 없습니다."));
 
         return new UserResponseDto(user);
     }
@@ -112,5 +112,12 @@ public class UserService {
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
         return user.getUserSecret();
     }
+
+    // 중복체크
+    public boolean isEmailDuplicate(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
+
+
 }
 
