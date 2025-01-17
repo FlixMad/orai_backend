@@ -87,21 +87,6 @@ public class ChatRoomService {
         ));
     }
 
-    private void sendChatRoomDeletedNotification(List<String> userIds, ChatRoom chatRoom, String removerId) {
-        UserResponseDto removerInfo = getUserInfo(removerId);
-        String removerName = removerInfo.getName();
-
-        userIds.forEach(userId -> simpMessagingTemplate.convertAndSendToUser(
-                userId,
-                "/queue/invitations",
-                ChatRoomInvitationDto.builder()
-                        .chatRoomId(chatRoom.getChatRoomId())
-                        .name(chatRoom.getName())
-                        .message(removerName + "님이 " + chatRoom.getName() + " 채팅방을 삭제하였습니다.")
-                        .build()
-        ));
-    }
-
     // 채팅방 입장 알림(채팅방 생성 또는 초대 수락 시)
     private void sendEnterChatRoom(Long chatRoomId, String userId) {
         // 유저의 이름 가져오기
@@ -174,6 +159,23 @@ public class ChatRoomService {
                 "/sub/" + chatRoomId + "/chat",  // 채팅방 구독 경로
                 creatorName + "님이 " + userName + "님을 " + chatRoomInfo.getName() + " 채팅방에서 내보냈습니다."
         );
+    }
+
+
+    // 구독 유저들에게 채팅방 삭제 알림을 보내는 메서드
+    private void sendChatRoomDeletedNotification(List<String> userIds, ChatRoom chatRoom, String removerId) {
+        UserResponseDto removerInfo = getUserInfo(removerId);
+        String removerName = removerInfo.getName();
+
+        userIds.forEach(userId -> simpMessagingTemplate.convertAndSendToUser(
+                userId,
+                "/queue/invitations",
+                ChatRoomInvitationDto.builder()
+                        .chatRoomId(chatRoom.getChatRoomId())
+                        .name(chatRoom.getName())
+                        .message(removerName + "님이 " + chatRoom.getName() + " 채팅방을 삭제하였습니다.")
+                        .build()
+        ));
     }
 
     // ChatRoom 및 UserChatRoom 생성
