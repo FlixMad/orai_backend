@@ -1,8 +1,9 @@
 package com.ovengers.userservice.dto;
-
 import com.ovengers.userservice.entity.Position;
 import com.ovengers.userservice.entity.User;
 import lombok.*;
+
+import java.util.Map;
 
 @Getter
 @Setter
@@ -17,9 +18,21 @@ public class UserResponseDto {
     private Position position;
     private String phoneNum;
     private boolean accountActive;
+    private String departmentName;
     private String departmentId;
 
     // 기존 User 엔티티를 기반으로 하는 생성자
+    public UserResponseDto(User user, Map<String,String> map) {
+        this.userId = user.getUserId();
+        this.email = user.getEmail();
+        this.name = user.getName();
+        this.profileImage = user.getProfileImage();
+        this.position = user.getPosition();
+        this.phoneNum = user.getPhoneNum();
+        this.accountActive = user.isAccountActive();
+        this.departmentName = map.get(user.getDepartmentId());
+        this.departmentId = map.get(user.getDepartmentId());
+    }
     public UserResponseDto(User user) {
         this.userId = user.getUserId();
         this.email = user.getEmail();
@@ -30,7 +43,6 @@ public class UserResponseDto {
         this.accountActive = user.isAccountActive();
         this.departmentId = user.getDepartmentId();
     }
-
     // JWT 토큰을 포함하는 생성자 추가
     public UserResponseDto(User user, String token) {
         this(user);  // 기존 User 엔티티 기반 생성자 호출
