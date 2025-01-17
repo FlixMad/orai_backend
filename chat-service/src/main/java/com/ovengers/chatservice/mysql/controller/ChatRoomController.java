@@ -31,6 +31,13 @@ public class ChatRoomController {
         return ResponseEntity.ok(userResponse);
     }
 
+    @Operation(summary = "유저 리스트 생성")
+    @PostMapping("/userList")
+    public ResponseEntity<List<UserResponseDto>> getAllUsers(@RequestBody List<String> userIds) {
+        List<UserResponseDto> getAllUsers = chatRoomService.getAllUsers(userIds);
+        return ResponseEntity.ok(getAllUsers);
+    }
+
     @Operation(summary = "채팅방 생성", description = "이미지, 제목, 유저Ids")
     @PostMapping("/createChatRoom")
     public ResponseEntity<CompositeChatRoomDto> createChatRoom(@RequestBody ChatRoomRequestDto chatRoomRequestDto,

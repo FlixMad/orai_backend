@@ -48,6 +48,10 @@ public class ChatRoomService {
         return userById;
     }
 
+    public List<UserResponseDto> getAllUsers(List<String> userIds) {
+        return userServiceClient.getUsersByIds(userIds);
+    }
+
     // 유효성 검사 메서드
     private void validateChatRoomName(String name) {
         if (StringUtils.isBlank(name)) { // Apache Commons Lang 사용 (공백 또는 null 확인)
