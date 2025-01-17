@@ -3,9 +3,7 @@ package com.ovengers.chatservice.mysql.controller;
 import com.ovengers.chatservice.client.UserResponseDto;
 import com.ovengers.chatservice.common.auth.TokenUserInfo;
 import com.ovengers.chatservice.common.config.AwsS3Config;
-import com.ovengers.chatservice.common.dto.CommonResDto;
 import com.ovengers.chatservice.mysql.dto.ChatRoomDto;
-import com.ovengers.chatservice.mysql.dto.ChatRoomRequestDto;
 import com.ovengers.chatservice.mysql.dto.ChatRoomUpdateDto;
 import com.ovengers.chatservice.mysql.dto.CompositeChatRoomDto;
 import com.ovengers.chatservice.mysql.service.ChatRoomService;
@@ -14,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -46,25 +45,26 @@ public class ChatRoomController {
     }
 
     @Operation(summary = "채팅방 생성", description = "이미지, 제목, 유저Ids")
-    @PostMapping("/createChatRoom")
-    public ResponseEntity<CompositeChatRoomDto> createChatRoom(@RequestParam String name,
-                                                               @RequestPart MultipartFile image,
-                                                               @RequestParam List<String> userIds,
-                                                               @AuthenticationPrincipal TokenUserInfo tokenUserInfo) throws IOException {
+    @PostMapping(value = "/createChatRoom", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<CompositeChatRoomDto> createChatRoom(@RequestPart(value = "image") MultipartFile image,
+                                                               @RequestParam String name,
+                                                               @AuthenticationPrincipal TokenUserInfo tokenUserInfo,
+                                                               @RequestParam List<String> userIds) throws IOException {
         String uniqueFileName;
-        String imageUrl="";
         if (image != null && !image.isEmpty()) {
             uniqueFileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
-            imageUrl
-                    = s3Config.uploadToS3Bucket(image.getBytes(), uniqueFileName);
+            String imageUrl = s3Config.uploadToS3Bucket(image.getBytes(), uniqueFileName);
+
+            CompositeChatRoomDto compositeChatRoomDto = chatRoomService.createChatRoom(
+                    imageUrl,
+                    name,
+                    tokenUserInfo.getId(),
+                    userIds
+            );
+
+            return ResponseEntity.ok(compositeChatRoomDto);
         }
-        CompositeChatRoomDto createdChatRoom = chatRoomService.createChatRoom(
-                imageUrl,
-                name,
-                tokenUserInfo.getId(),
-                userIds
-        );
-        return ResponseEntity.ok(createdChatRoom);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
     @Operation(summary = "구독한 채팅방 목록")
@@ -76,19 +76,17 @@ public class ChatRoomController {
 
     @Operation(summary = "채팅방을 구독한 유저 목록", description = "채팅방Id")
     @GetMapping("/{chatRoomId}/users")
-    public ResponseEntity<List<UserResponseDto>> getSubscribedUsers(
-            @PathVariable Long chatRoomId,
-            @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
+    public ResponseEntity<List<UserResponseDto>> getSubscribedUsers(@PathVariable Long chatRoomId,
+                                                                    @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
         List<UserResponseDto> subUsers = chatRoomService.getSubUsers(chatRoomId, tokenUserInfo.getId());
         return ResponseEntity.ok(subUsers);
     }
 
     @Operation(summary = "채팅방에 유저 초대", description = "채팅방Id, 유저Id")
     @PostMapping("/{chatRoomId}/invite")
-    public ResponseEntity<Void> inviteUsers(
-            @PathVariable Long chatRoomId,
-            @AuthenticationPrincipal TokenUserInfo tokenUserInfo,
-            @RequestBody List<String> inviteeIds) {
+    public ResponseEntity<Void> inviteUsers(@PathVariable Long chatRoomId,
+                                            @AuthenticationPrincipal TokenUserInfo tokenUserInfo,
+                                            @RequestBody List<String> inviteeIds) {
 
         chatRoomService.inviteUsers(chatRoomId, tokenUserInfo.getId(), inviteeIds);
         return ResponseEntity.ok().build();
@@ -96,9 +94,8 @@ public class ChatRoomController {
 
     @Operation(summary = "초대 수락", description = "채팅방Id - 수락을 하면 채팅방에 구독됨")
     @PostMapping("/{chatRoomId}/accept")
-    public ResponseEntity<Void> acceptInvitation(
-            @PathVariable Long chatRoomId,
-            @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
+    public ResponseEntity<Void> acceptInvitation(@PathVariable Long chatRoomId,
+                                                 @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
 
         chatRoomService.acceptInvitation(chatRoomId, tokenUserInfo.getId());
         return ResponseEntity.ok().build();
@@ -106,9 +103,8 @@ public class ChatRoomController {
 
     @Operation(summary = "초대 거절", description = "채팅방Id - 거절을 하면 초대 이력 삭제됨")
     @PostMapping("/{chatRoomId}/refusal")
-    public ResponseEntity<Void> refusalInvitation(
-            @PathVariable Long chatRoomId,
-            @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
+    public ResponseEntity<Void> refusalInvitation(@PathVariable Long chatRoomId,
+                                                  @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
 
         chatRoomService.refusalInvitation(chatRoomId, tokenUserInfo.getId());
         return ResponseEntity.ok().build();
@@ -141,10 +137,9 @@ public class ChatRoomController {
 
     @Operation(summary = "채팅방 내보내기", description = "채팅방Id, 유저Id - userChatRoom, invitation에서 삭제됨")
     @DeleteMapping("/{chatRoomId}/{userId}/deleteUser")
-    public ResponseEntity<Void> removeUserFromChatRoom(
-            @PathVariable Long chatRoomId,
-            @PathVariable String userId,
-            @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
+    public ResponseEntity<Void> removeUserFromChatRoom(@PathVariable Long chatRoomId,
+                                                       @PathVariable String userId,
+                                                       @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
         chatRoomService.removeUserFromChatRoom(chatRoomId, userId, tokenUserInfo.getId());
         return ResponseEntity.noContent().build();
     }
