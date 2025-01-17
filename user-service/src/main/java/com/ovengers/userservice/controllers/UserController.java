@@ -103,6 +103,7 @@ public class UserController {
     @GetMapping("/{userId}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable String userId) {  // 파라미터를 String으로 수정
         UserResponseDto responseDto = userService.getUserById(userId);
+        log.info("user:"+responseDto);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
