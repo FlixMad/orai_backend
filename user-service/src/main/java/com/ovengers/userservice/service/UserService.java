@@ -2,6 +2,7 @@ package com.ovengers.userservice.service;
 
 import com.ovengers.userservice.common.auth.JwtTokenProvider;
 import com.ovengers.userservice.common.auth.TokenUserInfo;
+import com.ovengers.userservice.dto.LoginRequestDto;
 import com.ovengers.userservice.dto.UserRequestDto;
 import com.ovengers.userservice.dto.UserResponseDto;
 import com.ovengers.userservice.entity.User;
@@ -49,6 +50,18 @@ public class UserService {
     }
 
     public UserResponseDto login(UserRequestDto dto) {
+        User user = userRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new EntityNotFoundException("이메일을 찾을 수 없습니다."));
+
+        if (!encoder.matches(dto.getPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        String token = jwtTokenProvider.createToken(user.getUserId(), user.getDepartmentId());
+        return new UserResponseDto(user, token);
+    }
+
+    public UserResponseDto login(LoginRequestDto dto) {
         User user = userRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException("이메일을 찾을 수 없습니다."));
 
