@@ -4,7 +4,6 @@ import com.ovengers.chatservice.client.UserResponseDto;
 import com.ovengers.chatservice.common.auth.TokenUserInfo;
 import com.ovengers.chatservice.common.config.AwsS3Config;
 import com.ovengers.chatservice.mysql.dto.ChatRoomDto;
-import com.ovengers.chatservice.mysql.dto.ChatRoomUpdateDto;
 import com.ovengers.chatservice.mysql.dto.CompositeChatRoomDto;
 import com.ovengers.chatservice.mysql.service.ChatRoomService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,6 +29,16 @@ public class ChatRoomController {
     private final ChatRoomService chatRoomService;
     private final AwsS3Config s3Config;
 
+    public String cleanInput(String input) {
+        if (input == null) {
+            return null;
+        }
+        // 문자열 양 끝의 쌍따옴표만 제거
+        return input.startsWith("\"") && input.endsWith("\"")
+                ? input.substring(1, input.length() - 1)
+                : input;
+    }
+
     @Operation(summary = "유저 프로필 조회", description = "유저Id")
     @GetMapping("/{userId}/profile")
     public ResponseEntity<UserResponseDto> getUserFromUserService(@PathVariable String userId) {
@@ -50,6 +59,13 @@ public class ChatRoomController {
                                                                @RequestParam String name,
                                                                @AuthenticationPrincipal TokenUserInfo tokenUserInfo,
                                                                @RequestParam List<String> userIds) throws IOException {
+        // userIds에서 각 유저 ID의 앞뒤 따옴표 제거
+        List<String> cleanedUserIds = userIds.stream()
+                .map(this::cleanInput)
+                .toList();
+
+        log.info("\n\n\n" + cleanedUserIds + "\n\n\n");
+
         String uniqueFileName;
         if (image != null && !image.isEmpty()) {
             uniqueFileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
@@ -59,7 +75,7 @@ public class ChatRoomController {
                     imageUrl,
                     name,
                     tokenUserInfo.getId(),
-                    userIds
+                    cleanedUserIds
             );
 
             return ResponseEntity.ok(compositeChatRoomDto);
@@ -86,9 +102,15 @@ public class ChatRoomController {
     @PostMapping("/{chatRoomId}/invite")
     public ResponseEntity<Void> inviteUsers(@PathVariable Long chatRoomId,
                                             @AuthenticationPrincipal TokenUserInfo tokenUserInfo,
-                                            @RequestBody List<String> inviteeIds) {
+                                            @RequestParam List<String> inviteeIds) {
+        // userIds에서 각 유저 ID의 앞뒤 따옴표 제거
+        List<String> cleanedUserIds = inviteeIds.stream()
+                .map(this::cleanInput)
+                .toList();
 
-        chatRoomService.inviteUsers(chatRoomId, tokenUserInfo.getId(), inviteeIds);
+        log.info("\n\n\n" + cleanedUserIds + "\n\n\n");
+
+        chatRoomService.inviteUsers(chatRoomId, tokenUserInfo.getId(), cleanedUserIds);
         return ResponseEntity.ok().build();
     }
 
@@ -111,12 +133,25 @@ public class ChatRoomController {
     }
 
     @Operation(summary = "채팅방 수정", description = "채팅방Id, 이미지/제목 - 이미지나 제목 중 하나만 수정해도 됨")
-    @PutMapping("/{chatRoomId}/updateChatRoom")
+    @PutMapping(value = "/{chatRoomId}/updateChatRoom", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ChatRoomDto> updateChatRoom(@PathVariable Long chatRoomId,
-                                                      @RequestBody ChatRoomUpdateDto chatRoomUpdateDto,
-                                                      @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
-        ChatRoomDto updateChatRoom = chatRoomService.updateChatRoom(chatRoomId, chatRoomUpdateDto.getImage(), chatRoomUpdateDto.getName(), tokenUserInfo.getId());
-        return ResponseEntity.ok(updateChatRoom);
+                                                      @RequestPart(value = "image") MultipartFile image,
+                                                      @RequestParam String name,
+                                                      @AuthenticationPrincipal TokenUserInfo tokenUserInfo) throws IOException {
+        String uniqueFileName;
+        if (image != null && !image.isEmpty()) {
+            uniqueFileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
+            String imageUrl = s3Config.uploadToS3Bucket(image.getBytes(), uniqueFileName);
+
+            ChatRoomDto chatRoomDto = chatRoomService.updateChatRoom(
+                    chatRoomId,
+                    imageUrl,
+                    name,
+                    tokenUserInfo.getId()
+            );
+            return ResponseEntity.ok(chatRoomDto);
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
     @Operation(summary = "채팅방 삭제", description = "채팅방Id - chatRoom, userChatRoom, invitation에서 삭제됨")

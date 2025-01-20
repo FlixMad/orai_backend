@@ -27,7 +27,7 @@ public class ChatRoom {
     private String image;
 
     @Setter
-    @Column(name = "name", length = 100, nullable = false)
+    @Column(name = "name", length = 100)
     private String name;
 
     @Column(name = "creator_id", nullable = false)

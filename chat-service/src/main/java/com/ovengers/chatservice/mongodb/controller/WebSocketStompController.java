@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -43,10 +42,7 @@ public class WebSocketStompController {
         return messageService.sendMessage(chatRoomId, content, userId);
     }
 
-    /**
-     * 메시지 조회
-     */
-    @MessageMapping("/{chatRoomId}/messages")
+/*  @MessageMapping("/{chatRoomId}/messages")
     public Flux<MessageDto> getMessages(
             @DestinationVariable Long chatRoomId,
             @Header("userId") String userId) {
@@ -57,9 +53,6 @@ public class WebSocketStompController {
         return messageService.getMessages(chatRoomId, userId);
     }
 
-    /**
-     * 메시지 수정
-     */
     @MessageMapping("/{chatRoomId}/{messageId}/update")
     @SendTo("/sub/{chatRoomId}/chat")
     public Mono<MessageDto> updateMessage(
@@ -74,9 +67,6 @@ public class WebSocketStompController {
         return messageService.updateMessage(chatRoomId, messageId, newContent, userId);
     }
 
-    /**
-     * 메시지 삭제
-     */
     @MessageMapping("/{chatRoomId}/{messageId}/delete")
     @SendTo("/sub/{chatRoomId}/chat")
     public Mono<Void> deleteMessage(
@@ -88,5 +78,5 @@ public class WebSocketStompController {
 //        String senderId = extractIdFromPrincipal(principalId);
 
         return messageService.deleteMessage(chatRoomId, messageId, userId);
-    }
+    }*/
 }

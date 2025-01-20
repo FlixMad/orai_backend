@@ -81,15 +81,4 @@ public class MessageController {
 
         return messageService.deleteMessage(chatRoomId, messageId, senderId);
     }
-
-//    public String cleanInput(String input) {
-//        if (input == null) {
-//            return null;
-//        }
-//        // 문자열 양 끝의 쌍따옴표만 제거
-//        return input.startsWith("\"") && input.endsWith("\"")
-//                ? input.substring(1, input.length() - 1)
-//                : input;
-//    }
-
 }
