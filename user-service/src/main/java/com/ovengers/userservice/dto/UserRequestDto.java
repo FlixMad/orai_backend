@@ -1,4 +1,5 @@
 package com.ovengers.userservice.dto;
+
 import com.ovengers.userservice.entity.Position;
 import com.ovengers.userservice.entity.User;
 import com.ovengers.userservice.entity.UserState;
@@ -10,17 +11,20 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @ToString
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor // 기본 생성자 추가
+@NoArgsConstructor
 public class UserRequestDto {
     private String email;
     private String password;
     private String name;
     private String profileImage;
     private String phoneNum;
-    private Position position;  // 추가된 필드
+    private Position position;
     private boolean accountActive;
     private UserState state;
     private String departmentId;
+
+    // 추가된 mfa시크릿
+    private String mfaSecret;
 
     // User 엔티티로 변환하는 메서드
     public User toEntity(PasswordEncoder encoder) {
@@ -29,12 +33,12 @@ public class UserRequestDto {
                 .password(encoder.encode(this.password)) // 비밀번호 암호화
                 .name(this.name)
                 .profileImage(this.profileImage)
-                .phoneNum(this.phoneNum)  // 추가된 필드
-                .position(this.position)  // 추가된 필드
+                .phoneNum(this.phoneNum)
+                .position(this.position)
                 .accountActive(this.accountActive)
                 .state(this.state)
-                .departmentId(this.departmentId)  // 추가된 필드
+                .departmentId(this.departmentId)
+                .mfaSecret(this.mfaSecret) // 추가된 mfa 매핑
                 .build();
     }
-
 }
