@@ -4,6 +4,7 @@ import com.ovengers.userservice.common.auth.JwtTokenProvider;
 import com.ovengers.userservice.common.dto.CommonErrorDto;
 import com.ovengers.userservice.common.dto.CommonResDto;
 import com.ovengers.userservice.common.util.MfaSecretGenerator;
+import com.ovengers.userservice.dto.LoginRequestDto;
 import com.ovengers.userservice.dto.UserRequestDto;
 import com.ovengers.userservice.dto.UserResponseDto;
 import com.ovengers.userservice.service.UserService;
@@ -65,6 +66,15 @@ public class UserController {
 
         return new ResponseEntity<>(
                 new CommonResDto<>(HttpStatus.OK, "Login successful, Mfa required.", result),
+                HttpStatus.OK
+        );
+    }
+    @PostMapping("/devLogin")
+    public ResponseEntity<CommonResDto<Map<String, Object>>> devLogin(@Valid @RequestBody LoginRequestDto reqDto) {
+        UserResponseDto responseDto = userService.login(reqDto);
+
+        return new ResponseEntity<>(
+                new CommonResDto<>(HttpStatus.OK, "Login successful", responseDto),
                 HttpStatus.OK
         );
     }
