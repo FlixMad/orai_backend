@@ -18,8 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -135,12 +134,11 @@ public class ChatRoomController {
     @Operation(summary = "채팅방 수정", description = "채팅방Id, 이미지/제목 - 이미지나 제목 중 하나만 수정해도 됨")
     @PutMapping(value = "/{chatRoomId}/updateChatRoom", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ChatRoomDto> updateChatRoom(@PathVariable Long chatRoomId,
-                                                      @RequestPart(value = "image") MultipartFile image,
+                                                      @RequestPart(value = "image", required = false) MultipartFile image,
                                                       @RequestParam String name,
                                                       @AuthenticationPrincipal TokenUserInfo tokenUserInfo) throws IOException {
-        String uniqueFileName;
         if (image != null && !image.isEmpty()) {
-            uniqueFileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
+            String uniqueFileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
             String imageUrl = s3Config.uploadToS3Bucket(image.getBytes(), uniqueFileName);
 
             ChatRoomDto chatRoomDto = chatRoomService.updateChatRoom(
@@ -149,9 +147,17 @@ public class ChatRoomController {
                     name,
                     tokenUserInfo.getId()
             );
+            log.info("\n\n\n" + chatRoomDto + "\n\n\n");
+            return ResponseEntity.ok(chatRoomDto);
+        } else {
+            ChatRoomDto chatRoomDto = chatRoomService.updateChatRoom(
+                    chatRoomId,
+                    "",
+                    name,
+                    tokenUserInfo.getId()
+            );
             return ResponseEntity.ok(chatRoomDto);
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
     @Operation(summary = "채팅방 삭제", description = "채팅방Id - chatRoom, userChatRoom, invitation에서 삭제됨")

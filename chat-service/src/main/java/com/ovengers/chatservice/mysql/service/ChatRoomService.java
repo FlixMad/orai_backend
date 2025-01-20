@@ -417,12 +417,16 @@ public class ChatRoomService {
             isUpdated = true;
         }
 
+        log.info("\n\n\n{}\n\n\n", newImage);
+
         // 이름이 null이 아니고 공백이 아닌 경우 수정
         if (newName != null && !newName.trim().isEmpty() && !newName.equals(chatRoom.getName())) {
             validateChatRoomName(newName.trim());
             chatRoom.setName(newName);
             isUpdated = true;
         }
+
+        log.info("\n\n\n{}\n\n\n", newName);
 
         // 둘 다 수정되지 않은 경우 예외 발생
         if (!isUpdated) {
