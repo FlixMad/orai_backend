@@ -23,7 +23,6 @@ public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/queue", "/sub"); // 메시지 수신 (개인, 그룹)
         registry.setApplicationDestinationPrefixes("/pub"); // 메시지 발신
-        registry.setUserDestinationPrefix("/user");
     }
 
     @Override

@@ -8,23 +8,27 @@ import org.springframework.messaging.handler.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.security.Principal;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "WebSocketStompController", description = "유튜브 참고")
 public class WebSocketStompController {
     private final MessageService messageService;
 
-//    private String extractIdFromPrincipal(String principalName) {
-//        // 정규식으로 id 값 추출
-//        Pattern pattern = Pattern.compile("id=([a-f0-9-]+)");
-//        Matcher matcher = pattern.matcher(principalName);
-//
-//        if (matcher.find()) {
-//            return matcher.group(1); // 첫 번째 그룹(id 값) 반환
-//        } else {
-//            throw new IllegalArgumentException("Invalid Principal format");
-//        }
-//    }
+    private String extractIdFromPrincipal(String principalName) {
+        // 정규식으로 id 값 추출
+        Pattern pattern = Pattern.compile("id=([a-f0-9-]+)");
+        Matcher matcher = pattern.matcher(principalName);
+
+        if (matcher.find()) {
+            return matcher.group(1); // 첫 번째 그룹(id 값) 반환
+        } else {
+            throw new IllegalArgumentException("Invalid Principal format");
+        }
+    }
 
     /**
      * 메시지 전송
@@ -34,12 +38,12 @@ public class WebSocketStompController {
     public Mono<MessageDto> sendMessage(
             @DestinationVariable Long chatRoomId,
             @Payload String content,
-            @Header("userId") String userId) {
+            Principal principal) {
 
-//        String principalId = principal.getName();
-//        String senderId = extractIdFromPrincipal(principalId);
+        String principalId = principal.getName();
+        String senderId = extractIdFromPrincipal(principalId);
 
-        return messageService.sendMessage(chatRoomId, content, userId);
+        return messageService.sendMessage(chatRoomId, content, senderId);
     }
 
 /*  @MessageMapping("/{chatRoomId}/messages")
