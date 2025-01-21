@@ -1,5 +1,6 @@
 package com.ovengers.calendarservice.service;
 
+import com.ovengers.calendarservice.dto.request.DepartmentRequestDto;
 import com.ovengers.calendarservice.dto.response.DepartmentResDto;
 import com.ovengers.calendarservice.entity.Department;
 import com.ovengers.calendarservice.repository.DepartmentRepository;
@@ -20,10 +21,15 @@ public class DepartmentService {
     private final DepartmentRepository departmentRepository;
 
     // CREATE
-    public Department createDepartment(Department department) {
-        department.setCreatedAt(LocalDateTime.now());
-        department.setUpdatedAt(LocalDateTime.now());
-        return departmentRepository.save(department);
+    public Department createDepartment(DepartmentRequestDto department) {
+        Department newDepartment = new Department();
+        newDepartment.setName(department.getName());
+        newDepartment.setType(Department.DepartmentType.valueOf(department.getType()));
+        Department parentDepartment = departmentRepository.findById(department.getParent()).orElseThrow(
+                () -> new IllegalArgumentException("Department not found")
+        );
+        newDepartment.setParent(parentDepartment);
+        return departmentRepository.save(newDepartment);
     }
 
     // READ - All Departments
@@ -60,4 +66,11 @@ public class DepartmentService {
         }
         departmentRepository.deleteById(departmentId);
     }
+
+    public DepartmentResDto patchDepartment(String departmentId, DepartmentRequestDto departmentRequestDto) {
+        Department existingDepartment = getDepartmentById(departmentId);
+        existingDepartment.setName(departmentRequestDto.getName());
+        return new DepartmentResDto(departmentRepository.save(existingDepartment));
+    }
+
 }

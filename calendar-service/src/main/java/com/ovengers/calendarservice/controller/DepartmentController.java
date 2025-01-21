@@ -1,6 +1,7 @@
 package com.ovengers.calendarservice.controller;
 
 import com.ovengers.calendarservice.common.CommonResDto;
+import com.ovengers.calendarservice.dto.request.DepartmentRequestDto;
 import com.ovengers.calendarservice.dto.response.DepartmentResDto;
 import com.ovengers.calendarservice.entity.Department;
 import com.ovengers.calendarservice.service.DepartmentService;
@@ -21,9 +22,10 @@ public class DepartmentController {
 
     // CREATE
     @PostMapping
-    public ResponseEntity<Department> createDepartment(@RequestBody Department department) {
+    public ResponseEntity<DepartmentResDto> createDepartment(@RequestBody DepartmentRequestDto department) {
         Department createdDepartment = departmentService.createDepartment(department);
-        return ResponseEntity.ok(createdDepartment);
+        DepartmentResDto departmentResDto = new DepartmentResDto(createdDepartment);
+        return ResponseEntity.ok(departmentResDto);
     }
 
     // READ - All Departments
@@ -48,10 +50,17 @@ public class DepartmentController {
         return ResponseEntity.ok(departmentMap);
     }
 
-    // UPDATE
+    //PUT
     @PutMapping("/{id}")
     public ResponseEntity<Department> updateDepartment(@PathVariable("id") String departmentId, @RequestBody Department department) {
         Department updatedDepartment = departmentService.updateDepartment(departmentId, department);
+        return ResponseEntity.ok(updatedDepartment);
+    }
+
+    //PATCH
+    @PatchMapping("/{id}")
+    public ResponseEntity<DepartmentResDto> patchDepartment(@PathVariable("id") String departmentId, @RequestBody DepartmentRequestDto departmentRequestDto) {
+        DepartmentResDto updatedDepartment = departmentService.patchDepartment(departmentId, departmentRequestDto);
         return ResponseEntity.ok(updatedDepartment);
     }
 
