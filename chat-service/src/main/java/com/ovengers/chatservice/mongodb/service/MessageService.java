@@ -3,10 +3,8 @@ package com.ovengers.chatservice.mongodb.service;
 import com.ovengers.chatservice.mongodb.dto.MessageDto;
 import com.ovengers.chatservice.mongodb.document.Message;
 import com.ovengers.chatservice.mongodb.repository.MessageRepository;
-import com.ovengers.chatservice.mysql.exception.InvalidChatRoomNameException;
 import com.ovengers.chatservice.mysql.repository.ChatRoomRepository;
 import com.ovengers.chatservice.mysql.repository.UserChatRoomRepository;
-import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -22,8 +20,8 @@ public class MessageService {
     private final UserChatRoomRepository userChatRoomRepository;
 
     private void validateMessageContent(String content) {
-        if (StringUtils.isBlank(content)) { // Apache Commons Lang 사용 (공백 또는 null 확인)
-            throw new InvalidChatRoomNameException("메시지는 공백만으로 지정할 수 없습니다.");
+        if (content == null || content.isBlank()) {
+            throw new IllegalArgumentException("메시지 내용이 비어 있습니다.");
         }
     }
 

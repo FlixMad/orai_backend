@@ -113,7 +113,7 @@ public class ChatRoomController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "초대 수락", description = "채팅방Id - 수락을 하면 채팅방에 구독됨")
+/*    @Operation(summary = "초대 수락", description = "채팅방Id - 수락을 하면 채팅방에 구독됨")
     @PostMapping("/{chatRoomId}/accept")
     public ResponseEntity<Void> acceptInvitation(@PathVariable Long chatRoomId,
                                                  @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
@@ -129,7 +129,7 @@ public class ChatRoomController {
 
         chatRoomService.refusalInvitation(chatRoomId, tokenUserInfo.getId());
         return ResponseEntity.ok().build();
-    }
+    }*/
 
     @Operation(summary = "채팅방 수정", description = "채팅방Id, 이미지/제목 - 이미지나 제목 중 하나만 수정해도 됨")
     @PutMapping(value = "/{chatRoomId}/updateChatRoom", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

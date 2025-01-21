@@ -4,7 +4,6 @@ import com.ovengers.chatservice.client.UserResponseDto;
 import com.ovengers.chatservice.client.UserServiceClient;
 import com.ovengers.chatservice.mysql.dto.ChatRoomDto;
 import com.ovengers.chatservice.mysql.dto.ChatRoomInvitationDto;
-import com.ovengers.chatservice.mysql.dto.ChatRoomNotificationDto;
 import com.ovengers.chatservice.mysql.dto.CompositeChatRoomDto;
 import com.ovengers.chatservice.mysql.entity.ChatRoom;
 import com.ovengers.chatservice.mysql.entity.Invitation;
@@ -24,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,7 +59,7 @@ public class ChatRoomService {
         }
     }
 
-    // 생성자에게 채팅방 생성 알림
+/*    // 생성자에게 채팅방 생성 알림
     private void sendChatRoomCreatedNotification(String userId, ChatRoom chatRoom) {
         // STOMP 메시지를 생성자에게 전송
         simpMessagingTemplate.convertAndSendToUser(
@@ -71,9 +71,9 @@ public class ChatRoomService {
                         .message(chatRoom.getName() + "채팅방이 생성되었습니다.")
                         .build()
         );
-    }
+    }*/
 
-    // 초대 유저들에게 알림을 보내는 메서드
+/*    // 초대 유저들에게 알림을 보내는 메서드
     private void sendInvitationsToUsers(List<String> userIds, ChatRoom chatRoom, String inviterId) {
         // 초대한 사람의 정보를 가져옴
         UserResponseDto inviterInfo = getUserInfo(inviterId);
@@ -89,9 +89,9 @@ public class ChatRoomService {
                         .message(inviterName + "님이 " + chatRoom.getName() + " 채팅방에 초대했습니다.")
                         .build()
         ));
-    }
+    }*/
 
-    // 채팅방 입장 알림(채팅방 생성 또는 초대 수락 시)
+    // 채팅방 입장 알림(채팅방 생성 시(생성자))
     private void sendEnterChatRoom(Long chatRoomId, String userId) {
         // 유저의 이름 가져오기
         UserResponseDto userInfo = getUserInfo(userId);
@@ -106,6 +106,22 @@ public class ChatRoomService {
         );
     }
 
+    // 채팅방 입장 알림(채팅방 생성 시(유저들))
+    private void sendEnterUsers(Long chatRoomId, List<String> userIds) {
+        // 채팅방 정보를 가져옴
+        ChatRoomDto chatRoomInfo = chatRoomRepository.findByChatRoomId(chatRoomId).toDto();
+
+        // 사용자 정보를 가져옴
+        List<UserResponseDto> userInfos = getAllUsers(userIds);
+
+        // 각 사용자에 대해 메시지 전송
+        userInfos.forEach(userInfo -> {
+            String userName = userInfo.getName();
+            String message = userName + "님이 " + chatRoomInfo.getName() + " 채팅방에 입장했습니다.";
+            simpMessagingTemplate.convertAndSend("/sub/" + chatRoomId + "/chat", message);
+        });
+    }
+
     // 채팅방 수정 알림
     private void sendChatRoomUpdatedNotification(Long chatRoomId, String newImage, String newName) {
         // 채팅방에 속한 유저들이 아닌, 해당 채팅방을 구독한 유저들에게만 알림을 전송
@@ -113,7 +129,7 @@ public class ChatRoomService {
         ChatRoom chatRoom = chatRoomRepository.findByChatRoomId(chatRoomId);
 
         // 이름이 변경되었을 때
-        if (newName != null && !newName.equals(chatRoom.getName())) {
+        if (!newName.equals(chatRoom.getName())) {
             String nameUpdateMessage = chatRoom.getName() + "에서 " + newName + "으로 변경되었습니다.";
             simpMessagingTemplate.convertAndSend(
                     "/sub/" + chatRoomId + "/chat",  // 채팅방 구독 경로
@@ -173,11 +189,11 @@ public class ChatRoomService {
 
         userIds.forEach(userId -> simpMessagingTemplate.convertAndSendToUser(
                 userId,
-                "/queue/invitations",
+                "/queue",
                 ChatRoomInvitationDto.builder()
                         .chatRoomId(chatRoom.getChatRoomId())
                         .name(chatRoom.getName())
-                        .message(removerName + "님이 " + chatRoom.getName() + " 채팅방을 삭제하였습니다.")
+                        .message(removerName + "님이 " + chatRoom.getName() + " 채팅방을 삭제했습니다.")
                         .build()
         ));
     }
@@ -224,17 +240,26 @@ public class ChatRoomService {
                         .inviterId(savedChatRoom.getCreatorId())
                         .chatRoomId(savedChatRoom.getChatRoomId())
                         .userId(getUserId)
-                        .accepted(false)
+                        .accepted(true)
                         .build())
                 .toList();
         invitationRepository.saveAll(invitations);
 
-        // **WebSocket 알림 처리 추가**
+        List<UserChatRoom> users = inviteeIds.stream()
+                .map(getUserId -> UserChatRoom.builder()
+                        .chatRoomId(savedChatRoom.getChatRoomId())
+                        .userId(getUserId)
+                        .build())
+                .toList();
+        userChatRoomRepository.saveAll(users);
+
+/*        // **WebSocket 알림 처리 추가**
         sendChatRoomCreatedNotification(userId, savedChatRoom); // 생성자에게 알림
-        sendInvitationsToUsers(inviteeIds, chatRoom, userId); // 초대 유저들에게 알림
+        sendInvitationsToUsers(inviteeIds, chatRoom, userId); // 초대 유저들에게 알림*/
 
         // 생성자가 채팅방에 입장했을 때 입장 메시지 전송
         sendEnterChatRoom(savedChatRoom.getChatRoomId(), userId);  // 생성자가 입장했음을 알림
+        sendEnterUsers(savedChatRoom.getChatRoomId(), inviteeIds);
 
         return CompositeChatRoomDto.builder()
                 .chatRoomDto(savedChatRoom.toDto())
@@ -334,16 +359,24 @@ public class ChatRoomService {
                         .inviterId(inviterId)
                         .chatRoomId(chatRoom.getChatRoomId())
                         .userId(inviteeId)
-                        .accepted(false)
+                        .accepted(true)
                         .build())
                 .toList();
 
-        // 아직 초대만
+        List<UserChatRoom> users = validUserIds.stream()
+                .map(getUserId -> UserChatRoom.builder()
+                        .chatRoomId(chatRoom.getChatRoomId())
+                        .userId(getUserId)
+                        .build())
+                .toList();
+
+        // 초대와 구독
         invitationRepository.saveAll(invitations);
-        sendInvitationsToUsers(validUserIds, chatRoom, inviterId);       // 초대 유저들에게 알림
+        userChatRoomRepository.saveAll(users);
+//        sendInvitationsToUsers(validUserIds, chatRoom, inviterId);       // 초대 유저들에게 알림
     }
 
-    // 초대 수락 시 UserChatRoom 저장
+/*    // 초대 수락 시 UserChatRoom 저장
     @Transactional
     public void acceptInvitation(Long chatRoomId, String userId) {
         // 초대받은 유저인지 확인
@@ -367,9 +400,9 @@ public class ChatRoomService {
         userChatRoomRepository.save(userChatRoom);
 
         sendEnterChatRoom(chatRoomId, userId);  // 유저가 입장했음을 알림
-    }
+    }*/
 
-    // 초대 거절 시 Invitation 삭제
+/*    // 초대 거절 시 Invitation 삭제
     @Transactional
     public void refusalInvitation(Long chatRoomId, String userId) {
         // 초대받은 유저인지 확인
@@ -397,7 +430,7 @@ public class ChatRoomService {
         );
 
         invitationRepository.deleteByChatRoomIdAndUserId(chatRoomId, userId);
-    }
+    }*/
 
     // 채팅방 생성자만 채팅방 이미지 및 이름 수정
     public ChatRoomDto updateChatRoom(Long chatRoomId, String newImage, String newName, String userId) {
@@ -434,7 +467,7 @@ public class ChatRoomService {
         }
 
         // 수정된 내용에 대해 해당 채팅방에 알림 보내기
-        sendChatRoomUpdatedNotification(chatRoomId, newImage, newName);
+        sendChatRoomUpdatedNotification(chatRoomId, newImage, Objects.requireNonNull(newName));
 
         return chatRoom.toDto();
     }
