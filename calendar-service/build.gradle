@@ -49,6 +49,9 @@ dependencies {
 	// Spring Cloud 환경에서 server to server 요청을 처리해 주는 feign client 라이브러리
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
+	implementation 'org.hibernate.validator:hibernate-validator:8.0.0.Final'
+	implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+
 
 	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 	implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'

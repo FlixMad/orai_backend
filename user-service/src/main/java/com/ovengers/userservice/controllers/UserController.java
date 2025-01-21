@@ -7,6 +7,7 @@ import com.ovengers.userservice.common.util.MfaSecretGenerator;
 import com.ovengers.userservice.dto.LoginRequestDto;
 import com.ovengers.userservice.dto.UserRequestDto;
 import com.ovengers.userservice.dto.UserResponseDto;
+import com.ovengers.userservice.entity.User;
 import com.ovengers.userservice.service.UserService;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
@@ -19,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -92,7 +94,7 @@ public class UserController {
         if (isValid) {
             // secret으로 사용자 조회
             UserResponseDto user = userService.getUserBySecret(secret);
-            String token = jwtTokenProvider.createToken(user.getUserId(), user.getDepartmentId());
+            String token = jwtTokenProvider.createToken(user.getUserId(), user.getEmail(), user.getDepartmentId());
 
             Map<String, Object> result = new HashMap<>();
             result.put("accessToken", token);
@@ -143,8 +145,9 @@ public class UserController {
             log.info("Refresh token expired.");
             return new ResponseEntity<>(new CommonErrorDto(HttpStatus.UNAUTHORIZED, "EXPIRED_RT"), HttpStatus.UNAUTHORIZED);
         }
-
-        String newAccessToken = jwtTokenProvider.createToken(user.getUserId(), user.getDepartmentId());
+        // 새로운 access token을 발급하자.
+        String newAccessToken
+                = jwtTokenProvider.createToken(user.getUserId(),user.getEmail(),user.getDepartmentId());
 
         Map<String, Object> result = new HashMap<>();
         result.put("token", newAccessToken);
