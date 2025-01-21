@@ -67,7 +67,7 @@ public class UserController {
         }
         // 새로운 access token을 발급하자.
         String newAccessToken
-                = jwtTokenProvider.createToken(user.getUserId(),user.getDepartmentId());
+                = jwtTokenProvider.createToken(user.getUserId(),user.getEmail(),user.getDepartmentId());
 
         Map<String, Object> info = new HashMap<>();
         info.put("token", newAccessToken);
