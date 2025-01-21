@@ -82,6 +82,7 @@ public class AuthorizationHeaderFilter
                     .mutate()
                     .header("X-User-Id", claims.getSubject())
                     .header("X-User-DepartmentId", claims.get("departmentId", String.class))
+                    .header("X-User-Email", claims.get("email", String.class))
                     .build();
 
             // 새롭게 만든(토큰 정보를 헤더에 담은) request를 exchange에 갈아끼워서 보내자.

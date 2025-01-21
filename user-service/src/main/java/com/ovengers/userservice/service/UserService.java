@@ -57,7 +57,7 @@ public class UserService {
         }
 
         // JWT 토큰 발급 (부서 ID만 전달, 역할은 부서 정보로 대체)
-        String token = jwtTokenProvider.createToken(user.getUserId(), user.getDepartmentId());
+        String token = jwtTokenProvider.createToken(user.getUserId(),user.getEmail(), user.getDepartmentId());
 
         // Refresh Token을 생성해 주겠다.
         // Access Token의 수명이 만료되었을 경우 Refresh Token을 확인해서 리프레시가 유효한 경우

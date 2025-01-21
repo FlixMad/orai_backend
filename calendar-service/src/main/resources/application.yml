@@ -6,11 +6,29 @@ spring:
     username: root
     password: mysql
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     database: mysql
-    database-platform: org.hibernate.dialect.MySQL8Dialect
+    # MySQL8Dialect가 더 이상 권장되지 않으므로 최신 Dialect로 변경
+    database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: update
+    # Open-in-view를 false로 설정하여 성능 개선
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true # SQL 포맷팅 활성화
+        show_sql: true   # 콘솔에서 SQL 쿼리 보기
+
+  # Bean Validation 관련 설정 추가 (Spring Boot 3.x 기준)
+  validation:
+    enabled: true
+
+  task:
+    scheduling:
+      pool:
+        size: 5
+      thread-name-prefix: scheduler-task-
 
   application:
     name: calendar-service
