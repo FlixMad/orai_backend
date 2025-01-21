@@ -7,6 +7,8 @@ import com.ovengers.userservice.dto.UserRequestDto;
 import com.ovengers.userservice.dto.UserResponseDto;
 import com.ovengers.userservice.entity.User;
 import com.ovengers.userservice.repository.UserRepository;
+import lombok.AllArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,8 +16,11 @@ import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityNotFoundException;
 import com.ovengers.userservice.common.util.MfaSecretGenerator;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
+@AllArgsConstructor
 @Transactional
 @Service
 public class UserService {
@@ -24,12 +29,6 @@ public class UserService {
     private final PasswordEncoder encoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisTemplate<String, Object> redisTemplate;
-
-    public UserService(UserRepository userRepository, PasswordEncoder encoder, JwtTokenProvider jwtTokenProvider) {
-        this.userRepository = userRepository;
-        this.encoder = encoder;
-        this.jwtTokenProvider = jwtTokenProvider;
-    }
 
     public UserResponseDto createUser(UserRequestDto dto) {
         // 이메일 중복 체크
@@ -80,29 +79,10 @@ public class UserService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        String token = jwtTokenProvider.createToken(user.getUserId(), user.getDepartmentId());
+        String token = jwtTokenProvider.createToken(user.getUserId(),user.getEmail(), user.getDepartmentId());
         return new UserResponseDto(user, token);
     }
 
-    public UserResponseDto getUserById(String userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
-
-        return new UserResponseDto(user);
-    }
-
-    @Transactional
-    public void changePassword(String userId, String currentPassword, String newPassword) {
-        User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-
-        if (!encoder.matches(currentPassword, user.getPassword())) {
-            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
-        }
-
-        user.setPassword(encoder.encode(newPassword));
-        userRepository.save(user);
-    }
     /**
      * 내 정보 조회
      */
@@ -140,9 +120,6 @@ public class UserService {
     public boolean isEmailDuplicate(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
-
-
-}
     /**
      * 모든 사용자 조회
      */
@@ -175,8 +152,6 @@ public class UserService {
         return user;
     }
 
-
-
     /**
      * 사용자 비밀번호 변경
      */
@@ -195,10 +170,4 @@ public class UserService {
         userRepository.save(user);
     }
 
-    /**
-     * 사용자 이메일 중복 체크
-     */
-    public boolean isEmailDuplicate(String email) {
-        return userRepository.findByEmail(email).isPresent();
-    }
 }
