@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // 상태 비저장
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/v3/api-docs/**","/api/users/create", "/api/users/login", "/refresh","/health-check", "/actuator/**", "/findByEmail", "/users/email",
-                                         "/api/users/**","/api/users/create","/api/users/validate-mfa", "/api/users/mfa/validate-code/**"
+                                         "/api/users/**","/api/users/validate-mfa", "/api/users/mfa/validate-code/**"
                                 )  // 인증 없이 접근할 수 있는 URL들
                         .permitAll()  // 해당 URL들은 인증 없이 접근 가능
                         .anyRequest().authenticated())  // 나머지 요청은 인증 필요

@@ -2,6 +2,9 @@ package com.ovengers.calendarservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,6 +18,7 @@ public class Department {
 
     @Id
     @Column(name = "department_id", nullable = false, length = 255)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String departmentId; // 부서 아이디
 
     @Column(name = "name", length = 30)
@@ -28,11 +32,13 @@ public class Department {
     @JoinColumn(name = "parent_id")
     private Department parent; // 상위 부서를 참조
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt; // 생성일자
+    private LocalDateTime createdAt; // 생성 일자
 
+    @UpdateTimestamp
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt; // 수정일자
+    private LocalDateTime updatedAt; // 수정 일자
 
     public enum DepartmentType {
         TEAM, DIVISION, GROUP, OTHER

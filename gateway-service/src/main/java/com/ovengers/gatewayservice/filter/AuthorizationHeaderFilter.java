@@ -30,7 +30,7 @@ public class AuthorizationHeaderFilter
     private String secretKey;
 
     private final List<String> allowUrl = Arrays.asList(
-            "/v3/api-docs/**","/api/users/create", "/api/users/login", "/refresh", "/", "/findByEmail", "/users/email","/health-check","/actuator/**"
+            "/v3/api-docs/**","/api/users/create", "/api/users/login","/api/users/devLogin", "/refresh", "/", "/findByEmail", "/users/email","/health-check","/actuator/**"
             ,"/api/users/validate-mfa", "/api/users/mfa/validate-code/**"
     );
 

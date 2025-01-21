@@ -5,8 +5,8 @@ spring:
     redis:
       host: localhost
       port: 6379
-#  profiles:
-#    include: secret
+  profiles:
+    include: secret
   application:
     name: user-service
   cloud:
