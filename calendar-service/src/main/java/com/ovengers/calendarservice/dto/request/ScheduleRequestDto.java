@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 public class ScheduleRequestDto {
     private String title;
 
+    private String description;
+
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate start;
     @JsonFormat(pattern = "yyyy-MM-dd")

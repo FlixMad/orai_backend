@@ -34,6 +34,7 @@ public class CalendarService {
 
         Schedule schedule = Schedule.builder()
                 .title(scheduleRequestDto.getTitle())
+                .description(scheduleRequestDto.getDescription())
                 .userId(userInfo.getId())
                 .startTime(scheduleRequestDto.getStart())
                 .endTime(scheduleRequestDto.getEnd())
@@ -87,6 +88,7 @@ public class CalendarService {
 
         // 수정 요청 데이터를 기존 엔티티에 반영
         oldSchedule.setTitle(scheduleRequestDto.getTitle());
+        oldSchedule.setDescription(scheduleRequestDto.getDescription());
         oldSchedule.setStartTime(scheduleRequestDto.getStart());
         oldSchedule.setEndTime(scheduleRequestDto.getEnd());
 
@@ -107,6 +109,7 @@ public class CalendarService {
         return ScheduleResponseDto.builder()
                 .ScheduleId(schedule.getScheduleId().toString())
                 .title(schedule.getTitle())
+                .description(schedule.getDescription())
                 .start(schedule.getStartTime().toString())
                 .end(schedule.getEndTime().toString())
                 .type(schedule.getType().name())
