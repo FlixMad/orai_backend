@@ -30,9 +30,8 @@ public class AuthorizationHeaderFilter
     private String secretKey;
 
     private final List<String> allowUrl = Arrays.asList(
-            "/v3/api-docs/**","/api/users/create", "/api/users/login", "/refresh", "/", "/findByEmail", "/users/email" ,
-            "/api/attitude/*"
-
+            "/v3/api-docs/**","/api/users/create", "/api/users/login","/api/users/devLogin", "/refresh", "/", "/findByEmail", "/users/email","/health-check","/actuator/**"
+            ,"/api/users/validate-mfa", "/api/users/mfa/validate-code/**"
     );
 
     public AuthorizationHeaderFilter() {
@@ -82,6 +81,7 @@ public class AuthorizationHeaderFilter
                     .mutate()
                     .header("X-User-Id", claims.getSubject())
                     .header("X-User-DepartmentId", claims.get("departmentId", String.class))
+                    .header("X-User-Email", claims.get("email", String.class))
                     .build();
 
             // 새롭게 만든(토큰 정보를 헤더에 담은) request를 exchange에 갈아끼워서 보내자.
