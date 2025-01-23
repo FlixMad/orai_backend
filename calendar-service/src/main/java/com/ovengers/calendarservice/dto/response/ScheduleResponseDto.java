@@ -27,8 +27,6 @@ public class ScheduleResponseDto {
 
     private String type;
 
-    // type만 작성해줘
-
 //    public ScheduleResponseDto(Schedule schedule) {
 //        this.userId = schedule.getUserId();
 //        this.title = schedule.getTitle();

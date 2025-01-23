@@ -12,7 +12,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter @Setter
 @Entity
@@ -25,8 +24,9 @@ public class Schedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "schedule_id")
-    private UUID scheduleId;
+    @Column(name = "schedule_id", length = 36, nullable = false)
+    private String scheduleId;
+
 
     @NotNull
     private String title;
@@ -48,9 +48,14 @@ public class Schedule {
     private LocalDate startTime;
 
     @NotNull
-    @AssertTrue(message = "종료 날짜는 시작 날짜 이후여야 합니다.")
+//    @FutureOrPresent(message = "종료 날짜는 시작 날짜 이후여야 합니다.")
     @Column(name = "end_time")
     private LocalDate endTime;
+
+    @AssertTrue(message = "종료 날짜는 시작 날짜 이후여야 합니다.")
+    public boolean isEndTimeAfterStartTime() {
+        return endTime.isAfter(startTime);
+    }
 
     @JoinColumn(name = "user_id", nullable = false)
     private String userId;
@@ -58,6 +63,7 @@ public class Schedule {
     @Enumerated(EnumType.STRING)
     @NotNull
     @Column(name = "schedule_status")
+    @Builder.Default
     private ScheduleStatus scheduleStatus = ScheduleStatus.PENDING;
 
     @Enumerated(EnumType.STRING)

@@ -1,4 +1,5 @@
 package com.ovengers.userservice.controllers;
+import com.ovengers.userservice.client.CalendarServiceClient;
 import com.ovengers.userservice.common.configs.AwsS3Config;
 import com.ovengers.userservice.common.dto.CommonResDto;
 import com.ovengers.userservice.dto.AttitudeResponseDto;
@@ -40,6 +41,7 @@ public class AdminController {
 
     private final AdminService adminService;
     private final AwsS3Config s3Config;
+    private final CalendarServiceClient calendarServiceClient;
 
     @Operation(summary = "사용자 조회(리스트)", description = "사용자 조회할 때 사용하는 api")
     @ApiResponses({
@@ -50,7 +52,10 @@ public class AdminController {
     @GetMapping(value = "/admin/users/list")
     public ResponseEntity<CommonResDto> getUsers(@RequestParam Map<String, String> params) {
         log.info("Search params: {}", params);
-        List<UserResponseDto> users = adminService.search(params);
+
+        Map<String,String> map = calendarServiceClient.getDepartmentMap();
+
+        List<UserResponseDto> users = adminService.search(params, map);
         CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "조회 성공", users);
         return ResponseEntity.ok(commonResDto);
     }
@@ -68,7 +73,10 @@ public class AdminController {
     public ResponseEntity<?> getUsers(@RequestParam Map<String,String> params,
                                       Pageable pageable) {
         log.info("params : {}", params);
-        List<UserResponseDto> users = adminService.search(params);
+
+        Map<String,String> map = calendarServiceClient.getDepartmentMap();
+
+        List<UserResponseDto> users = adminService.search(params, map);
         Page<UserResponseDto> userPage = adminService.listToPage(users,pageable);
 
         CommonResDto commonResDto = new CommonResDto(HttpStatus.OK,"조회 성공", userPage);

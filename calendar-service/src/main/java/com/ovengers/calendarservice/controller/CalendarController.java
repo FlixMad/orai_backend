@@ -53,7 +53,7 @@ public class CalendarController {
     }
     // 특정 일정 조회
     @GetMapping("/{id}")
-    public ResponseEntity<ScheduleResponseDto> getScheduleById(@PathVariable("id") UUID scheduleId) {
+    public ResponseEntity<ScheduleResponseDto> getScheduleById(@PathVariable("id") String scheduleId) {
         ScheduleResponseDto schedule = calendarService.getScheduleById(scheduleId);
         return ResponseEntity.ok(schedule);
     }
@@ -76,7 +76,7 @@ public class CalendarController {
     @PutMapping("/modify-schedule/{id}")
     public ResponseEntity<ScheduleResponseDto> modifySchedule(
             @RequestBody ScheduleRequestDto scheduleRequestDto,
-            @PathVariable("id") UUID scheduleId) {
+            @PathVariable("id") String scheduleId) {
 
         ScheduleResponseDto modifySchedule = calendarService.updateSchedule(scheduleId, scheduleRequestDto);
 
@@ -84,7 +84,7 @@ public class CalendarController {
     }
 
     @DeleteMapping("/delete-schedule")
-    public ResponseEntity<Void> deleteSchedule(@RequestParam UUID scheduleId) {
+    public ResponseEntity<Void> deleteSchedule(@RequestParam String scheduleId) {
         if (scheduleId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "scheduleId is required");
         }

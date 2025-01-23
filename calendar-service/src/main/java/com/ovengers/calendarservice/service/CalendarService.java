@@ -9,13 +9,16 @@ import com.ovengers.calendarservice.repository.CalendarRepository;
 import com.ovengers.calendarservice.repository.DepartmentRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CalendarService {
@@ -27,10 +30,11 @@ public class CalendarService {
     public ScheduleResponseDto createSchedule(TokenUserInfo userInfo, ScheduleRequestDto scheduleRequestDto) {
         // Department 조회
         Department department = departmentRepository.findById(userInfo.getDepartmentId())
-                .orElseThrow(() -> new RuntimeException("Department not found"));
+                .orElseThrow(() -> new RuntimeException("Department not found: " + userInfo.getDepartmentId()));
 
         Schedule schedule = Schedule.builder()
                 .title(scheduleRequestDto.getTitle())
+                .userId(userInfo.getId())
                 .startTime(scheduleRequestDto.getStart())
                 .endTime(scheduleRequestDto.getEnd())
                 .department(department)
@@ -54,11 +58,18 @@ public class CalendarService {
                 .collect(Collectors.toList());
     }
 
-    // 특정 일정 조회
-    public ScheduleResponseDto getScheduleById(UUID scheduleId) {
+    // 특정 일정 조회 by scheduleId
+    public ScheduleResponseDto getScheduleById(String scheduleId) {
         Schedule schedule = calendarRepository.findById(scheduleId)
                 .orElseThrow(() -> new RuntimeException("Schedule not found"));
         return toDto(schedule);
+    }
+
+    // 특정 일정 조회 by userId
+    public List<ScheduleResponseDto> getScheduleByUserId(String userId) {
+        return calendarRepository.findByUserId(userId).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
     // 날짜 범위 내 일정 조회
@@ -70,7 +81,7 @@ public class CalendarService {
 
     // 일정 수정
     @Transactional
-    public ScheduleResponseDto updateSchedule(UUID scheduleId, ScheduleRequestDto scheduleRequestDto) {
+    public ScheduleResponseDto updateSchedule(String scheduleId, ScheduleRequestDto scheduleRequestDto) {
         Schedule oldSchedule = calendarRepository.findById(scheduleId)
                 .orElseThrow(() -> new RuntimeException("Schedule not found"));
 
@@ -84,7 +95,7 @@ public class CalendarService {
     }
 
     // 일정 삭제
-    public void deleteSchedule(UUID scheduleId) {
+    public void deleteSchedule(String scheduleId) {
         if (!calendarRepository.existsById(scheduleId)) {
             throw new RuntimeException("Schedule not found for ID: " + scheduleId);
         }
@@ -100,5 +111,10 @@ public class CalendarService {
                 .end(schedule.getEndTime().toString())
                 .type(schedule.getType().name())
                 .build();
+    }
+
+    // 
+    public List<String> getUserIdsWithSchedulesForDate(LocalDate date) {
+        return null;
     }
 }
