@@ -1,0 +1,10 @@
+# application.yml보다 우선순위가 높은 설정 파일과 읽을 설정 파일 등록
+spring:
+  application:
+    name: user-service
+  cloud:
+    config:
+      uri: http://localhost:8888
+      name: user-service
+  profiles:
+    active: default

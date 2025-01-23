@@ -15,13 +15,15 @@ spring:
         cors-configurations:
           "[/**]": # 모든 경로에 대한 CORS 설정
             allowed-origins:
-              - "https://jiangxy.github.io"
+              - "https://orai.store"
+              - "http://orai.store"
               - "http://localhost:3000"
               - "http://localhost:8181"
             allowed-methods:
               - GET
               - POST
               - PUT
+              - PATCH
               - DELETE
               - OPTIONS
             allowed-headers:
@@ -50,13 +52,14 @@ spring:
             - RewritePath=/user-service/(?<path>.*), /$\{path}
             - AuthorizationHeaderFilter
 
-#        - id: user-service-swagger
-#          uri: lb://USER-SERVICE
-#          predicates:
-#            - Path=/api/user-service/v3/api-docs/**
-#            - Method=GET
-#          filters:
-#            - RewritePath=/api/payments/(?<path>.*), /$\{path}
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/actuator/**
+            - Method=GET, POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
 
         # 채팅 서비스(웹소켓)
         - id: chat-service-ws
@@ -81,6 +84,7 @@ spring:
           filters:
             - RewritePath=/calendar-service/(?<path>.*), /$\{path}
             - AuthorizationHeaderFilter
+
 springdoc:
   swagger-ui:
     use-root-path: true
@@ -105,12 +109,14 @@ jwt:
   secretKey: mysecretkeymysecretkeymysecretkeymysecretkeymysecretkeymysecretkeymysecretkey
   secretKeyRt: myrefreshsecretkeymyrefreshsecretkeymyrefreshsecretkeymyrefreshsecretkeymyrefreshsecretkey # 리프레시 토큰 서명용 비밀 키
   expirationRt: 1440         # 리프레시 토큰 유효 시간 (분 단위)
+
+
 # 액츄에이터 등록 (beans: 컨테이너에 등록된 빈 보여줌, health: 서버 살아 있는지 알려줌)
-#management:
-#  endpoints:
-#    web:
-#      exposure:
-#        include: refresh, health, busrefresh, beans, httpexchanges
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, health, busrefresh, beans, httpexchanges
 
 
 

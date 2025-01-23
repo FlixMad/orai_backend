@@ -1,0 +1,32 @@
+server:
+  port: 8888
+
+spring:
+#  profiles:
+#      active: native
+  application:
+    name: config-service
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: file:///C:\\devlop\\git-local-repo
+        git:
+          uri: https://github.com/CodeName-maru/cloud-config-setting.git
+          username: CodeName-maru
+          password: ${GITHUB_PRIVATE_KEY}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, health, beans
+
+# log level setting
+logging:
+  level:
+    root: info
+    org:
+      hibernate.SQL: info
+      springframework.cloud.config: info
+    com:
+      ovengers : info
