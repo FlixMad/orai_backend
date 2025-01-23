@@ -1,21 +1,12 @@
 package com.ovengers.chatservice.mongodb.controller;
 
-import com.ovengers.chatservice.mongodb.config.JwtUtils;
 import com.ovengers.chatservice.mongodb.dto.MessageDto;
-import com.ovengers.chatservice.mongodb.dto.MessageRequestDto;
-import com.ovengers.chatservice.mongodb.service.MessageService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.*;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 
-import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Controller
 @RequiredArgsConstructor

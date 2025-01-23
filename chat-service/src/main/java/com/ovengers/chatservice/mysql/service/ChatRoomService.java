@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -119,7 +118,8 @@ public class ChatRoomService {
                 .map(UserResponseDto::getName)
                 .collect(Collectors.joining(", "));
 
-        simpMessagingTemplate.convertAndSend("/sub/" + chatRoomId + "/chat", userNames + "님이 채팅방에 입장했습니다.");
+        simpMessagingTemplate.convertAndSend("/sub/" + chatRoomId + "/chat", userNames + "님이 " +
+                chatRoomInfo.getName() + " 채팅방에 입장했습니다.");
     }
 
     // 채팅방 수정 알림
