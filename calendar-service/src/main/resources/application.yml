@@ -1,6 +1,8 @@
 server:
   port: 0
 spring:
+  profiles:
+    include: secret
   datasource:
     url: jdbc:mysql://localhost:3306/orai?serverTimezone=Asia/Seoul
     username: root

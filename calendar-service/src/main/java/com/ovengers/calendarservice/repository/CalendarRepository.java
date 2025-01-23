@@ -29,4 +29,5 @@ public interface CalendarRepository extends JpaRepository<Schedule, String> {
     @Query("SELECT s FROM Schedule s WHERE DATE(s.startTime) = :date")
     List<Schedule> findByDate(LocalDate date);
 
+    List<Schedule> findByDepartment_DepartmentIdIn(List<String> departmentIds);
 }

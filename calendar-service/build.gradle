@@ -52,6 +52,13 @@ dependencies {
 	implementation 'org.hibernate.validator:hibernate-validator:8.0.0.Final'
 	implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 
+	// 쿼리 파라미터 추가 외부 로그 남기기
+	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
+
+	// s3...
+	implementation 'io.awspring.cloud:spring-cloud-aws-s3:3.0.2'
+
+
 
 	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 	implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'

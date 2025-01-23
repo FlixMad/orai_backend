@@ -76,7 +76,7 @@ public class Schedule {
     }
 
     public enum Type {
-        PERSONAL, TEAM
+        TEAM, DIVISION, GROUP
     }
 
     @ManyToOne(fetch = FetchType.LAZY) // 부서와 다대일 관계
