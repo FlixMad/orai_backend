@@ -2,6 +2,7 @@ package com.ovengers.chatservice.mongodb.config;
 
 import com.ovengers.chatservice.common.auth.TokenUserInfo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtChannelInterceptor implements ChannelInterceptor {
@@ -42,8 +44,8 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
                     throw new IllegalArgumentException("Invalid JWT Token: " + e.getMessage());
                 }
             }
+            log.debug("Authorization header: " + jwtToken);
         }
-
         return message;
     }
 }
