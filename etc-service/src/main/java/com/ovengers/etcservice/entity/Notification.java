@@ -20,9 +20,6 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(nullable = false, length = 255)
-    private String title;
-
     @Column(name = "message", nullable = false, length = 255) // 메시지 매핑
     private String message; // 알림 메시지
 
