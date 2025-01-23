@@ -1,23 +1,46 @@
 package com.ovengers.chatservice.mongodb.controller;
 
+import com.ovengers.chatservice.mongodb.config.JwtUtils;
+import com.ovengers.chatservice.mongodb.dto.MessageDto;
+import com.ovengers.chatservice.mongodb.dto.MessageRequestDto;
 import com.ovengers.chatservice.mongodb.service.MessageService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@RestController
+@Controller
 @RequiredArgsConstructor
 @Tag(name = "WebSocketStompController", description = "유튜브 참고")
 public class WebSocketStompController {
-    private final MessageService messageService;
-    private final SimpMessagingTemplate messagingTemplate;
+    /**
+     * stomp 통신
+     */
+    @MessageMapping("/{chatRoomId}/send")
+    @SendTo("/sub/{chatRoomId}/chat")
+    public MessageDto broadcastMessage(
+            @DestinationVariable Long chatRoomId,
+            @Payload String content,
+            @Header("userId") String userId) {
 
+        // 메시지 DTO 생성 후 브로드캐스트
+        return MessageDto.builder()
+                .chatRoomId(chatRoomId)
+                .senderId(userId)
+                .content(content)
+                .createdAt(LocalDateTime.now().toString())
+                .build();
+    }
+
+/*
     private String extractIdFromPrincipal(String principalName) {
         // 정규식으로 id 값 추출
         Pattern pattern = Pattern.compile("id=([a-f0-9-]+)");
@@ -30,27 +53,7 @@ public class WebSocketStompController {
         }
     }
 
-    /**
-     * 메시지 전송
-     */
-    @MessageMapping("/{chatRoomId}/send")
-    public void sendMessage(@DestinationVariable Long chatRoomId,
-                            @Payload String content,
-                            Principal principal) {
-        String senderId = extractIdFromPrincipal(principal.getName());
-
-        // 메시지 저장 및 DTO 반환
-        messageService.sendMessage(chatRoomId, content, senderId)
-                .subscribe(messageDto -> {
-                    // 저장된 메시지를 브로드캐스트
-                    messagingTemplate.convertAndSend(
-                            "/sub/" + chatRoomId + "/chat",
-                            messageDto
-                    );
-                });
-    }
-
-/*  @MessageMapping("/{chatRoomId}/messages")
+    @MessageMapping("/{chatRoomId}/messages")
     public Flux<MessageDto> getMessages(
             @DestinationVariable Long chatRoomId,
             @Header("userId") String userId) {

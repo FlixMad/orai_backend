@@ -89,6 +89,13 @@ public class ChatRoomController {
         return ResponseEntity.ok(chatRoomList);
     }
 
+    @Operation(summary = "채팅방 조회", description = "채팅방Id")
+    @GetMapping("/{chatRoomId}/chatRoom")
+    public ResponseEntity<ChatRoomDto> getChatRoom(@PathVariable Long chatRoomId, @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
+        ChatRoomDto chatRoom = chatRoomService.getChatRoom(chatRoomId, tokenUserInfo.getId());
+        return ResponseEntity.ok(chatRoom);
+    }
+
     @Operation(summary = "채팅방을 구독한 유저 목록", description = "채팅방Id")
     @GetMapping("/{chatRoomId}/users")
     public ResponseEntity<List<UserResponseDto>> getSubscribedUsers(@PathVariable Long chatRoomId,

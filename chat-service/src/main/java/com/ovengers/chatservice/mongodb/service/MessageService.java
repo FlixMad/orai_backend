@@ -6,12 +6,16 @@ import com.ovengers.chatservice.mongodb.repository.MessageRepository;
 import com.ovengers.chatservice.mysql.repository.ChatRoomRepository;
 import com.ovengers.chatservice.mysql.repository.UserChatRoomRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MessageService {
@@ -43,12 +47,14 @@ public class MessageService {
                 .senderId(userId)
                 .build();
 
+        log.debug("\n\n\n chatRoomId: {}, content: {}, senderId: {}\n\n\n", chatRoomId, content, userId);
+
         // 메시지 저장 및 DTO로 변환 후 반환
         return messageRepository.save(message).map(Message::toDto);
     }
 
     // 메시지 조회
-    public Flux<MessageDto> getMessages(Long chatRoomId, String userId) {
+    public Flux<MessageDto> getMessages(Long chatRoomId, String userId, Integer page, int size) {
         if (!chatRoomRepository.existsById(chatRoomId)) {
             throw new IllegalArgumentException(chatRoomId + "번 채팅방은 존재하지 않습니다.");
         }
@@ -57,9 +63,15 @@ public class MessageService {
             throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
         }
 
-        // 메시지 조회
-        return messageRepository.findAllByChatRoomId(chatRoomId)
-                .map(Message::toDto);
+        return messageRepository.countByChatRoomId(chatRoomId)
+                .flatMapMany(totalMessages -> {
+                    int totalPages = (int) Math.ceil((double) totalMessages / size);
+                    int targetPage = (page == null) ? totalPages - 1 : page;
+                    Pageable pageable = PageRequest.of(targetPage, size);
+
+                    return messageRepository.findAllByChatRoomId(chatRoomId, pageable)
+                            .map(Message::toDto);
+                });
     }
 
     // 메시지 수정
@@ -91,7 +103,6 @@ public class MessageService {
 
                     // 메시지 수정
                     existingMessage.setContent(newContent.trim());
-                    existingMessage.setUpdatedAt(LocalDateTime.now());
 
                     return messageRepository.save(existingMessage)
                             .map(Message::toDto);

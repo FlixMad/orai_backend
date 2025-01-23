@@ -14,5 +14,6 @@ public class MessageDto {
     private String content;
     private String createdAt;
     private String updatedAt;
+
 //    private List<String> unreadUserIds; // 읽지 않은 사용자 ID 목록
 }

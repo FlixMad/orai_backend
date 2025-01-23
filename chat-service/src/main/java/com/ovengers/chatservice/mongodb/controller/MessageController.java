@@ -1,62 +1,43 @@
 package com.ovengers.chatservice.mongodb.controller;
 
+import com.ovengers.chatservice.common.auth.TokenUserInfo;
 import com.ovengers.chatservice.mongodb.dto.MessageDto;
 import com.ovengers.chatservice.mongodb.dto.MessageRequestDto;
 import com.ovengers.chatservice.mongodb.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.security.Principal;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "MessageController", description = "단순히 MongoDB에 데이터를 저장하는 컨트롤러")
 public class MessageController {
     private final MessageService messageService;
-
-    /**
-     * Principal에서 id를 추출하는 유틸리티 메서드
-     *
-     * @param principalName Principal에서 가져온 name 값
-     * @return 추출된 id
-     */
-    private String extractIdFromPrincipal(String principalName) {
-        // 정규식으로 id 값 추출
-        Pattern pattern = Pattern.compile("id=([a-f0-9-]+)");
-        Matcher matcher = pattern.matcher(principalName);
-
-        if (matcher.find()) {
-            return matcher.group(1); // 첫 번째 그룹(id 값) 반환
-        } else {
-            throw new IllegalArgumentException("Invalid Principal format");
-        }
-    }
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Operation(summary = "메시지 저장", description = "채팅방Id, 콘텐츠")
     @PostMapping("/{chatRoomId}/saveMessage")
     public Mono<MessageDto> saveMessage(@PathVariable Long chatRoomId,
                                         @RequestBody MessageRequestDto messageRequestDto,
-                                        Principal principal) {
-        String principalId = principal.getName();
-        String senderId = extractIdFromPrincipal(principalId);
+                                        @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
 
-        return messageService.sendMessage(chatRoomId, messageRequestDto.getContent(), senderId);
+        return messageService.sendMessage(chatRoomId, messageRequestDto.getContent(), tokenUserInfo.getId());
+//                .doOnSuccess(messageDto -> messagingTemplate.convertAndSend("/sub/" + chatRoomId + "/chat", messageDto));
     }
 
     @Operation(summary = "채팅방의 메시지 조회", description = "채팅방Id")
     @GetMapping("/{chatRoomId}/messageList")
     public Flux<MessageDto> getMessages(@PathVariable Long chatRoomId,
-                                        Principal principal) {
-        String principalId = principal.getName();
-        String senderId = extractIdFromPrincipal(principalId);
+                                        @AuthenticationPrincipal TokenUserInfo tokenUserInfo,
+                                        @RequestParam(required = false) Integer page,
+                                        @RequestParam(defaultValue = "30") int size) {
 
-        return messageService.getMessages(chatRoomId, senderId);
+        return messageService.getMessages(chatRoomId, tokenUserInfo.getId(), page, size);
     }
 
     @Operation(summary = "메시지 수정", description = "채팅방Id, 메시지Id, 콘텐츠")
@@ -64,21 +45,19 @@ public class MessageController {
     public Mono<MessageDto> updateMessage(@PathVariable Long chatRoomId,
                                           @PathVariable String messageId,
                                           @RequestBody MessageRequestDto messageRequestDto,
-                                          Principal principal) {
-        String principalId = principal.getName();
-        String senderId = extractIdFromPrincipal(principalId);
+                                          @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
 
-        return messageService.updateMessage(chatRoomId, messageId, messageRequestDto.getContent(), senderId);
+        return messageService.updateMessage(chatRoomId, messageId, messageRequestDto.getContent(), tokenUserInfo.getId())
+                .doOnSuccess(updatedMessage -> messagingTemplate.convertAndSend("/sub/" + chatRoomId + "/chat", updatedMessage));
     }
 
     @Operation(summary = "메시지 삭제", description = "채팅방Id, 메시지Id")
     @DeleteMapping("/{chatRoomId}/{messageId}/deleteMessage")
     public Mono<Void> deleteMessage(@PathVariable Long chatRoomId,
                                     @PathVariable String messageId,
-                                    Principal principal) {
-        String principalId = principal.getName();
-        String senderId = extractIdFromPrincipal(principalId);
+                                    @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
 
-        return messageService.deleteMessage(chatRoomId, messageId, senderId);
+        return messageService.deleteMessage(chatRoomId, messageId, tokenUserInfo.getId())
+                .doOnSuccess(aVoid -> messagingTemplate.convertAndSend("/sub/" + chatRoomId + "/chat", "메시지가 삭제되었습니다."));
     }
 }

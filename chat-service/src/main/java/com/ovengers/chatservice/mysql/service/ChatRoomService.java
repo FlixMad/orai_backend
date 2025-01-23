@@ -21,9 +21,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 @Service
@@ -106,20 +109,17 @@ public class ChatRoomService {
         );
     }
 
-    // 채팅방 입장 알림(채팅방 생성 시(유저들))
+    // 채팅방 입장 알림(채팅방 생성 또는 초대 시(유저들))
     private void sendEnterUsers(Long chatRoomId, List<String> userIds) {
-        // 채팅방 정보를 가져옴
         ChatRoomDto chatRoomInfo = chatRoomRepository.findByChatRoomId(chatRoomId).toDto();
-
-        // 사용자 정보를 가져옴
         List<UserResponseDto> userInfos = getAllUsers(userIds);
 
-        // 각 사용자에 대해 메시지 전송
-        userInfos.forEach(userInfo -> {
-            String userName = userInfo.getName();
-            String message = userName + "님이 " + chatRoomInfo.getName() + " 채팅방에 입장했습니다.";
-            simpMessagingTemplate.convertAndSend("/sub/" + chatRoomId + "/chat", message);
-        });
+        // 한 번의 메시지로 모든 입장 사용자 표시
+        String userNames = userInfos.stream()
+                .map(UserResponseDto::getName)
+                .collect(Collectors.joining(", "));
+
+        simpMessagingTemplate.convertAndSend("/sub/" + chatRoomId + "/chat", userNames + "님이 채팅방에 입장했습니다.");
     }
 
     // 채팅방 수정 알림
@@ -287,6 +287,17 @@ public class ChatRoomService {
                 .collect(Collectors.toList());
     }
 
+    public ChatRoomDto getChatRoom(Long chatRoomId, String userId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new EntityNotFoundException(chatRoomId + "번 채팅방은 존재하지 않습니다."));
+
+        if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userId)) {
+            throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
+        }
+
+        return chatRoom.toDto();
+    }
+
     // chatRoomId 별 userList 조회
     public List<UserResponseDto> getSubUsers(Long chatRoomId, String userId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
@@ -315,6 +326,10 @@ public class ChatRoomService {
 
         if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, inviterId)) {
             throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
+        }
+
+        if (inviteUserIds == null || inviteUserIds.isEmpty()) {
+            throw new IllegalArgumentException("초대할 사용자 목록이 비어있습니다.");
         }
 
         // 기존 채팅방 유저 목록 조회
@@ -371,8 +386,16 @@ public class ChatRoomService {
                 .toList();
 
         // 초대와 구독
-        invitationRepository.saveAll(invitations);
-        userChatRoomRepository.saveAll(users);
+        // 동시성 처리를 위한 락 획득
+        Lock lock = new ReentrantLock();
+        lock.lock();
+        try {
+            invitationRepository.saveAll(invitations);
+            userChatRoomRepository.saveAll(users);
+            sendEnterUsers(chatRoomId, validUserIds);
+        } finally {
+            lock.unlock();
+        }
 //        sendInvitationsToUsers(validUserIds, chatRoom, inviterId);       // 초대 유저들에게 알림
     }
 
