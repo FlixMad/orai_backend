@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -123,28 +122,16 @@ public class ChatRoomService {
     }
 
     // 채팅방 수정 알림
-    private void sendChatRoomUpdatedNotification(Long chatRoomId, String newImage, String newName) {
+    private void sendChatRoomUpdatedNotification(Long chatRoomId) {
         // 채팅방에 속한 유저들이 아닌, 해당 채팅방을 구독한 유저들에게만 알림을 전송
         // "/sub/{chatRoomId}/chat"으로 구독한 유저에게 메시지를 전송
         ChatRoom chatRoom = chatRoomRepository.findByChatRoomId(chatRoomId);
 
-        // 이름이 변경되었을 때
-        if (!newName.equals(chatRoom.getName())) {
-            String nameUpdateMessage = chatRoom.getName() + "에서 " + newName + "으로 변경되었습니다.";
-            simpMessagingTemplate.convertAndSend(
-                    "/sub/" + chatRoomId + "/chat",  // 채팅방 구독 경로
-                    nameUpdateMessage
-            );
-        }
-
-        // 이미지가 변경되었을 때
-        if (!newImage.equals(chatRoom.getImage())) {
-            String imageUpdateMessage = "이미지가 변경되었습니다.";
-            simpMessagingTemplate.convertAndSend(
-                    "/sub/" + chatRoomId + "/chat",  // 채팅방 구독 경로
-                    imageUpdateMessage
-            );
-        }
+        String chatRoomUpdateMessage = chatRoom.getName() + " 채팅방이 변경되었습니다.";
+        simpMessagingTemplate.convertAndSend(
+                "/sub/" + chatRoomId + "/chat",
+                chatRoomUpdateMessage
+        );
     }
 
     // 채팅방 퇴장 알림(채팅방 나가기)
@@ -490,7 +477,7 @@ public class ChatRoomService {
         }
 
         // 수정된 내용에 대해 해당 채팅방에 알림 보내기
-        sendChatRoomUpdatedNotification(chatRoomId, newImage, Objects.requireNonNull(newName));
+        sendChatRoomUpdatedNotification(chatRoomId);
 
         return chatRoom.toDto();
     }

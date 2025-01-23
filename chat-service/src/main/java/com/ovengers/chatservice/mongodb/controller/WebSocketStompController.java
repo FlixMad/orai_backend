@@ -20,12 +20,14 @@ public class WebSocketStompController {
     public MessageDto broadcastMessage(
             @DestinationVariable Long chatRoomId,
             @Payload String content,
-            @Header("userId") String userId) {
+            @Header("userId") String userId,
+            @Header("userName") String userName) {
 
         // 메시지 DTO 생성 후 브로드캐스트
         return MessageDto.builder()
                 .chatRoomId(chatRoomId)
                 .senderId(userId)
+                .senderName(userName)
                 .content(content)
                 .createdAt(LocalDateTime.now().toString())
                 .build();
