@@ -1,5 +1,7 @@
 package com.ovengers.chatservice.mongodb.service;
 
+import com.ovengers.chatservice.client.UserResponseDto;
+import com.ovengers.chatservice.client.UserServiceClient;
 import com.ovengers.chatservice.mongodb.dto.MessageDto;
 import com.ovengers.chatservice.mongodb.document.Message;
 import com.ovengers.chatservice.mongodb.repository.MessageRepository;
@@ -20,6 +22,17 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final UserChatRoomRepository userChatRoomRepository;
+    private final UserServiceClient userServiceClient;
+
+    public UserResponseDto getUserInfo(String userId) {
+        UserResponseDto userById = userServiceClient.getUserById(userId);
+
+        if (userById == null) {
+            throw new RuntimeException("사용자 정보를 가져오는 데 실패했습니다: " + userId);
+        }
+
+        return userById;
+    }
 
     private void validateMessageContent(String content) {
         if (content == null || content.isBlank()) {
@@ -37,12 +50,14 @@ public class MessageService {
             throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
         }
 
+        UserResponseDto userInfo = getUserInfo(userId);
+
         validateMessageContent(content.trim());
 
         Message message = Message.builder()
                 .chatRoomId(chatRoomId)
                 .content(content)
-                .senderId(userId)
+                .senderId(userInfo.getName())
                 .build();
 
         log.debug("\n\n\n chatRoomId: {}, content: {}, senderId: {}\n\n\n", chatRoomId, content, userId);
@@ -53,11 +68,13 @@ public class MessageService {
 
     // 메시지 조회
     public Flux<MessageDto> getMessages(Long chatRoomId, String userId, Integer page, int size) {
+        UserResponseDto userInfo = getUserInfo(userId);
+
         if (!chatRoomRepository.existsById(chatRoomId)) {
             throw new IllegalArgumentException(chatRoomId + "번 채팅방은 존재하지 않습니다.");
         }
 
-        if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userId)) {
+        if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userInfo.getUserId())) {
             throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
         }
 
@@ -84,10 +101,12 @@ public class MessageService {
             throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
         }
 
+        UserResponseDto userInfo = getUserInfo(userId);
+
         return messageRepository.findByMessageId(messageId)
                 .flatMap(existingMessage -> {
                     // 메시지 작성자가 아닌 경우 권한 에러 반환
-                    if (!existingMessage.getSenderId().equals(userId)) {
+                    if (!existingMessage.getSenderId().equals(userInfo.getName())) {
                         return Mono.error(new IllegalAccessException("메시지를 수정할 권한이 없습니다."));
                     }
 
@@ -118,9 +137,11 @@ public class MessageService {
             throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
         }
 
+        UserResponseDto userInfo = getUserInfo(userId);
+
         return messageRepository.findByMessageId(messageId)
                 .flatMap(delete -> {
-                    if (!delete.getSenderId().equals(userId)) {
+                    if (!delete.getSenderId().equals(userInfo.getName())) {
                         return Mono.error(new IllegalAccessException("메시지를 삭제할 권한이 없습니다."));
                     }
                     return messageRepository.delete(delete);
