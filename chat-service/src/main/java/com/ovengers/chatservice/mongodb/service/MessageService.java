@@ -1,55 +1,151 @@
 package com.ovengers.chatservice.mongodb.service;
 
+import com.ovengers.chatservice.client.UserResponseDto;
+import com.ovengers.chatservice.client.UserServiceClient;
 import com.ovengers.chatservice.mongodb.dto.MessageDto;
 import com.ovengers.chatservice.mongodb.document.Message;
 import com.ovengers.chatservice.mongodb.repository.MessageRepository;
 import com.ovengers.chatservice.mysql.repository.ChatRoomRepository;
+import com.ovengers.chatservice.mysql.repository.UserChatRoomRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MessageService {
     private final MessageRepository messageRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final UserChatRoomRepository userChatRoomRepository;
+    private final UserServiceClient userServiceClient;
 
-    /**
-     * MongoDB에 데이터 저장
-     * (JSON - "")
-     */
-    public Mono<MessageDto> createMessage(Message message) {
-        // 채팅방이 존재하는지 확인
-        if (!chatRoomRepository.existsById(message.getChatRoomId())) {
-            throw new IllegalArgumentException(message.getChatRoomId() + "번 채팅방은 존재하지 않습니다.");
+    public UserResponseDto getUserInfo(String userId) {
+        UserResponseDto userById = userServiceClient.getUserById(userId);
+
+        if (userById == null) {
+            throw new RuntimeException("사용자 정보를 가져오는 데 실패했습니다: " + userId);
         }
+
+        return userById;
+    }
+
+    private void validateMessageContent(String content) {
+        if (content == null || content.isBlank()) {
+            throw new IllegalArgumentException("메시지 내용이 비어 있습니다.");
+        }
+    }
+
+    // 메시지 전송
+    public Mono<MessageDto> sendMessage(Long chatRoomId, String content, String userId) {
+        if (!chatRoomRepository.existsById(chatRoomId)) {
+            throw new IllegalArgumentException(chatRoomId + "번 채팅방은 존재하지 않습니다.");
+        }
+
+        if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userId)) {
+            throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
+        }
+
+        UserResponseDto userInfo = getUserInfo(userId);
+
+        validateMessageContent(content.trim());
+
+        Message message = Message.builder()
+                .chatRoomId(chatRoomId)
+                .content(content)
+                .senderId(userInfo.getUserId())
+                .senderName(userInfo.getName())
+                .build();
+
+        log.debug("\n\n\n chatRoomId: {}, content: {}, senderId: {}\n\n\n", chatRoomId, content, userId);
+
         // 메시지 저장 및 DTO로 변환 후 반환
         return messageRepository.save(message).map(Message::toDto);
     }
 
-/*
-    // MongoDB에 저장된 chatRoomId 마다의 모든 데이터 조회
-    public Flux<MessageDto> getMessages(Long chatRoomId) {
+    // 메시지 조회
+    public Flux<MessageDto> getMessages(Long chatRoomId, String userId, Integer page, int size) {
+        UserResponseDto userInfo = getUserInfo(userId);
+
         if (!chatRoomRepository.existsById(chatRoomId)) {
             throw new IllegalArgumentException(chatRoomId + "번 채팅방은 존재하지 않습니다.");
         }
-        Flux<Message> messages = messageRepository.findAllByChatRoomId(chatRoomId);
-        return messages.map(Message::toDto);
+
+        if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userInfo.getUserId())) {
+            throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
+        }
+
+        return messageRepository.countByChatRoomId(chatRoomId)
+                .flatMapMany(totalMessages -> {
+                    int totalPages = (int) Math.ceil((double) totalMessages / size);
+                    int targetPage = (page == null) ? totalPages - 1 : page;
+                    Pageable pageable = PageRequest.of(targetPage, size);
+
+                    return messageRepository.findAllByChatRoomId(chatRoomId, pageable)
+                            .map(Message::toDto);
+                });
     }
 
-    // MongoDB에 저장된 데이터 중 해당 messageId를 가진 content 수정
-    public Mono<MessageDto> updateMessage(String messageId, String newContent) {
-        return messageRepository.findById(messageId)
+    // 메시지 수정
+    public Mono<MessageDto> updateMessage(Long chatRoomId, String messageId, String newContent, String userId) {
+        // 채팅방 존재 여부 확인
+        if (!chatRoomRepository.existsById(chatRoomId)) {
+            throw new IllegalArgumentException(chatRoomId + "번 채팅방은 존재하지 않습니다.");
+        }
+
+        // 유저가 채팅방에 속해 있는지 확인
+        if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userId)) {
+            throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
+        }
+
+        UserResponseDto userInfo = getUserInfo(userId);
+
+        return messageRepository.findByMessageId(messageId)
                 .flatMap(existingMessage -> {
-                    existingMessage.setContent(newContent);
-                    return messageRepository.save(existingMessage);
+                    // 메시지 작성자가 아닌 경우 권한 에러 반환
+                    if (!existingMessage.getSenderId().equals(userInfo.getUserId())) {
+                        return Mono.error(new IllegalAccessException("메시지를 수정할 권한이 없습니다."));
+                    }
+
+                    // 수정 사항이 없는 경우 에러 반환
+                    if (existingMessage.getContent().equals(newContent.trim())) {
+                        return Mono.error(new IllegalArgumentException("메시지에 수정 사항이 없습니다."));
+                    }
+
+                    // 새로운 메시지 내용 유효성 검사
+                    validateMessageContent(newContent.trim());
+
+                    // 메시지 수정
+                    existingMessage.setContent(newContent.trim());
+
+                    return messageRepository.save(existingMessage)
+                            .map(Message::toDto);
                 })
-                .map(Message::toDto);
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("메시지가 존재하지 않습니다.")));
     }
 
-    // MongoDB에 저장된 데이터 중 해당 messageId를 가진 데이터 삭제
-    public Mono<Void> deleteMessage(String messageId) {
-        return messageRepository.deleteById(messageId);
-    }*/
+    // 메시지 삭제
+    public Mono<Void> deleteMessage(Long chatRoomId, String messageId, String userId) {
+        if (!chatRoomRepository.existsById(chatRoomId)) {
+            throw new IllegalArgumentException(chatRoomId + "번 채팅방은 존재하지 않습니다.");
+        }
 
+        if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userId)) {
+            throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
+        }
+
+        UserResponseDto userInfo = getUserInfo(userId);
+
+        return messageRepository.findByMessageId(messageId)
+                .flatMap(delete -> {
+                    if (!delete.getSenderId().equals(userInfo.getUserId())) {
+                        return Mono.error(new IllegalAccessException("메시지를 삭제할 권한이 없습니다."));
+                    }
+                    return messageRepository.delete(delete);
+                });
+    }
 }

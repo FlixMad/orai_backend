@@ -7,7 +7,6 @@ import com.ovengers.userservice.common.util.MfaSecretGenerator;
 import com.ovengers.userservice.dto.LoginRequestDto;
 import com.ovengers.userservice.dto.UserRequestDto;
 import com.ovengers.userservice.dto.UserResponseDto;
-import com.ovengers.userservice.entity.User;
 import com.ovengers.userservice.service.UserService;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
@@ -193,5 +192,11 @@ public class UserController {
     public ResponseEntity<Boolean> isEmailDuplicate(@RequestParam String email) {
         boolean isDuplicate = userService.isEmailDuplicate(email);
         return new ResponseEntity<>(isDuplicate, HttpStatus.OK);
+    }
+
+    @PostMapping("/list")
+    public ResponseEntity<List<UserResponseDto>> getUsersByIds(@RequestBody List<String> userIds) {
+        List<UserResponseDto> users = userService.getUsersByIds(userIds);
+        return ResponseEntity.ok(users);
     }
 }
