@@ -28,6 +28,9 @@ public class Message {
     private String senderId;
 
     @Setter
+    private String senderName;
+
+    @Setter
     private String content;
 
     @CreatedDate
@@ -48,6 +51,7 @@ public class Message {
                 .messageId(messageId)
                 .chatRoomId(chatRoomId)
                 .senderId(senderId)
+                .senderName(senderName)
                 .content(content)
                 .createdAt(createdAt != null ? createdAt.format(formatter) : "메시지생성시간없음")
                 .updatedAt(updatedAt != null ? updatedAt.format(formatter) : "메시지수정시간없음")

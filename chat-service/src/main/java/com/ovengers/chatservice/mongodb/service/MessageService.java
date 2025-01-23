@@ -57,7 +57,8 @@ public class MessageService {
         Message message = Message.builder()
                 .chatRoomId(chatRoomId)
                 .content(content)
-                .senderId(userInfo.getName())
+                .senderId(userInfo.getUserId())
+                .senderName(userInfo.getName())
                 .build();
 
         log.debug("\n\n\n chatRoomId: {}, content: {}, senderId: {}\n\n\n", chatRoomId, content, userId);
@@ -106,7 +107,7 @@ public class MessageService {
         return messageRepository.findByMessageId(messageId)
                 .flatMap(existingMessage -> {
                     // 메시지 작성자가 아닌 경우 권한 에러 반환
-                    if (!existingMessage.getSenderId().equals(userInfo.getName())) {
+                    if (!existingMessage.getSenderId().equals(userInfo.getUserId())) {
                         return Mono.error(new IllegalAccessException("메시지를 수정할 권한이 없습니다."));
                     }
 
@@ -141,7 +142,7 @@ public class MessageService {
 
         return messageRepository.findByMessageId(messageId)
                 .flatMap(delete -> {
-                    if (!delete.getSenderId().equals(userInfo.getName())) {
+                    if (!delete.getSenderId().equals(userInfo.getUserId())) {
                         return Mono.error(new IllegalAccessException("메시지를 삭제할 권한이 없습니다."));
                     }
                     return messageRepository.delete(delete);
