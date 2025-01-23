@@ -43,3 +43,5 @@ springdoc:
   enable-spring-security: true
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
+jwt:  # JWT 관련 설정 추가
+  secretKey: mysecretkeymysecretkeymysecretkeymysecretkeymysecretkeymysecretkeymysecretkey   # JWT 서명용 비밀 키
