@@ -10,7 +10,6 @@ import com.ovengers.chatservice.mysql.repository.UserChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -72,22 +71,18 @@ public class MessageService {
         UserResponseDto userInfo = getUserInfo(userId);
 
         if (!chatRoomRepository.existsById(chatRoomId)) {
-            throw new IllegalArgumentException(chatRoomId + "번 채팅방은 존재하지 않습니다.");
+            return Flux.error(new IllegalArgumentException(chatRoomId + "번 채팅방은 존재하지 않습니다."));
         }
 
         if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userInfo.getUserId())) {
-            throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
+            return Flux.error(new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다."));
         }
 
-        return messageRepository.countByChatRoomId(chatRoomId)
-                .flatMapMany(totalMessages -> {
-                    int totalPages = (int) Math.ceil((double) totalMessages / size);
-                    int targetPage = (page == null) ? totalPages - 1 : page;
-                    Pageable pageable = PageRequest.of(targetPage, size);
-
-                    return messageRepository.findAllByChatRoomId(chatRoomId, pageable)
-                            .map(Message::toDto);
-                });
+        int currentPage = page != null ? page : 0;
+        return messageRepository.findByChatRoomIdOrderByCreatedAtAsc(
+                chatRoomId,
+                PageRequest.of(currentPage, size)
+        ).map(Message::toDto);
     }
 
     // 메시지 수정
