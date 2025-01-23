@@ -29,14 +29,6 @@ public class ScheduleResponseDto {
 
     private String type;
 
-//    public ScheduleResponseDto(Schedule schedule) {
-//        this.userId = schedule.getUserId();
-//        this.title = schedule.getTitle();
-//        this.start = formatDateTime(schedule.getStartTime());
-//        this.end = formatDateTime(schedule.getEndTime());
-//        this.type = schedule.getType().name();
-//    }
-
     // 날짜를 ISO8601 형식의 문자열로 변환
     private String formatDateTime(LocalDateTime dateTime) {
         return dateTime != null ? dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : null;
