@@ -3,6 +3,7 @@ package com.ovengers.etcservice.service;
 import com.ovengers.etcservice.dto.NotificationMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -16,7 +17,8 @@ public class NotificationService {
     @Value("${spring.application.name}")
     private String instanceId;
 
-    private final RedisTemplate<String, String> redisTemplate;
+    @Qualifier("sse-template")
+    private final RedisTemplate<String, Object> redisTemplate;
     private final SseConnectionService connectionService;
 
     public void handleNotification(String userId, NotificationMessage message) {

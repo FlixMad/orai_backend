@@ -1,6 +1,8 @@
 package com.ovengers.etcservice.common.configs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ovengers.etcservice.util.NotificationSubscriber;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,11 +12,13 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+@RequiredArgsConstructor
 @Configuration
 @Slf4j
 public class RedisConfig {
@@ -24,7 +28,6 @@ public class RedisConfig {
 
     @Value("${spring.data.redis.port}")
     private int port;
-
 
     // Redis 서버와의 연결을 설정하는 역할을 하는 RedisConnectionFactory
     // Redis 접속에 필요한 설정을 지정한 후 구현체를 빈으로 등록
@@ -88,17 +91,29 @@ public class RedisConfig {
         return template;
     }
 
+//    @Bean
+//    @Qualifier("sseConnect")
+//    // Redis pub/sub 메시지를 비동기로 수신하고 처리하는 컨테이너.
+//    public RedisMessageListenerContainer redisMessageListenerContainer(
+//            @Qualifier("sse-redis-factory") RedisConnectionFactory factory
+//    ) {
+//        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+//        container.setConnectionFactory(factory);
+//        return container;
+//    }
+
     @Bean
-    @Qualifier("sseConnect")
-    // Redis pub/sub 메시지를 비동기로 수신하고 처리하는 컨테이너.
     public RedisMessageListenerContainer redisMessageListenerContainer(
-            @Qualifier("sse-redis-factory") RedisConnectionFactory factory
-    ) {
+            @Qualifier("sse-redis-factory") RedisConnectionFactory connectionFactory,
+            NotificationSubscriber notificationSubscriber) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(factory);
+        container.setConnectionFactory(connectionFactory);
+        container.addMessageListener(
+                notificationSubscriber,
+                new PatternTopic("notifications")
+        );
         return container;
     }
-
 
 }
 

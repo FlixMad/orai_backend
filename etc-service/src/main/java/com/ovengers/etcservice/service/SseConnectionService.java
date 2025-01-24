@@ -2,6 +2,7 @@ package com.ovengers.etcservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,8 @@ public class SseConnectionService {
     @Value("${spring.application.name}")
     private String instanceId;
 
-    private final RedisTemplate<String, String> redisTemplate;
+    @Qualifier("sse-template")
+    private final RedisTemplate<String, Object> redisTemplate;
     private final Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
 
     public SseEmitter connect(String userId) {
