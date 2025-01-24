@@ -2,6 +2,8 @@ package com.ovengers.userservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -33,10 +35,10 @@ public class Approval {
     @OneToOne
     @JoinColumn(name = "vacation_id", nullable = false)
     private Vacation vacation; // 연관된 휴가 정보
-
+    @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt; // 생성일
-
+    @UpdateTimestamp
     private LocalDateTime updatedAt; // 수정일
 
 

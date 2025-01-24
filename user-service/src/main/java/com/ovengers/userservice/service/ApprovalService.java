@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @AllArgsConstructor
 @Transactional
@@ -21,7 +22,7 @@ public class ApprovalService {
     private final UserRepository userRepository;
     private final VacationRepository vacationRepository; // VacationRepository 주입
 
-    public ApprovalResponseDto processApproval(Long vacationId, ApprovalRequestDto requestDto) {
+    public ApprovalResponseDto processApproval(UUID vacationId, ApprovalRequestDto requestDto) {
         Vacation vacation = vacationRepository.findById(vacationId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 휴가입니다."));
         Approval approval = vacation.getApproval();
