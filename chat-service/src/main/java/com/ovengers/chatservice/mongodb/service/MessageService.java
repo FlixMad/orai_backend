@@ -83,7 +83,7 @@ public class MessageService {
                     int totalPages = (int) Math.ceil((double) totalCount / size);
                     int currentPage = page != null ? page : Math.max(0, totalPages - 1);
 
-                    return messageRepository.findByChatRoomIdOrderByCreatedAtDesc(
+                    return messageRepository.findByChatRoomIdOrderByCreatedAtAsc(
                             chatRoomId,
                             PageRequest.of(currentPage, size)
                     ).map(Message::toDto);
