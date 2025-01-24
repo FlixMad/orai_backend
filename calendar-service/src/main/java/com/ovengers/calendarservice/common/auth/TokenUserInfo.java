@@ -2,7 +2,9 @@ package com.ovengers.calendarservice.common.auth;
 
 import lombok.*;
 
-@Setter @Getter @ToString
+@Setter
+@Getter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

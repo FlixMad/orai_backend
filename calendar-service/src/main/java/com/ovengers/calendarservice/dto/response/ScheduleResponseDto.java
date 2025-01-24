@@ -1,14 +1,12 @@
 package com.ovengers.calendarservice.dto.response;
 
-import com.ovengers.calendarservice.entity.Schedule;
 import lombok.*;
-
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.UUID;
 
-@Setter @Getter
+@Setter
+@Getter
 @Builder
 @AllArgsConstructor
 @ToString
