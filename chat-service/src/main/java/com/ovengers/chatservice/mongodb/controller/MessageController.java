@@ -36,7 +36,6 @@ public class MessageController {
                                         @AuthenticationPrincipal TokenUserInfo tokenUserInfo,
                                         @RequestParam(required = false) Integer page,
                                         @RequestParam(defaultValue = "30") int size) {
-
         return messageService.getMessages(chatRoomId, tokenUserInfo.getId(), page, size);
     }
 

@@ -78,11 +78,17 @@ public class MessageService {
             return Flux.error(new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다."));
         }
 
-        int currentPage = page != null ? page : 0;
-        return messageRepository.findByChatRoomIdOrderByCreatedAtAsc(
-                chatRoomId,
-                PageRequest.of(currentPage, size)
-        ).map(Message::toDto);
+        // 전체 메시지 수를 먼저 조회하여 마지막 페이지 계산
+        return messageRepository.countByChatRoomId(chatRoomId)
+                .flatMapMany(totalCount -> {
+                    int totalPages = (int) Math.ceil((double) totalCount / size);
+                    int currentPage = page != null ? page : Math.max(0, totalPages - 1);
+
+                    return messageRepository.findByChatRoomIdOrderByCreatedAtAsc(
+                            chatRoomId,
+                            PageRequest.of(currentPage, size)
+                    ).map(Message::toDto);
+                });
     }
 
     // 메시지 수정
