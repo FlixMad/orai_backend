@@ -9,7 +9,6 @@ import com.ovengers.chatservice.mysql.repository.ChatRoomRepository;
 import com.ovengers.chatservice.mysql.repository.UserChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -67,7 +66,7 @@ public class MessageService {
     }
 
     // 메시지 조회
-    public Flux<MessageDto> getMessages(Long chatRoomId, String userId, Integer page, int size) {
+    public Flux<MessageDto> getMessages(Long chatRoomId, String userId/*, Integer page, int size*/) {
         UserResponseDto userInfo = getUserInfo(userId);
 
         if (!chatRoomRepository.existsById(chatRoomId)) {
@@ -78,7 +77,9 @@ public class MessageService {
             return Flux.error(new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다."));
         }
 
-        return messageRepository.countByChatRoomId(chatRoomId)
+        return messageRepository.findByChatRoomIdOrderByCreatedAtAsc(chatRoomId).map(Message::toDto);
+
+/*        return messageRepository.countByChatRoomId(chatRoomId)
                 .flatMapMany(totalCount -> {
                     int totalPages = (int) Math.ceil((double) totalCount / size);
                     int currentPage = page != null ? page : Math.max(0, totalPages - 1);
@@ -87,7 +88,7 @@ public class MessageService {
                             chatRoomId,
                             PageRequest.of(currentPage, size)
                     ).map(Message::toDto);
-                });
+                });*/
     }
 
     // 메시지 수정

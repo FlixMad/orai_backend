@@ -33,10 +33,10 @@ public class MessageController {
     @Operation(summary = "채팅방의 메시지 조회", description = "채팅방Id")
     @GetMapping("/{chatRoomId}/messageList")
     public Flux<MessageDto> getMessages(@PathVariable Long chatRoomId,
-                                        @AuthenticationPrincipal TokenUserInfo tokenUserInfo,
-                                        @RequestParam(required = false) Integer page,
-                                        @RequestParam(defaultValue = "30") int size) {
-        return messageService.getMessages(chatRoomId, tokenUserInfo.getId(), page, size);
+                                        @AuthenticationPrincipal TokenUserInfo tokenUserInfo
+                                        /*@RequestParam(required = false) Integer page,*/
+                                        /*@RequestParam(defaultValue = "10") int size*/) {
+        return messageService.getMessages(chatRoomId, tokenUserInfo.getId()/*, page, size*/);
     }
 
     @Operation(summary = "메시지 수정", description = "채팅방Id, 메시지Id, 콘텐츠")
