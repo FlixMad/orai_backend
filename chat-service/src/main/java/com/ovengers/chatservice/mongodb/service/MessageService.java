@@ -80,7 +80,8 @@ public class MessageService {
 
         return messageRepository.countByChatRoomId(chatRoomId)
                 .flatMapMany(totalCount -> {
-                    int currentPage = page != null ? page : 0;
+                    int totalPages = (int) Math.ceil((double) totalCount / size);
+                    int currentPage = page != null ? page : Math.max(0, totalPages - 1);
 
                     return messageRepository.findByChatRoomIdOrderByCreatedAtDesc(
                             chatRoomId,
