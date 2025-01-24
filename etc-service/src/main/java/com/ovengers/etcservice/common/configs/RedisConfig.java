@@ -89,7 +89,7 @@ public class RedisConfig {
     }
 
     @Bean
-    @Qualifier("sse-listener")
+    @Qualifier("sseConnect")
     // Redis pub/sub 메시지를 비동기로 수신하고 처리하는 컨테이너.
     public RedisMessageListenerContainer redisMessageListenerContainer(
             @Qualifier("sse-redis-factory") RedisConnectionFactory factory
