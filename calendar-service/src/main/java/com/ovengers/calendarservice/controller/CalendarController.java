@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
@@ -100,4 +101,27 @@ public class CalendarController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+/*
+    // 첨부파일 관련 메서드
+
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadAttachment(@RequestParam("file") MultipartFile file) {
+        try {
+//            String fileUrl = calendarService.(file);
+            return ResponseEntity.ok(fileUrl);
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("파일 업로드 실패: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteAttachment(@RequestParam("fileUrl") String fileUrl) {
+        try {
+//            calendarService.(fileUrl);
+            return ResponseEntity.ok("파일 삭제 성공");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("파일 삭제 실패: " + e.getMessage());
+        }
+    }
+*/
 }
