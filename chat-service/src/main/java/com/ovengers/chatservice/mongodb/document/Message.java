@@ -31,6 +31,9 @@ public class Message {
     private String senderName;
 
     @Setter
+    private String type = "CHAT"; // CHAT, SYSTEM, EDIT, DELETE, ERROR 등
+
+    @Setter
     private String content;
 
     @CreatedDate
@@ -52,6 +55,7 @@ public class Message {
                 .chatRoomId(chatRoomId)
                 .senderId(senderId)
                 .senderName(senderName)
+                .type(type)
                 .content(content)
                 .createdAt(createdAt != null ? createdAt.format(formatter) : "메시지생성시간없음")
                 .updatedAt(updatedAt != null ? updatedAt.format(formatter) : "메시지수정시간없음")

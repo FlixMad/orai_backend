@@ -20,15 +20,15 @@ public class MessageController {
     private final MessageService messageService;
     private final SimpMessagingTemplate messagingTemplate;
 
-    @Operation(summary = "메시지 저장", description = "채팅방Id, 콘텐츠")
-    @PostMapping("/{chatRoomId}/saveMessage")
-    public Mono<MessageDto> saveMessage(@PathVariable Long chatRoomId,
-                                        @RequestBody MessageRequestDto messageRequestDto,
-                                        @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
-
-        return messageService.sendMessage(chatRoomId, messageRequestDto.getContent(), tokenUserInfo.getId());
-//                .doOnSuccess(messageDto -> messagingTemplate.convertAndSend("/sub/" + chatRoomId + "/chat", messageDto));
-    }
+//    @Operation(summary = "메시지 저장", description = "채팅방Id, 콘텐츠")
+//    @PostMapping("/{chatRoomId}/saveMessage")
+//    public Mono<MessageDto> saveMessage(@PathVariable Long chatRoomId,
+//                                        @RequestBody MessageRequestDto messageRequestDto,
+//                                        @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
+//
+//        return messageService.sendMessage(chatRoomId, messageRequestDto.getContent(), tokenUserInfo.getId());
+////                .doOnSuccess(messageDto -> messagingTemplate.convertAndSend("/sub/" + chatRoomId + "/chat", messageDto));
+//    }
 
     @Operation(summary = "채팅방의 메시지 조회", description = "채팅방Id")
     @GetMapping("/{chatRoomId}/messageList")
@@ -53,11 +53,11 @@ public class MessageController {
 
     @Operation(summary = "메시지 삭제", description = "채팅방Id, 메시지Id")
     @DeleteMapping("/{chatRoomId}/{messageId}/deleteMessage")
-    public Mono<Void> deleteMessage(@PathVariable Long chatRoomId,
-                                    @PathVariable String messageId,
-                                    @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
-
+    public Mono<MessageDto> deleteMessage(@PathVariable Long chatRoomId,
+                                          @PathVariable String messageId,
+                                          @AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
         return messageService.deleteMessage(chatRoomId, messageId, tokenUserInfo.getId())
-                .doOnSuccess(aVoid -> messagingTemplate.convertAndSend("/sub/" + chatRoomId + "/chat", "메시지가 삭제되었습니다."));
+                .doOnSuccess(deletedMessage ->
+                        messagingTemplate.convertAndSend("/sub/" + chatRoomId + "/chat", deletedMessage));
     }
 }
