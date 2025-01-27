@@ -22,6 +22,8 @@ public class Vacation {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String vacationId; // UUID로 PK 설정
+    @Column(nullable = false)
+    private String title; // 제목
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -41,6 +43,7 @@ public class Vacation {
     private String userId; // 휴가 신청자 ID
 
     @OneToOne(mappedBy = "vacation", cascade = CascadeType.ALL)
+    @JoinColumn(name = "vacation_id", referencedColumnName = "vacationId") // 외래 키 설정
     private Approval approval; // 연관된 결재 정보
 
     @CreationTimestamp

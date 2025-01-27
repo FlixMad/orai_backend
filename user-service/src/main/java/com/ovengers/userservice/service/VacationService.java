@@ -3,6 +3,7 @@ package com.ovengers.userservice.service;
 import com.ovengers.userservice.dto.VacationRequestDto;
 import com.ovengers.userservice.dto.VacationResponseDto;
 import com.ovengers.userservice.entity.*;
+import com.ovengers.userservice.repository.ApprovalRepository;
 import com.ovengers.userservice.repository.UserRepository;
 import com.ovengers.userservice.repository.VacationRepository;
 import lombok.AllArgsConstructor;
@@ -16,14 +17,18 @@ public class VacationService {
 
     private final UserRepository userRepository;
     private final VacationRepository vacationRepository;
+    private final ApprovalRepository approvalRepository;
 
     public VacationResponseDto applyForVacation(VacationRequestDto requestDto) {
         // Vacation 및 Approval 생성 로직
         Vacation vacation = createVacation(requestDto);
+
         Approval approval = createApproval(vacation, findDirectSupervisor(requestDto.getUserId()));
 
         // 저장
         vacationRepository.save(vacation);
+        approvalRepository.save(approval);
+
 
         // Response DTO 생성 및 반환
         return VacationResponseDto.builder()
@@ -40,6 +45,7 @@ public class VacationService {
     private Vacation createVacation(VacationRequestDto requestDto) {
         return Vacation.builder()
                 .type(requestDto.getType())
+                .title(requestDto.getTitle())
                 .startDate(requestDto.getStartDate())
                 .endDate(requestDto.getEndDate())
                 .userId(requestDto.getUserId()) // String 타입으로 처리
@@ -51,7 +57,7 @@ public class VacationService {
         return Approval.builder()
                 .vacation(vacation)
                 .approvalUserId(supervisor.getUserId()) // String 타입으로 처리
-                .status(VacationState.PENDING) // 초기 상태
+                .vacationState(VacationState.PENDING)
                 .title("Vacation Approval Request")
                 .contents("Approval request for vacation from " + vacation.getStartDate() + " to " + vacation.getEndDate())
                 .build();

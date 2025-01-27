@@ -1,55 +1,34 @@
 package com.ovengers.userservice.service;
 
-import com.ovengers.userservice.dto.ApprovalRequestDto;
 import com.ovengers.userservice.dto.ApprovalResponseDto;
 import com.ovengers.userservice.entity.Approval;
-import com.ovengers.userservice.entity.Vacation;
-import com.ovengers.userservice.entity.VacationState;
-import com.ovengers.userservice.repository.UserRepository;
-import com.ovengers.userservice.repository.VacationRepository; // 추가된 부분
-import lombok.AllArgsConstructor;
+import com.ovengers.userservice.repository.ApprovalRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.List;
+import java.util.stream.Collectors;
 
-@AllArgsConstructor
-@Transactional
 @Service
 public class ApprovalService {
 
-    private final UserRepository userRepository;
-    private final VacationRepository vacationRepository; // VacationRepository 주입
+    private final ApprovalRepository approvalRepository;
 
-    public ApprovalResponseDto processApproval(UUID vacationId, ApprovalRequestDto requestDto) {
-        Vacation vacation = vacationRepository.findById(vacationId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 휴가입니다."));
-        Approval approval = vacation.getApproval();
+    public ApprovalService(ApprovalRepository approvalRepository) {
+        this.approvalRepository = approvalRepository;
+    }
 
-        // 상태 업데이트
-        if (requestDto.getIsApproved()) {
-            approval.setStatus(VacationState.APPROVED);
-            vacation.setVacationState(VacationState.APPROVED);
-        } else {
-            approval.setStatus(VacationState.REJECTED);
-            vacation.setVacationState(VacationState.REJECTED);
+    // 특정 approvalUserId로 승인 목록 조회
+    public List<ApprovalResponseDto> getApprovalsByUserId(String approvalUserId) {
+        List<Approval> approvals = approvalRepository.findAllByApprovalUserId(approvalUserId);
+
+        // 데이터가 없으면 예외를 던짐
+        if (approvals.isEmpty()) {
+            throw new IllegalArgumentException("No approvals found for user: " + approvalUserId);
         }
 
-        approval.setUpdatedAt(LocalDateTime.now());
-        vacation.setUpdatedAt(LocalDateTime.now());
-
-        // 저장
-        vacationRepository.save(vacation);
-
-        // Response DTO 생성 및 반환
-        return ApprovalResponseDto.builder()
-                .approvalId(approval.getApprovalId())
-                .status(approval.getStatus())
-                .title(approval.getTitle())
-                .contents(approval.getContents())
-                .approvalUserId(approval.getApprovalUserId())
-                .vacationId(vacation.getVacationId())
-                .build();
+        return approvals.stream()
+                .map(approval -> new ApprovalResponseDto(approval)) // 생성자 호출
+                .collect(Collectors.toList());
     }
+
 }

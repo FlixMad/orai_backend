@@ -23,5 +23,7 @@ public class VacationRequestDto {
 
     @NotNull
     private String userId; // 신청자 ID
+    @NotNull
+    private String title;
 }
 
