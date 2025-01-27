@@ -1,4 +1,5 @@
-package com.ovengers.etcservice.dto;
+package com.ovengers.calendarservice.dto;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;

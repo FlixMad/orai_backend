@@ -1,6 +1,7 @@
 package com.ovengers.etcservice.entity;
 
 
+import com.ovengers.etcservice.dto.NotificationResDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -35,6 +36,14 @@ public class Notification {
 
     @Column(name = "user_id", nullable = false) // 대상 사용자 ID
     private String userId; // 알림 대상 사용자 (외부 서비스와 연계)
+
+    public NotificationResDto toDto(Notification notification){
+        return NotificationResDto.builder()
+                    .message(notification.getMessage())
+                    .userId(notification.getUserId())
+                    .isRead(notification.isRead).build();
+
+    }
 
 
 }

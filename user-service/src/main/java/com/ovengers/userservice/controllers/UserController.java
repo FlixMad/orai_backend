@@ -194,4 +194,5 @@ public class UserController {
         boolean isDuplicate = userService.isEmailDuplicate(email);
         return new ResponseEntity<>(isDuplicate, HttpStatus.OK);
     }
+
 }

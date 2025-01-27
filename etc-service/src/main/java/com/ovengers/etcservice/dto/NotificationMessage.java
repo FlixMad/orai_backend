@@ -1,17 +1,20 @@
 package com.ovengers.etcservice.dto;
 
-import lombok.Builder;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Getter
+
+@Getter @Setter @ToString
+@NoArgsConstructor // 기본 생성자 추가
+@AllArgsConstructor
 @Builder
 public class NotificationMessage {
-    private String type;            // "SCHEDULE"
-    private String departmentId;    // "dev"
-    private String scheduleId;      // "schedule123"
-    private String title;           // "주간 회의"
-    private String content;         // "이번 주 회의가 등록되었습니다"
+    private String type;
+    private String departmentId;
+    private String scheduleId;
+    private String title;
+    private String content;
     private LocalDateTime createdAt;
 }

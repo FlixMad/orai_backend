@@ -52,9 +52,12 @@ dependencies {
 	implementation 'org.hibernate.validator:hibernate-validator:8.0.0.Final'
 	implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 
-
 	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 	implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+
+	//레디스 관련 라이브러리
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
 }
 
 dependencyManagement {

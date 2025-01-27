@@ -1,6 +1,6 @@
 package com.ovengers.etcservice.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ovengers.etcservice.dto.NotificationEvent;
 import com.ovengers.etcservice.service.NotificationService;
@@ -13,20 +13,22 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class NotificationSubscriber implements MessageListener{
+public class NotificationSubscriber implements MessageListener {
+
     private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
-
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
         try {
-            String messageBody = new String(message.getBody());
-            NotificationEvent event = objectMapper.readValue(messageBody, NotificationEvent.class);
+            String json = new String(message.getBody());
+            NotificationEvent event = NotificationEventParser.parseNotificationEvent(json);
             event.getUserIds().forEach(userId ->
                     notificationService.handleNotification(userId, event.getMessage()));
-        } catch (JsonProcessingException e) {
+            log.info("Received notification: {}", event);
+        } catch (Exception e) {
             log.error("Failed to process notification message", e);
         }
     }
+
 }
