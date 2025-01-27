@@ -2,6 +2,7 @@ package com.ovengers.calendarservice.dto.response;
 
 import lombok.*;
 
+import com.ovengers.calendarservice.entity.Schedule.ScheduleStatus;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -20,6 +21,8 @@ public class ScheduleResponseDto {
     private String title;
 
     private String description;
+
+    private ScheduleStatus scheduleStatus;
 
     private String start;
 
