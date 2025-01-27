@@ -27,4 +27,7 @@ public interface CalendarRepository extends JpaRepository<Schedule, String> {
     List<Schedule> findByDate(LocalDate date);
 
     List<Schedule> findByDepartment_DepartmentIdIn(List<String> departmentIds);
+
+    List<Schedule> findByStartTime(LocalDate startTime);
+
 }
