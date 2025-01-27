@@ -45,5 +45,13 @@ public class Approval {
     @UpdateTimestamp
     private LocalDateTime updatedAt; // 수정일
 
+    // vacationId를 가져오는 메서드 추가
+    public String getVacationId() {
+        return vacation != null ? vacation.getVacationId() : null;
+    }
 
+    // vacationState에 대한 setter 메서드 추가
+    public void setState(VacationState vacationState) {
+        this.vacationState = vacationState;
+    }
 }
