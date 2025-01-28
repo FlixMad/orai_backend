@@ -1,6 +1,7 @@
 package com.ovengers.calendarservice.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ovengers.calendarservice.entity.Department;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +11,10 @@ import java.time.LocalDateTime;
 @Getter @Setter
 public class ScheduleRequestDto {
     private String title;
+
+    private String description;
+
+    private String departmentId;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate start;
