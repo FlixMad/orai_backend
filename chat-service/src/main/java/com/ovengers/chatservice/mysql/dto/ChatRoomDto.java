@@ -20,7 +20,4 @@ public class ChatRoomDto {
     private String createdAt;
 
     private String updatedAt;
-
-//    private List<String> userIds; // 채팅방에 참여한 사용자 ID 목록
-
 }

@@ -2,6 +2,8 @@ package com.ovengers.chatservice.mysql.service;
 
 import com.ovengers.chatservice.client.UserResponseDto;
 import com.ovengers.chatservice.client.UserServiceClient;
+import com.ovengers.chatservice.mongodb.document.Message;
+import com.ovengers.chatservice.mongodb.repository.MessageRepository;
 import com.ovengers.chatservice.mysql.dto.ChatRoomDto;
 import com.ovengers.chatservice.mysql.dto.ChatRoomInvitationDto;
 import com.ovengers.chatservice.mysql.dto.CompositeChatRoomDto;
@@ -21,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -38,6 +41,7 @@ public class ChatRoomService {
     private final InvitationRepository invitationRepository;
     private final UserServiceClient userServiceClient;
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final MessageRepository messageRepository;
 
     public UserResponseDto getUserInfo(String userId) {
         UserResponseDto userById = userServiceClient.getUserById(userId);
@@ -94,17 +98,23 @@ public class ChatRoomService {
 
     // 채팅방 입장 알림(채팅방 생성 시(생성자))
     private void sendEnterChatRoom(Long chatRoomId, String userId) {
-        // 유저의 이름 가져오기
         UserResponseDto userInfo = getUserInfo(userId);
-        String userName = userInfo.getName(); // 유저의 이름
-
         ChatRoomDto chatRoomInfo = chatRoomRepository.findByChatRoomId(chatRoomId).toDto();
 
-        // 채팅방에 속한 모든 유저에게 메시지 전송
-        simpMessagingTemplate.convertAndSend(
-                "/sub/" + chatRoomId + "/chat",  // 채팅방 구독 경로
-                userName + "님이 " + chatRoomInfo.getName() + " 채팅방에 입장했습니다."
-        );
+        Message systemMessage = Message.builder()
+                .chatRoomId(chatRoomId)
+                .type("SYSTEM")
+                .content(userInfo.getName() + "님이 " + chatRoomInfo.getName() + " 채팅방에 입장했습니다.")
+                .build();
+
+        // 메시지 저장
+        messageRepository.save(systemMessage)
+                .subscribe(savedMessage -> {
+                    simpMessagingTemplate.convertAndSend(
+                            "/sub/" + chatRoomId + "/chat",
+                            savedMessage.toDto()
+                    );
+                });
     }
 
     // 채팅방 입장 알림(채팅방 생성 또는 초대 시(유저들))
@@ -112,62 +122,86 @@ public class ChatRoomService {
         ChatRoomDto chatRoomInfo = chatRoomRepository.findByChatRoomId(chatRoomId).toDto();
         List<UserResponseDto> userInfos = getAllUsers(userIds);
 
-        // 한 번의 메시지로 모든 입장 사용자 표시
         String userNames = userInfos.stream()
                 .map(UserResponseDto::getName)
                 .collect(Collectors.joining(", "));
 
-        simpMessagingTemplate.convertAndSend("/sub/" + chatRoomId + "/chat", userNames + "님이 " +
-                chatRoomInfo.getName() + " 채팅방에 입장했습니다.");
+        Message systemMessage = Message.builder()
+                .chatRoomId(chatRoomId)
+                .type("SYSTEM")
+                .content(userNames + "님이 " + chatRoomInfo.getName() + " 채팅방에 입장했습니다.")
+                .build();
+
+        messageRepository.save(systemMessage)
+                .subscribe(savedMessage -> {
+                    simpMessagingTemplate.convertAndSend(
+                            "/sub/" + chatRoomId + "/chat",
+                            savedMessage.toDto()
+                    );
+                });
     }
 
     // 채팅방 수정 알림
     private void sendChatRoomUpdatedNotification(Long chatRoomId) {
-        // 채팅방에 속한 유저들이 아닌, 해당 채팅방을 구독한 유저들에게만 알림을 전송
-        // "/sub/{chatRoomId}/chat"으로 구독한 유저에게 메시지를 전송
-        ChatRoom chatRoom = chatRoomRepository.findByChatRoomId(chatRoomId);
+        Message systemMessage = Message.builder()
+                .chatRoomId(chatRoomId)
+                .type("SYSTEM")
+                .content("채팅방 정보가 수정되었습니다.")
+                .createdAt(LocalDateTime.now())
+                .build();
 
-        String chatRoomUpdateMessage = chatRoom.getName() + " 채팅방이 변경되었습니다.";
-        simpMessagingTemplate.convertAndSend(
-                "/sub/" + chatRoomId + "/chat",
-                chatRoomUpdateMessage
-        );
+        messageRepository.save(systemMessage)
+                .subscribe(savedMessage -> {
+                    simpMessagingTemplate.convertAndSend(
+                            "/sub/" + chatRoomId + "/chat",
+                            savedMessage.toDto()
+                    );
+                });
     }
 
     // 채팅방 퇴장 알림(채팅방 나가기)
     private void sendExitChatRoom(Long chatRoomId, String userId) {
-        // 유저의 이름 가져오기
         UserResponseDto userInfo = getUserInfo(userId);
-        String userName = userInfo.getName(); // 유저의 이름
-
         ChatRoomDto chatRoomInfo = chatRoomRepository.findByChatRoomId(chatRoomId).toDto();
 
-        // 채팅방에 속한 모든 유저에게 메시지 전송
-        simpMessagingTemplate.convertAndSend(
-                "/sub/" + chatRoomId + "/chat",  // 채팅방 구독 경로
-                userName + "님이 " + chatRoomInfo.getName() + " 채팅방에서 퇴장했습니다."
-        );
+        Message systemMessage = Message.builder()
+                .chatRoomId(chatRoomId)
+                .type("SYSTEM")
+                .content(userInfo.getName() + "님이 " + chatRoomInfo.getName() + " 채팅방에서 퇴장했습니다.")
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        messageRepository.save(systemMessage)
+                .subscribe(savedMessage -> {
+                    simpMessagingTemplate.convertAndSend(
+                            "/sub/" + chatRoomId + "/chat",
+                            savedMessage.toDto()
+                    );
+                });
     }
 
     // 채팅방 강퇴 알림(채팅방 내보내기)
     private void sendExportChatRoom(Long chatRoomId, String userId, String creatorId) {
-        // 유저의 이름 가져오기
         UserResponseDto userInfo = getUserInfo(userId);
-        String userName = userInfo.getName();
-
-        // 생성자 이름 가져오기
         UserResponseDto creatorInfo = getUserInfo(creatorId);
-        String creatorName = creatorInfo.getName();
-
         ChatRoomDto chatRoomInfo = chatRoomRepository.findByChatRoomId(chatRoomId).toDto();
 
-        // 채팅방에 속한 모든 유저에게 메시지 전송
-        simpMessagingTemplate.convertAndSend(
-                "/sub/" + chatRoomId + "/chat",  // 채팅방 구독 경로
-                creatorName + "님이 " + userName + "님을 " + chatRoomInfo.getName() + " 채팅방에서 내보냈습니다."
-        );
-    }
+        Message systemMessage = Message.builder()
+                .chatRoomId(chatRoomId)
+                .type("SYSTEM")
+                .content(creatorInfo.getName() + "님이 " + userInfo.getName() + "님을 " +
+                        chatRoomInfo.getName() + " 채팅방에서 내보냈습니다.")
+                .createdAt(LocalDateTime.now())
+                .build();
 
+        messageRepository.save(systemMessage)
+                .subscribe(savedMessage -> {
+                    simpMessagingTemplate.convertAndSend(
+                            "/sub/" + chatRoomId + "/chat",
+                            savedMessage.toDto()
+                    );
+                });
+    }
 
     // 구독 유저들에게 채팅방 삭제 알림을 보내는 메서드
     private void sendChatRoomDeletedNotification(List<String> userIds, ChatRoom chatRoom, String removerId) {

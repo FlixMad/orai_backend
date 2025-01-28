@@ -20,10 +20,6 @@ public class UserChatRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    @ManyToOne
-//    @JoinColumn(name = "chat_room_id", referencedColumnName = "chat_room_id")
-//    private ChatRoom chatRoom;
-
     @JoinColumn(name = "chat_room_id", nullable = false)
     private Long chatRoomId;
 
@@ -40,7 +36,6 @@ public class UserChatRoom {
                 .id(id)
                 .chatRoomId(chatRoomId)
                 .userId(userId)
-//                .chatRoomId(chatRoom.getChatRoomId())
                 .subAt(subAt!= null ? subAt.format(formatter) : "채팅방구독시간없음")
                 .build();
     }

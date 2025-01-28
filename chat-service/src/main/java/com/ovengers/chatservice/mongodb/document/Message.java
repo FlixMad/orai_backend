@@ -31,6 +31,9 @@ public class Message {
     private String senderName;
 
     @Setter
+    private String type = "CHAT"; // CHAT, SYSTEM, EDIT, DELETE, ERROR 등
+
+    @Setter
     private String content;
 
     @CreatedDate
@@ -42,9 +45,6 @@ public class Message {
     @Field("updated_at")
     private LocalDateTime updatedAt;
 
-//    @Field("unread_user_ids")
-//    private List<String> unreadUserIds = new ArrayList<>();
-
     public MessageDto toDto() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         return MessageDto.builder()
@@ -52,10 +52,10 @@ public class Message {
                 .chatRoomId(chatRoomId)
                 .senderId(senderId)
                 .senderName(senderName)
+                .type(type)
                 .content(content)
                 .createdAt(createdAt != null ? createdAt.format(formatter) : "메시지생성시간없음")
                 .updatedAt(updatedAt != null ? updatedAt.format(formatter) : "메시지수정시간없음")
-//                .unreadUserIds(unreadUserIds)
                 .build();
     }
 }

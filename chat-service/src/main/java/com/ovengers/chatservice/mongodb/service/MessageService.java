@@ -9,8 +9,6 @@ import com.ovengers.chatservice.mysql.repository.ChatRoomRepository;
 import com.ovengers.chatservice.mysql.repository.UserChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -41,7 +39,7 @@ public class MessageService {
     }
 
     // 메시지 전송
-    public Mono<MessageDto> sendMessage(Long chatRoomId, String content, String userId) {
+    public Mono<MessageDto> sendMessage(Long chatRoomId, String content, String userId, String userName) {
         if (!chatRoomRepository.existsById(chatRoomId)) {
             throw new IllegalArgumentException(chatRoomId + "번 채팅방은 존재하지 않습니다.");
         }
@@ -50,16 +48,16 @@ public class MessageService {
             throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
         }
 
-        UserResponseDto userInfo = getUserInfo(userId);
-
         validateMessageContent(content.trim());
 
         Message message = Message.builder()
                 .chatRoomId(chatRoomId)
                 .content(content)
-                .senderId(userInfo.getUserId())
-                .senderName(userInfo.getName())
+                .senderId(userId)
+                .senderName(userName)
                 .build();
+
+        message.setType("CHAT");
 
         log.debug("\n\n\n chatRoomId: {}, content: {}, senderId: {}\n\n\n", chatRoomId, content, userId);
 
@@ -68,26 +66,29 @@ public class MessageService {
     }
 
     // 메시지 조회
-    public Flux<MessageDto> getMessages(Long chatRoomId, String userId, Integer page, int size) {
+    public Flux<MessageDto> getMessages(Long chatRoomId, String userId/*, Integer page, int size*/) {
         UserResponseDto userInfo = getUserInfo(userId);
 
         if (!chatRoomRepository.existsById(chatRoomId)) {
-            throw new IllegalArgumentException(chatRoomId + "번 채팅방은 존재하지 않습니다.");
+            return Flux.error(new IllegalArgumentException(chatRoomId + "번 채팅방은 존재하지 않습니다."));
         }
 
         if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userInfo.getUserId())) {
-            throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
+            return Flux.error(new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다."));
         }
 
-        return messageRepository.countByChatRoomId(chatRoomId)
-                .flatMapMany(totalMessages -> {
-                    int totalPages = (int) Math.ceil((double) totalMessages / size);
-                    int targetPage = (page == null) ? totalPages - 1 : page;
-                    Pageable pageable = PageRequest.of(targetPage, size);
+        return messageRepository.findByChatRoomIdOrderByCreatedAtAsc(chatRoomId).map(Message::toDto);
 
-                    return messageRepository.findAllByChatRoomId(chatRoomId, pageable)
-                            .map(Message::toDto);
-                });
+/*        return messageRepository.countByChatRoomId(chatRoomId)
+                .flatMapMany(totalCount -> {
+                    int totalPages = (int) Math.ceil((double) totalCount / size);
+                    int currentPage = page != null ? page : Math.max(0, totalPages - 1);
+
+                    return messageRepository.findByChatRoomIdOrderByCreatedAtAsc(
+                            chatRoomId,
+                            PageRequest.of(currentPage, size)
+                    ).map(Message::toDto);
+                });*/
     }
 
     // 메시지 수정
@@ -121,6 +122,7 @@ public class MessageService {
 
                     // 메시지 수정
                     existingMessage.setContent(newContent.trim());
+                    existingMessage.setType("EDIT");
 
                     return messageRepository.save(existingMessage)
                             .map(Message::toDto);
@@ -129,7 +131,7 @@ public class MessageService {
     }
 
     // 메시지 삭제
-    public Mono<Void> deleteMessage(Long chatRoomId, String messageId, String userId) {
+    public Mono<MessageDto> deleteMessage(Long chatRoomId, String messageId, String userId) {
         if (!chatRoomRepository.existsById(chatRoomId)) {
             throw new IllegalArgumentException(chatRoomId + "번 채팅방은 존재하지 않습니다.");
         }
@@ -141,11 +143,13 @@ public class MessageService {
         UserResponseDto userInfo = getUserInfo(userId);
 
         return messageRepository.findByMessageId(messageId)
-                .flatMap(delete -> {
-                    if (!delete.getSenderId().equals(userInfo.getUserId())) {
+                .flatMap(message -> {
+                    if (!message.getSenderId().equals(userInfo.getUserId())) {
                         return Mono.error(new IllegalAccessException("메시지를 삭제할 권한이 없습니다."));
                     }
-                    return messageRepository.delete(delete);
+                    message.setContent("메시지가 삭제되었습니다.");
+                    message.setType("DELETE");
+                    return messageRepository.save(message).map(Message::toDto);
                 });
     }
 }
