@@ -117,9 +117,9 @@ public class UserService {
     }
 
 //    // 중복체크
-//    public boolean isEmailDuplicate(String email) {
-//        return userRepository.findByEmail(email).isPresent();
-//    }
+    public boolean isEmailDuplicate(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
     /**
      * 모든 사용자 조회
      */
