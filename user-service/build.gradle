@@ -31,7 +31,7 @@ dependencies {
     // Spring Boot 기본 라이브러리
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-//    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
@@ -77,7 +77,6 @@ dependencies {
     //redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
-    //스웨거 관련설정
     implementation 'io.awspring.cloud:spring-cloud-aws-s3:3.0.2'
 
     // querydsl
@@ -95,6 +94,25 @@ dependencies {
     // Spring Cloud 환경에서 server to server 요청을 처리해 주는 feign client 라이브러리
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+
+    //Google Authenticator 라이브러리 (TOTP 관련):
+    implementation 'com.warrenstrange:googleauth:1.5.0'
+
+
+    //QR 코드 생성을 위한 라이브러리:
+    implementation 'com.google.zxing:core:3.4.1'
+
+
+
+
+    //Authenticator와 호환되는 Google Authenticator의 공식 라이브러리인 JOTP
+    implementation 'org.jboss.aerogear:aerogear-otp-java:1.0.0'
+
+
+    // Spring Cloud 환경에서 server to server 요청을 처리해 주는 feign client 라이브러리
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
 }
 
 dependencyManagement {

@@ -6,7 +6,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TokenUserInfo {
+public class
+TokenUserInfo {
     private String id;           // 사용자 ID
     private String departmentId; // 부서 ID 추가
     private String Role;

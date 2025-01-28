@@ -57,12 +57,12 @@ public class AdminService{
     }
 
     // 검색 Query
-    public List<UserResponseDto> search(final Map<String, String> searchCondition) {
+    public List<UserResponseDto> search(final Map<String, String> searchCondition, Map<String, String> map) {
         List<User> users = queryFactory
                 .selectFrom(user)
                 .where(allCond(searchCondition))
                 .fetch();
-        return users.stream().map(UserResponseDto::new).collect(Collectors.toList());
+        return users.stream().map(user -> new UserResponseDto(user,map)).collect(Collectors.toList());
 
     }
     //유저 정보 업데이트

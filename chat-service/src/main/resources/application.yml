@@ -6,13 +6,15 @@ logging:
 spring:
   application:
     name: chat-service
+  profiles:
+    include: secret
   cloud:
     client:
       hostname: localhost
   datasource:
-    url: jdbc:mysql://localhost:3306/orai?serverTimezone=Asia/Seoul
+    url: jdbc:mysql://orai-db.c3yo06kg0hd5.ap-northeast-2.rds.amazonaws.com
     username: root
-    password: mysql
+    password: ovengersassemble
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database: mysql
@@ -41,3 +43,5 @@ springdoc:
   enable-spring-security: true
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
+jwt:  # JWT 관련 설정 추가
+  secretKey: mysecretkeymysecretkeymysecretkeymysecretkeymysecretkeymysecretkeymysecretkey   # JWT 서명용 비밀 키

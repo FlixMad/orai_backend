@@ -1,4 +1,5 @@
 package com.ovengers.userservice.controllers;
+import com.ovengers.userservice.client.CalendarServiceClient;
 import com.ovengers.userservice.common.configs.AwsS3Config;
 import com.ovengers.userservice.common.dto.CommonResDto;
 import com.ovengers.userservice.dto.AttitudeResponseDto;
@@ -40,6 +41,7 @@ public class AdminController {
 
     private final AdminService adminService;
     private final AwsS3Config s3Config;
+    private final CalendarServiceClient calendarServiceClient;
 
     @Operation(summary = "사용자 조회(리스트)", description = "사용자 조회할 때 사용하는 api")
     @ApiResponses({
@@ -47,30 +49,34 @@ public class AdminController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(value = "/admin/users/list")
     public ResponseEntity<CommonResDto> getUsers(@RequestParam Map<String, String> params) {
         log.info("Search params: {}", params);
-        List<UserResponseDto> users = adminService.search(params);
+
+        Map<String,String> map = calendarServiceClient.getDepartmentMap();
+
+        List<UserResponseDto> users = adminService.search(params, map);
         CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "조회 성공", users);
         return ResponseEntity.ok(commonResDto);
     }
 
 
     //사용자 조회
-    @Operation(summary = "사용자 조회(페이지)(오버라이딩)", description = "사용자 조회할 때 사용하는 api")
+    @Operation(summary = "사용자 조회(페이지)", description = "사용자 조회할 때 사용하는 api")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "사용자 조회 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @PageableAsQueryParam
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(value = "/admin/users/page")
     public ResponseEntity<?> getUsers(@RequestParam Map<String,String> params,
                                       Pageable pageable) {
         log.info("params : {}", params);
-        List<UserResponseDto> users = adminService.search(params);
+
+        Map<String,String> map = calendarServiceClient.getDepartmentMap();
+
+        List<UserResponseDto> users = adminService.search(params, map);
         Page<UserResponseDto> userPage = adminService.listToPage(users,pageable);
 
         CommonResDto commonResDto = new CommonResDto(HttpStatus.OK,"조회 성공", userPage);

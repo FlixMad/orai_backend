@@ -3,9 +3,7 @@ package com.ovengers.chatservice.client;
 import com.ovengers.chatservice.common.dto.CommonResDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -19,7 +17,10 @@ public interface UserServiceClient {
      * @return userResoponseDto로 정보 받아옴
      */
     @GetMapping("api/users/{userId}")
-    CommonResDto<UserResponseDto> getUser(@PathVariable("userId") String userId);
+    UserResponseDto getUserById(@PathVariable("userId") String userId);
+
+    @PostMapping("api/users/list")
+    List<UserResponseDto> getUsersByIds(@RequestBody List<String> userIds);
 
     /**
      *

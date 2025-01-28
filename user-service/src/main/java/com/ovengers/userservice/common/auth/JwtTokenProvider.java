@@ -28,9 +28,10 @@ public class JwtTokenProvider {
     /**
      * 액세스 토큰 생성
      */
-    public String createToken(String userId, String departmentId) {
-        Claims claims = Jwts.claims().setSubject(userId); // 사용자 ID를 subject로 설정
+    public String createToken(String id, String email, String departmentId) {
+        Claims claims = Jwts.claims().setSubject(id); // 사용자 ID를 subject로 설정
         claims.put("departmentId", departmentId); // 부서 ID 추가
+        claims.put("email",email);
 //        claims.get("departmentId", String.class);
 
         Date now = new Date();

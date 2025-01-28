@@ -31,32 +31,39 @@ public class CalendarController {
     // 전체 일정 조회
     @GetMapping("")
     public ResponseEntity<List<ScheduleResponseDto>> getAllSchedules(@AuthenticationPrincipal TokenUserInfo info) {
-        String departmentId = info.getDepartmentId(); // NullPointerException 방지
+        if (info == null || info.getDepartmentId() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유효하지 않은 사용자입니다.");
+        }
 
+        String departmentId = info.getDepartmentId();
         log.info("TokenUserInfo: {}", info);
 
         List<ScheduleResponseDto> schedules;
-        if ("team9".equals(departmentId)) {
-            try {
+
+        try {
+            if ("team9".equals(departmentId)) {
+                // 'team9'이면 전체 일정 조회
                 schedules = calendarService.getAllSchedules();
-            } catch (Exception e) {
-                log.error("Error fetching schedules", e);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
+            } else {
+                // 사용자의 팀 및 상위 부서 일정 조회
+                schedules = calendarService.getSchedulesForUser(departmentId);
             }
-        } else {
-            schedules = calendarService.getScheduleByDepartment(departmentId);
+        } catch (Exception e) {
+            log.error("Error fetching schedules for department: {}", departmentId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
         }
 
-        log.info("schedules: {}", schedules);
+        log.info("Fetched schedules: {}", schedules.size());
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(schedules);
     }
-    // 특정 일정 조회
-    @GetMapping("/{id}")
-    public ResponseEntity<ScheduleResponseDto> getScheduleById(@PathVariable("id") UUID scheduleId) {
-        ScheduleResponseDto schedule = calendarService.getScheduleById(scheduleId);
-        return ResponseEntity.ok(schedule);
-    }
+
+//    // 특정 일정 조회
+//    @GetMapping("/{id}")
+//    public ResponseEntity<ScheduleResponseDto> getScheduleById(@PathVariable("id") String scheduleId) {
+//        ScheduleResponseDto schedule = calendarService.getScheduleById(scheduleId);
+//        return ResponseEntity.ok(schedule);
+//    }
 
 
     // 일정 생성
@@ -76,7 +83,7 @@ public class CalendarController {
     @PutMapping("/modify-schedule/{id}")
     public ResponseEntity<ScheduleResponseDto> modifySchedule(
             @RequestBody ScheduleRequestDto scheduleRequestDto,
-            @PathVariable("id") UUID scheduleId) {
+            @PathVariable("id") String scheduleId) {
 
         ScheduleResponseDto modifySchedule = calendarService.updateSchedule(scheduleId, scheduleRequestDto);
 
@@ -84,7 +91,7 @@ public class CalendarController {
     }
 
     @DeleteMapping("/delete-schedule")
-    public ResponseEntity<Void> deleteSchedule(@RequestParam UUID scheduleId) {
+    public ResponseEntity<Void> deleteSchedule(@RequestParam String scheduleId) {
         if (scheduleId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "scheduleId is required");
         }
