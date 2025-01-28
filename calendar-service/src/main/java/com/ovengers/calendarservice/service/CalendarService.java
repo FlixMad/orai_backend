@@ -2,6 +2,7 @@ package com.ovengers.calendarservice.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ovengers.calendarservice.client.EtcServiceClient;
 import com.ovengers.calendarservice.client.UserResponseDto;
 import com.ovengers.calendarservice.client.UserServiceClient;
 import com.ovengers.calendarservice.common.auth.TokenUserInfo;
@@ -35,13 +36,14 @@ public class CalendarService {
     private final CalendarRepository calendarRepository;
     private final DepartmentRepository departmentRepository;
     private final UserServiceClient userServiceClient;
+    private final EtcServiceClient etcServiceClient;
+
     @Qualifier("sse-template")
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
 
     public void createNotification(Schedule schedule) {
-
-        // 2. 부서 사용자 목록 조회
+        // 1. 부서 사용자 목록 조회
         Map<String,String> map = new HashMap<>();
         map.put("departmentId", schedule.getDepartment().getDepartmentId());
         List<UserResponseDto> departmentUsers = userServiceClient.getUsersToList(map).getResult();
@@ -49,7 +51,7 @@ public class CalendarService {
                 .map(UserResponseDto::getUserId)
                 .toList();
 
-        // 3. 알림 메시지 생성
+        // 2. 알림 메시지 생성
         NotificationMessage message = NotificationMessage.builder()
                 .type("SCHEDULE")
                 .departmentId(schedule.getDepartment().getDepartmentId())
@@ -64,6 +66,8 @@ public class CalendarService {
                 .message(message)
                 .build();
 
+        // 3. 알림 저장
+        etcServiceClient.createNotification(event);
         try {
             // 4. Redis pub/sub 채널에 발행
             String jsonMessage = objectMapper.writeValueAsString(event);
@@ -73,9 +77,6 @@ public class CalendarService {
             log.error("Failed to send notification for schedule {}", schedule.getScheduleId(), e);
         }
     }
-
-
-
 
     // 일정 생성
     public ScheduleResponseDto createSchedule(TokenUserInfo userInfo, ScheduleRequestDto scheduleRequestDto) {

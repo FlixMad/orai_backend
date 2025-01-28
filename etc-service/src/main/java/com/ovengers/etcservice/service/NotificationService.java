@@ -1,5 +1,6 @@
 package com.ovengers.etcservice.service;
 
+import com.ovengers.etcservice.dto.NotificationEvent;
 import com.ovengers.etcservice.dto.NotificationMessage;
 import com.ovengers.etcservice.dto.NotificationResDto;
 import com.ovengers.etcservice.entity.Notification;
@@ -25,7 +26,6 @@ public class NotificationService {
     @Qualifier("sse-template")
     private final RedisTemplate<String, Object> redisTemplate;
     private final SseConnectionService connectionService;
-
     private final NotificationRepository notificationRepository;
 
     //알림 내용 조회 화면
@@ -44,8 +44,9 @@ public class NotificationService {
     }
 
     //sse 연결된 사용자가 알림 이벤트 목록에 있으면 SSE 알림 보냄
-    public void handleNotification(String userId, NotificationMessage message) {
+    public void handleNotification(String userId) {
         String connectionInfo = (String) redisTemplate.opsForHash().get("user:connections", userId);
+        long notificationCount = getNotificationCount(userId);
 
         if (connectionInfo != null && connectionInfo.startsWith(instanceId)) {
             SseEmitter emitter = connectionService.getEmitter(userId);
@@ -53,7 +54,7 @@ public class NotificationService {
                 try {
                     emitter.send(SseEmitter.event()
                             .name("notification")
-                            .data(message));
+                            .data(notificationCount));
                     log.info("Notification sent to user {}", userId);
                 } catch (IOException e) {
                     log.error("Failed to send notification to user {}", userId);
@@ -61,5 +62,20 @@ public class NotificationService {
                 }
             }
         }
+    }
+
+    public long getNotificationCount(String userId) {
+        return notificationRepository.countByUserIdAndIsReadFalse(userId);
+    }
+
+    public void createNotification(NotificationEvent event) {
+        NotificationMessage message = event.getMessage();
+        event.getUserIds().forEach(userId -> {
+            Notification notification = new Notification();
+            notification.setUserId(userId);
+            notification.setRead(false);
+            notification.setCreatedAt(message.getCreatedAt());
+            notificationRepository.save(notification);
+        });
     }
 }

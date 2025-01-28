@@ -20,6 +20,9 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @Column(name = "title", nullable = false, length = 255) // 메시지 매핑
+    private String title; // 알림 메시지
+
     @Column(name = "message", nullable = false, length = 255) // 메시지 매핑
     private String message; // 알림 메시지
 
@@ -39,6 +42,7 @@ public class Notification {
 
     public NotificationResDto toDto(Notification notification){
         return NotificationResDto.builder()
+                    .title(notification.getTitle())
                     .message(notification.getMessage())
                     .userId(notification.getUserId())
                     .isRead(notification.isRead).build();

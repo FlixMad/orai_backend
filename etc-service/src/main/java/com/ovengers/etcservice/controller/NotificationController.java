@@ -2,6 +2,7 @@ package com.ovengers.etcservice.controller;
 
 import com.ovengers.etcservice.common.auth.TokenUserInfo;
 import com.ovengers.etcservice.common.dto.CommonResDto;
+import com.ovengers.etcservice.dto.NotificationEvent;
 import com.ovengers.etcservice.dto.NotificationResDto;
 import com.ovengers.etcservice.entity.Notification;
 import com.ovengers.etcservice.service.NotificationService;
@@ -32,8 +33,8 @@ public class NotificationController {
     private final Map<String, SseEmitter> clients = new ConcurrentHashMap<>();
 
     @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter subscribe(@AuthenticationPrincipal String userId) {
-        return connectionService.connect(userId);
+    public SseEmitter subscribe(@AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
+        return connectionService.connect(tokenUserInfo.getId());
     }
 
     @GetMapping
@@ -42,9 +43,19 @@ public class NotificationController {
         CommonResDto<?> commonResDto = new CommonResDto<>(HttpStatus.OK,"알림 조회 완료", notification);
         return ResponseEntity.ok(commonResDto);
     }
+    //안 읽은 알림 갯수 세기
     @GetMapping("/count")
     public ResponseEntity<?> getNotificationCount(@AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
+        long notificationCount = notificationService.getNotificationCount(tokenUserInfo.getId()) + 1;
+        CommonResDto<?> commonResDto = new CommonResDto<>(HttpStatus.OK,"갯수 조회 완료", notificationCount);
+        log.info("notification count: {}", notificationCount);
+        return ResponseEntity.ok(commonResDto);
+    }
 
+    @PostMapping
+    public ResponseEntity<?> createNotification(@RequestBody NotificationEvent event) {
+        notificationService.createNotification(event);
+        return ResponseEntity.ok(event);
     }
 
 

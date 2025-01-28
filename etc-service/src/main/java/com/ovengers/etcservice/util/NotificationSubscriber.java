@@ -23,8 +23,7 @@ public class NotificationSubscriber implements MessageListener {
         try {
             String json = new String(message.getBody());
             NotificationEvent event = NotificationEventParser.parseNotificationEvent(json);
-            event.getUserIds().forEach(userId ->
-                    notificationService.handleNotification(userId, event.getMessage()));
+            event.getUserIds().forEach(notificationService::handleNotification);
             log.info("Received notification: {}", event);
         } catch (Exception e) {
             log.error("Failed to process notification message", e);
