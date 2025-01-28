@@ -1,4 +1,4 @@
-package com.ovengers.calendarservice.common;
+package com.ovengers.etcservice.common.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -6,17 +6,18 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.http.HttpStatus;
 
-@Getter @Setter @ToString
+@Getter @Setter
+@ToString
 @NoArgsConstructor
-public class CommonResDto<T> {
+public class CommonErrorDto {
 
     private int statusCode;
     private String statusMessage;
-    private T result;
 
-    public CommonResDto(HttpStatus httpStatus, String statusMessage, T result) {
+    public CommonErrorDto(HttpStatus httpStatus, String statusMessage) {
         this.statusCode = httpStatus.value();
         this.statusMessage = statusMessage;
-        this.result = result;
     }
+
+
 }

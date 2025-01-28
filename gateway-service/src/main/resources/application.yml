@@ -30,6 +30,7 @@ spring:
               - "Content-Type"
               - "Authorization"
               - "X-Requested-With"
+              - "Cache-Control"
             allow-credentials: true
 
       default-filters:
@@ -83,6 +84,14 @@ spring:
             - Path=/calendar-service/**
           filters:
             - RewritePath=/calendar-service/(?<path>.*), /$\{path}
+            - AuthorizationHeaderFilter
+        #기타 서비스
+        - id: etc-service
+          uri: lb://ETC-SERVICE
+          predicates:
+            - Path=/etc-service/**
+          filters:
+            - RewritePath=/etc-service/(?<path>.*), /$\{path}
             - AuthorizationHeaderFilter
 
 springdoc:

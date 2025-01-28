@@ -1,4 +1,4 @@
-package com.ovengers.calendarservice.common;
+package com.ovengers.etcservice.common.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,9 +12,9 @@ public class CommonResDto<T> {
 
     private int statusCode;
     private String statusMessage;
-    private T result;
+    private Object result;
 
-    public CommonResDto(HttpStatus httpStatus, String statusMessage, T result) {
+    public CommonResDto(HttpStatus httpStatus, String statusMessage, Object result) {
         this.statusCode = httpStatus.value();
         this.statusMessage = statusMessage;
         this.result = result;

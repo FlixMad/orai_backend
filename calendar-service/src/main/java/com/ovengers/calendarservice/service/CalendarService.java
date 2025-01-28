@@ -1,6 +1,13 @@
 package com.ovengers.calendarservice.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ovengers.calendarservice.client.EtcServiceClient;
+import com.ovengers.calendarservice.client.UserResponseDto;
+import com.ovengers.calendarservice.client.UserServiceClient;
 import com.ovengers.calendarservice.common.auth.TokenUserInfo;
+import com.ovengers.calendarservice.dto.NotificationEvent;
+import com.ovengers.calendarservice.dto.NotificationMessage;
 import com.ovengers.calendarservice.dto.request.ScheduleRequestDto;
 import com.ovengers.calendarservice.dto.response.ScheduleResponseDto;
 import com.ovengers.calendarservice.entity.Department;
@@ -10,12 +17,15 @@ import com.ovengers.calendarservice.repository.DepartmentRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -25,6 +35,48 @@ public class CalendarService {
 
     private final CalendarRepository calendarRepository;
     private final DepartmentRepository departmentRepository;
+    private final UserServiceClient userServiceClient;
+    private final EtcServiceClient etcServiceClient;
+
+    @Qualifier("sse-template")
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final ObjectMapper objectMapper;
+
+    public void createNotification(Schedule schedule) {
+        // 1. 부서 사용자 목록 조회
+        Map<String,String> map = new HashMap<>();
+        map.put("departmentId", schedule.getDepartment().getDepartmentId());
+        List<UserResponseDto> departmentUsers = userServiceClient.getUsersToList(map).getResult();
+        List<String> departmentUsersIds = departmentUsers.stream()
+                .map(UserResponseDto::getUserId)
+                .toList();
+
+        // 2. 알림 메시지 생성
+        NotificationMessage message = NotificationMessage.builder()
+                .type("SCHEDULE")
+                .departmentId(schedule.getDepartment().getDepartmentId())
+                .scheduleId(schedule.getScheduleId())
+                .title(schedule.getTitle())
+                .content("새로운 일정이 등록되었습니다: " + schedule.getTitle())
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        NotificationEvent event = NotificationEvent.builder()
+                .userIds(departmentUsersIds)
+                .message(message)
+                .build();
+
+        // 3. 알림 저장
+        etcServiceClient.createNotification(event);
+        try {
+            // 4. Redis pub/sub 채널에 발행
+            String jsonMessage = objectMapper.writeValueAsString(event);
+            redisTemplate.convertAndSend("notifications", jsonMessage);
+            log.info("Notification sent for schedule {}", schedule.getScheduleId());
+        } catch (JsonProcessingException e) {
+            log.error("Failed to send notification for schedule {}", schedule.getScheduleId(), e);
+        }
+    }
 
     // 일정 생성
     public ScheduleResponseDto createSchedule(TokenUserInfo userInfo, ScheduleRequestDto scheduleRequestDto) {
@@ -47,6 +99,7 @@ public class CalendarService {
                 .department(department)
                 .build();
         Schedule savedSchedule = calendarRepository.save(schedule);
+        createNotification(savedSchedule);
 
         return toDto(savedSchedule);
     }

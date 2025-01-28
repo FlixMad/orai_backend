@@ -7,6 +7,7 @@ import com.ovengers.userservice.common.util.MfaSecretGenerator;
 import com.ovengers.userservice.dto.LoginRequestDto;
 import com.ovengers.userservice.dto.UserRequestDto;
 import com.ovengers.userservice.dto.UserResponseDto;
+import com.ovengers.userservice.entity.User;
 import com.ovengers.userservice.service.UserService;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
