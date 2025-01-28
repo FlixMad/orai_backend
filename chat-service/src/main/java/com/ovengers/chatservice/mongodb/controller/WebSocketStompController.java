@@ -2,6 +2,7 @@ package com.ovengers.chatservice.mongodb.controller;
 
 import com.ovengers.chatservice.mongodb.dto.MessageDto;
 import com.ovengers.chatservice.mongodb.service.MessageService;
+import com.ovengers.chatservice.mysql.service.ChatService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import reactor.core.publisher.Mono;
 @Tag(name = "WebSocketStompController", description = "유튜브 참고")
 public class WebSocketStompController {
     private final MessageService messageService;
+    private final ChatService chatService;
 
     /**
      * stomp 통신
@@ -28,6 +30,10 @@ public class WebSocketStompController {
             @Header("userName") String userName) {
 
         return messageService.sendMessage(chatRoomId, content, userId, userName)
+                .doOnSuccess(messageDto -> {
+                    // 메시지 전송 성공 시 읽지 않은 메시지 수 증가
+                    chatService.incrementUnreadCount(chatRoomId, userId);
+                })
                 .onErrorResume(e -> {
                     log.error("메시지 전송 실패: {}", e.getMessage());
                     // 에러 메시지도 MessageDto 형식으로 반환
