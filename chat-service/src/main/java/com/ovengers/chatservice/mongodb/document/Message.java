@@ -45,9 +45,6 @@ public class Message {
     @Field("updated_at")
     private LocalDateTime updatedAt;
 
-//    @Field("unread_user_ids")
-//    private List<String> unreadUserIds = new ArrayList<>();
-
     public MessageDto toDto() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         return MessageDto.builder()
@@ -59,7 +56,6 @@ public class Message {
                 .content(content)
                 .createdAt(createdAt != null ? createdAt.format(formatter) : "메시지생성시간없음")
                 .updatedAt(updatedAt != null ? updatedAt.format(formatter) : "메시지수정시간없음")
-//                .unreadUserIds(unreadUserIds)
                 .build();
     }
 }
