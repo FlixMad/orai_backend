@@ -53,7 +53,7 @@ pipeline {
                         def changedServices = env.CHANGED_SERVICES.split(",")
                         changedServices.each { service ->
                             // 여기서 원하는 버전을 정하거나, 커밋 태그를 붙여보자.
-                            def newTag = "0.0.1"
+                            def newTag = "0.0.2"
                             sh """
                             mkdir -p ~/.docker
 
@@ -81,12 +81,12 @@ pipeline {
                         sh '''
                             cd ..
                             ls -a
-                            git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/FlixMad/orai-kubenetes.git
+                            git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/FlixMad/orai_kubenetes.git
                         '''
 
                         def changedServices = env.CHANGED_SERVICES.split(",")
                         changedServices.each { service ->
-                            def newTag = "0.0.1" // 이미지 빌드할 때 사용한 태그를 동일하게 사용.
+                            def newTag = "0.0.2" // 이미지 빌드할 때 사용한 태그를 동일하게 사용.
 
                             // umbrella-chart/charts/<service>/values.yaml 파일 내의 image 태그 교체.
                             sh """
