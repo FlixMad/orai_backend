@@ -7,7 +7,7 @@ pipeline {
     environment {
         REGION = "ap-northeast-2"
         ECR_URL = "054037133599.dkr.ecr.ap-northeast-2.amazonaws.com"
-        SERVICE_DIRS = "config-service,gateway-service,user-service,calendar-service,chat-service"
+        SERVICE_DIRS = "config-service,gateway-service,user-service,calendar-service,chat-service,etc-service"
         K8S_REPO_URL = "https://github.com/FlixMad/orai_kubenetes.git"
         K8S_REPO_CRED = "github-k8s-repo-token" // 여기다 토큰 넣는건가봐!
     }
@@ -31,7 +31,7 @@ pipeline {
                     // ordering-service/src/main/resources/application.yml
                     echo "Changed files: ${changedFiles}"
 
-                    def changedServices = []
+                    def changedServices = ["config-service,gateway-service,user-service,calendar-service,chat-service,etc-service"]
                     def serviceDirs = env.SERVICE_DIRS.split(",")
 
                     serviceDirs.each { service ->
