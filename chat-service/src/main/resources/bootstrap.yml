@@ -6,5 +6,4 @@ spring:
     config:
       uri: http://config-service:8888
       name: chat-service
-  profiles:
-    active: default
+

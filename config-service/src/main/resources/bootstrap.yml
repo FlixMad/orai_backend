@@ -1,8 +1,8 @@
 spring:
-  application:
-    name: orai
   cloud:
     config:
-#      uri: http://localhost:8888
-      uri: http://config-service:8888
-      profile: default
+      server:
+        git:
+          uri: https://github.com/CodeName-maru/cloud-config-setting.git
+          username: CodeName-maru
+          password: ${GITHUB_TOKEN}
