@@ -14,7 +14,7 @@ spring:
         git:
           uri: https://github.com/CodeName-maru/cloud-config-setting.git
           username: CodeName-maru
-          password: ${GITHUB_PRIVATE_KEY}
+          password: ${GIT_PRIVATE_KEY}
 management:
   endpoints:
     web:
