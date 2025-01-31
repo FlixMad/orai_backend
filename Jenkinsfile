@@ -38,6 +38,7 @@ pipeline {
                             echo "No changes detected in service directories. Skipping build and deployment."
                             currentBuild.result = 'SUCCESS'
                         }
+                }
             }
         }
 
