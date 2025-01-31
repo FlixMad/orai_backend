@@ -20,10 +20,24 @@ pipeline {
         stage('Detect Changes') {
             steps {
                 script {
-                    // 모든 서비스를 항상 빌드하도록 변경
-                    def serviceDirs = env.SERVICE_DIRS.split(",")
-                    env.CHANGED_SERVICES = serviceDirs.join(",")
-                }
+                        def changedFiles = sh(script: "git diff --name-only HEAD~1 HEAD", returnStdout: true)
+                            .trim()
+                            .split('\n')
+                        echo "Changed files: ${changedFiles}"
+
+                        def changedServices = ["config-service","gateway-service","user-service","calendar-service","chat-service","etc-service"]
+                        def serviceDirs = env.SERVICE_DIRS.split(",")
+                        serviceDirs.each { service ->
+                            if (changedFiles.any { it.startsWith(service + "/") }) {
+                                changedServices.add(service)
+                            }
+                        }
+
+                        env.CHANGED_SERVICES = changedServices.join(",")
+                        if (env.CHANGED_SERVICES == "") {
+                            echo "No changes detected in service directories. Skipping build and deployment."
+                            currentBuild.result = 'SUCCESS'
+                        }
             }
         }
 
