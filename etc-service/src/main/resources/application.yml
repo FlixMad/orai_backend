@@ -15,7 +15,7 @@ spring:
   datasource:
     url: jdbc:mysql://orai-db.c3yo06kg0hd5.ap-northeast-2.rds.amazonaws.com
     username: root
-    password: ovengersassemble
+    password: mysql
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database: mysql
