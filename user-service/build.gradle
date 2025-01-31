@@ -42,7 +42,6 @@ dependencies {
     implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
 
     // Eureka 클라이언트
-    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
     // OpenAPI 문서
     implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.2.0'
