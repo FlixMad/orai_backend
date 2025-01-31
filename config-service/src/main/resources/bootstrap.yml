@@ -1,8 +1,0 @@
-spring:
-  cloud:
-    config:
-      server:
-        git:
-          uri: https://github.com/CodeName-maru/cloud-config-setting.git
-          username: CodeName-maru
-          password: ${GIT_PRIVATE_KEY}
