@@ -1,24 +1,20 @@
 package com.ovengers.calendarservice.controller;
 
-import com.ovengers.calendarservice.common.CommonResDto;
 import com.ovengers.calendarservice.common.auth.TokenUserInfo;
 import com.ovengers.calendarservice.dto.request.ScheduleRequestDto;
 import com.ovengers.calendarservice.dto.response.ScheduleResponseDto;
-import com.ovengers.calendarservice.entity.Schedule;
 import com.ovengers.calendarservice.service.CalendarService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springdoc.core.service.SecurityService;
-import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/schedules")
@@ -100,4 +96,27 @@ public class CalendarController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+/*
+    // 첨부파일 관련 메서드
+
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadAttachment(@RequestParam("file") MultipartFile file) {
+        try {
+//            String fileUrl = calendarService.(file);
+            return ResponseEntity.ok(fileUrl);
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("파일 업로드 실패: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteAttachment(@RequestParam("fileUrl") String fileUrl) {
+        try {
+//            calendarService.(fileUrl);
+            return ResponseEntity.ok("파일 삭제 성공");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("파일 삭제 실패: " + e.getMessage());
+        }
+    }
+*/
 }

@@ -39,16 +39,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         log.info("request Url: {}", request.getRequestURI());
 
         // 토큰 위조검사 및 인증 완료
-        if (userId != null){
+        if (userId != null) {
             // 인증 완료 처리
             // spring security에게 인증 정보를 전달해서 전역적으로 어플리케이션 내에서
             // 인증 정보를 활용할 수 있도록 설정.
             List<SimpleGrantedAuthority> authorities = new ArrayList<>();
             authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
             Authentication auth = new UsernamePasswordAuthenticationToken(
-                    new TokenUserInfo(userId,departmentId),// 컨트롤러 등에서 활용할 유저 정보
+                    new TokenUserInfo(userId, departmentId),// 컨트롤러 등에서 활용할 유저 정보
                     "" // 인증된 사용자 비밀번호: 보통 null 혹은 빈 문자열로 선언.
-                    ,authorities
+                    , authorities
             );
 
             // 시큐리티 컨테이너에 인증 정보 객체 등록

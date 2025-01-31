@@ -94,6 +94,7 @@ public class CalendarService {
                 .description(scheduleRequestDto.getDescription())
                 .userId(userInfo.getId())
                 .type(scheduleType)
+                .scheduleStatus(scheduleRequestDto.getScheduleStatus())
                 .startTime(scheduleRequestDto.getStart())
                 .endTime(scheduleRequestDto.getEnd())
                 .department(department)
@@ -163,6 +164,7 @@ public class CalendarService {
         oldSchedule.setTitle(scheduleRequestDto.getTitle());
         oldSchedule.setDescription(scheduleRequestDto.getDescription());
         oldSchedule.setStartTime(scheduleRequestDto.getStart());
+        oldSchedule.setScheduleStatus(scheduleRequestDto.getScheduleStatus());
         oldSchedule.setEndTime(scheduleRequestDto.getEnd());
 
         Schedule updatedSchedule = calendarRepository.save(oldSchedule);
@@ -204,6 +206,7 @@ public class CalendarService {
                 .ScheduleId(schedule.getScheduleId())
                 .title(schedule.getTitle())
                 .description(schedule.getDescription())
+                .scheduleStatus(schedule.getScheduleStatus())
                 .start(schedule.getStartTime().toString())
                 .end(schedule.getEndTime().toString())
                 .type(schedule.getType().name())

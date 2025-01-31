@@ -2,7 +2,6 @@ package com.ovengers.calendarservice.dto.response;
 
 import com.ovengers.calendarservice.entity.Department;
 import lombok.*;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -23,7 +22,7 @@ public class DepartmentResDto {
         this.departmentId = department.getDepartmentId();
         this.departmentName = department.getName();
         this.type = String.valueOf(department.getType());
-        this.parentId = department.getParent() == null?"":department.getParent().getDepartmentId();
+        this.parentId = department.getParent() == null ? "" : department.getParent().getDepartmentId();
     }
 
 }
