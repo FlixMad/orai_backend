@@ -68,7 +68,7 @@ pipeline {
                         def changedServices = env.CHANGED_SERVICES.split(",")
                         changedServices.each { service ->
                             // 여기서 원하는 버전을 정하거나, 커밋 태그를 붙여보자.
-                            def newTag = "0.1.0"
+                            def newTag = "0.1.1"
                             sh """
                             mkdir -p ~/.docker
 
@@ -101,7 +101,7 @@ pipeline {
 
                         def changedServices = env.CHANGED_SERVICES.split(",")
                         changedServices.each { service ->
-                            def newTag = "0.1.0" // 이미지 빌드할 때 사용한 태그를 동일하게 사용.
+                            def newTag = "0.1.1" // 이미지 빌드할 때 사용한 태그를 동일하게 사용.
 
                             // umbrella-chart/charts/<service>/values.yaml 파일 내의 image 태그 교체.
                             sh """
