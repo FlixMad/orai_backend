@@ -57,7 +57,7 @@ public class CalendarService {
                 .departmentId(schedule.getDepartment().getDepartmentId())
                 .scheduleId(schedule.getScheduleId())
                 .title(schedule.getTitle())
-                .content("새로운 일정이 등록되었습니다: " + schedule.getTitle())
+                .content("오늘 예정된 일정입니다:" + (schedule.getDescription().isEmpty()?schedule.getTitle():schedule.getDescription()))
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -67,7 +67,7 @@ public class CalendarService {
                 .build();
 
         // 3. 알림 저장
-        etcServiceClient.createNotification(event);
+//        etcServiceClient.createNotification(event);
         try {
             // 4. Redis pub/sub 채널에 발행
             String jsonMessage = objectMapper.writeValueAsString(event);
@@ -94,6 +94,7 @@ public class CalendarService {
                 .description(scheduleRequestDto.getDescription())
                 .userId(userInfo.getId())
                 .type(scheduleType)
+                .scheduleStatus(scheduleRequestDto.getScheduleStatus())
                 .startTime(scheduleRequestDto.getStart())
                 .endTime(scheduleRequestDto.getEnd())
                 .department(department)
@@ -163,6 +164,7 @@ public class CalendarService {
         oldSchedule.setTitle(scheduleRequestDto.getTitle());
         oldSchedule.setDescription(scheduleRequestDto.getDescription());
         oldSchedule.setStartTime(scheduleRequestDto.getStart());
+        oldSchedule.setScheduleStatus(scheduleRequestDto.getScheduleStatus());
         oldSchedule.setEndTime(scheduleRequestDto.getEnd());
 
         Schedule updatedSchedule = calendarRepository.save(oldSchedule);
@@ -204,6 +206,7 @@ public class CalendarService {
                 .ScheduleId(schedule.getScheduleId())
                 .title(schedule.getTitle())
                 .description(schedule.getDescription())
+                .scheduleStatus(schedule.getScheduleStatus())
                 .start(schedule.getStartTime().toString())
                 .end(schedule.getEndTime().toString())
                 .type(schedule.getType().name())
