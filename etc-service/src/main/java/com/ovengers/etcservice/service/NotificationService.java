@@ -20,8 +20,6 @@ import org.springframework.beans.factory.annotation.Value;
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationService {
-    @Value("${spring.application.name}")
-    private String instanceId;
 
     @Qualifier("sse-template")
     private final RedisTemplate<String, Object> redisTemplate;
@@ -46,9 +44,10 @@ public class NotificationService {
     //sse 연결된 사용자가 알림 이벤트 목록에 있으면 SSE 알림 보냄
     public void handleNotification(String userId) {
         String connectionInfo = (String) redisTemplate.opsForHash().get("user:connections", userId);
+        log.info("connectionInfo: {}", connectionInfo);
         long notificationCount = getNotificationCount(userId);
 
-        if (connectionInfo != null && connectionInfo.startsWith(instanceId)) {
+        if (connectionInfo != null && connectionInfo.startsWith(connectionService.getInstanceId())) {
             SseEmitter emitter = connectionService.getEmitter(userId);
             if (emitter != null) {
                 try {
@@ -75,6 +74,8 @@ public class NotificationService {
             notification.setUserId(userId);
             notification.setRead(false);
             notification.setCreatedAt(message.getCreatedAt());
+            notification.setTitle(message.getTitle());
+            notification.setMessage(message.getContent());
             notificationRepository.save(notification);
         });
     }

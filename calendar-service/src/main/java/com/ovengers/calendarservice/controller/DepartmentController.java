@@ -32,7 +32,7 @@ public class DepartmentController {
     @GetMapping
     public ResponseEntity<?> getAllDepartments() {
         List<DepartmentResDto> departments = departmentService.getAllDepartments();
-        CommonResDto commonResDto = new CommonResDto(HttpStatus.OK,"조회 성공",departments);
+        CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "조회 성공", departments);
         return ResponseEntity.ok(commonResDto);
     }
 
