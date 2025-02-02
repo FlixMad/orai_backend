@@ -50,7 +50,7 @@ public class SseConnectionService {
         emitters.put(userId, emitter);
 
         // 연결 종료 시 cleanup
-        emitter.onCompletion(() -> removeEmitter(userId));
+//        emitter.onCompletion(() -> removeEmitter(userId));
         emitter.onTimeout(() -> removeEmitter(userId));
 
         try {
@@ -66,12 +66,12 @@ public class SseConnectionService {
                             .name("heartbeat")
                             .data("keep-alive")); // 클라이언트 단이 살아있는지 확인
                 } catch (IOException e) {
-                    log.warn("Failed to send heartbeat, removing emitter for email: {}", userId);
+                    log.warn("Failed to send heartbeat, removing emitter for userId: {}", userId);
                 }
             }, 30, 30, TimeUnit.SECONDS); // 30초마다 heartbeat 메시지 전송
         } catch (IOException e) {
             log.error("Failed to send connection message to user {}", userId);
-            removeEmitter(userId);
+//            removeEmitter(userId);
         }
 
         return emitter;

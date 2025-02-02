@@ -46,7 +46,7 @@ public class NotificationController {
     //안 읽은 알림 갯수 세기
     @GetMapping("/count")
     public ResponseEntity<?> getNotificationCount(@AuthenticationPrincipal TokenUserInfo tokenUserInfo) {
-        long notificationCount = notificationService.getNotificationCount(tokenUserInfo.getId()) + 1;
+        long notificationCount = notificationService.getNotificationCount(tokenUserInfo.getId());
         CommonResDto<?> commonResDto = new CommonResDto<>(HttpStatus.OK,"갯수 조회 완료", notificationCount);
         log.info("notification count: {}", notificationCount);
         return ResponseEntity.ok(commonResDto);

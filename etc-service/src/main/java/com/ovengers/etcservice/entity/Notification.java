@@ -21,7 +21,7 @@ public class Notification {
     private String id;
 
     @Column(name = "title", nullable = false, length = 255) // 메시지 매핑
-    private String title; // 알림 메시지
+    private String title; // 알림 제목
 
     @Column(name = "message", nullable = false, length = 255) // 메시지 매핑
     private String message; // 알림 메시지
