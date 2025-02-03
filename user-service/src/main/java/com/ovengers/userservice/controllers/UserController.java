@@ -7,10 +7,8 @@ import com.ovengers.userservice.common.util.MfaSecretGenerator;
 import com.ovengers.userservice.dto.LoginRequestDto;
 import com.ovengers.userservice.dto.UserRequestDto;
 import com.ovengers.userservice.dto.UserResponseDto;
-import com.ovengers.userservice.entity.User;
 import com.ovengers.userservice.service.UserService;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
-import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -195,9 +193,9 @@ public class UserController {
         return new ResponseEntity<>(isDuplicate, HttpStatus.OK);
     }
 
-//    @PostMapping("/list")
-//    public ResponseEntity<List<UserResponseDto>> getUsersByIds(@RequestBody List<String> userIds) {
-//        List<UserResponseDto> users = userService.getUsersByIds(userIds);
-//        return ResponseEntity.ok(users);
-//    }
+    @PostMapping("/list")
+    public ResponseEntity<List<UserResponseDto>> getUsersByIds(@RequestBody List<String> userIds) {
+        List<UserResponseDto> users = userService.getUsersByIds(userIds);
+        return ResponseEntity.ok(users);
+    }
 }
