@@ -140,11 +140,9 @@ public class MessageService {
             throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
         }
 
-        UserResponseDto userInfo = getUserInfo(userId);
-
         return messageRepository.findByMessageId(messageId)
                 .flatMap(message -> {
-                    if (!message.getSenderId().equals(userInfo.getUserId())) {
+                    if (!message.getSenderId().equals(userId)) {
                         return Mono.error(new IllegalAccessException("메시지를 삭제할 권한이 없습니다."));
                     }
                     message.setContent("메시지가 삭제되었습니다.");

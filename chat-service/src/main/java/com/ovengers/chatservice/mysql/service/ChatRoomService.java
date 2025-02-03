@@ -488,7 +488,7 @@ public class ChatRoomService {
 
         boolean isUpdated = false;
 
-        // 이미지가 공백이 아닌 경우 수정
+        // 채팅방이미지가 있을 경우 수정
         if (!newImage.trim().isEmpty() && !newImage.equals(chatRoom.getImage())) {
             chatRoom.setImage(newImage);
             isUpdated = true;
