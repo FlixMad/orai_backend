@@ -38,26 +38,35 @@ public class ApprovalService {
                 .collect(Collectors.toList());
     }
 
-    // 승인 또는 거절 처리
     public ApprovalResponseDto processApproval(String vacationId, ApprovalRequestDto requestDto, String state) {
-        // 해당 휴가의 Vacation을 찾아 상태를 업데이트
+        // ✅ 해당 휴가의 Vacation을 찾아 상태를 업데이트
         Vacation vacation = vacationRepository.findById(vacationId)
                 .orElseThrow(() -> new IllegalArgumentException("Vacation not found"));
 
-        // 승인/거절 상태를 업데이트
+        // ✅ 기존 Approval 엔티티 조회
+        Approval approval = approvalRepository.findByVacation_VacationId(vacationId);
+        if (approval == null) {
+            throw new IllegalArgumentException("Approval record not found for vacationId: " + vacationId);
+        }
+
+        // ✅ 승인/거절 상태 업데이트 (Vacation & Approval 둘 다 변경!)
         VacationState vacationState = VacationState.valueOf(state);
-        vacation.setVacationState(vacationState); // vacationState 업데이트
-        vacationRepository.save(vacation); // 업데이트 저장
+        vacation.setVacationState(vacationState);
+        vacationRepository.save(vacation); // 🔹 Vacation 변경 저장
 
+        approval.setVacationState(vacationState); // 🔹 Approval 상태도 업데이트
+        approvalRepository.save(approval); // 🔹 Approval 변경 저장
 
-        // ApprovalResponseDto 생성 (Vacation 정보를 기반으로 설정)
+        // ✅ ApprovalResponseDto 생성
         return ApprovalResponseDto.builder()
-                .approvalId(requestDto.getApprovalId())
+                .approvalId(approval.getApprovalId())
                 .title(requestDto.getTitle())
                 .contents(requestDto.getContents())
                 .vacationState(vacation.getVacationState())
                 .vacationId(vacation.getVacationId())
-                .approvalUserId(vacation.getUserId()) // 사용자 ID를 설정
+                .approvalUserId(approval.getApprovalUserId()) // ✅ Approval의 승인자 ID 사용
                 .build();
     }
+
+
 }
