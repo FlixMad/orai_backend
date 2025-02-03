@@ -11,6 +11,7 @@ import com.ovengers.chatservice.mysql.entity.ChatRoom;
 import com.ovengers.chatservice.mysql.entity.Invitation;
 import com.ovengers.chatservice.mysql.entity.UserChatRoom;
 import com.ovengers.chatservice.mysql.exception.InvalidChatRoomNameException;
+import com.ovengers.chatservice.mysql.repository.ChatRoomReadRepository;
 import com.ovengers.chatservice.mysql.repository.ChatRoomRepository;
 import com.ovengers.chatservice.mysql.repository.InvitationRepository;
 import com.ovengers.chatservice.mysql.repository.UserChatRoomRepository;
@@ -23,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -42,6 +42,7 @@ public class ChatRoomService {
     private final UserServiceClient userServiceClient;
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final MessageRepository messageRepository;
+    private final ChatRoomReadRepository chatRoomReadRepository;
 
     public UserResponseDto getUserInfo(String userId) {
         UserResponseDto userById = userServiceClient.getUserById(userId);
@@ -83,12 +84,14 @@ public class ChatRoomService {
         }
     }
 
+    // 채팅방 구독 취소
     private void removeUserFromChatRoomCommon(Long chatRoomId, String userIdToRemove) {
         userChatRoomRepository.deleteByChatRoomIdAndUserId(chatRoomId, userIdToRemove);
         invitationRepository.findByChatRoomIdAndUserId(chatRoomId, userIdToRemove)
                 .ifPresent(invitationRepository::delete);
     }
 
+    // 채팅방 생성자는 막음
     private void validateCreatorOperation(ChatRoom chatRoom, String targetUserId, boolean isRemoval) {
         if (chatRoom.getCreatorId().equals(targetUserId)) {
             String errorMessage = isRemoval ?
@@ -96,6 +99,10 @@ public class ChatRoomService {
                     "채팅방 생성자는 채팅방을 나갈 수 없습니다.";
             throw new IllegalArgumentException(errorMessage);
         }
+    }
+
+    private void removeChatRoomRead(Long chatRoomId, String userId) {
+        chatRoomReadRepository.deleteByChatRoomIdAndUserId(chatRoomId, userId);
     }
 
     // 시스템 메시지 생성 및 전송을 위한 공통 메서드
@@ -451,16 +458,20 @@ public class ChatRoomService {
         chatRoomRepository.delete(chatRoom);
         userChatRoomRepository.deleteByChatRoomId(chatRoom.getChatRoomId());
         invitationRepository.deleteByChatRoomId(chatRoom.getChatRoomId());
+        chatRoomReadRepository.deleteByChatRoomId(chatRoom.getChatRoomId());
     }
 
+    // 채팅방에서 나가기
     public void disconnectChatRoom(Long chatRoomId, String userId) {
         ChatRoom chatRoom = validateChatRoomAndUser(chatRoomId, userId);
         validateCreatorOperation(chatRoom, userId, false);
 
         removeUserFromChatRoomCommon(chatRoomId, userId);
         sendExitChatRoom(chatRoomId, userId);
+        removeChatRoomRead(chatRoomId, userId);
     }
 
+    // 채팅방에서 내보내기(채팅방 생성자만)
     @Transactional
     public void removeUserFromChatRoom(Long chatRoomId, String userIdToRemove, String userId) {
         ChatRoom chatRoom = validateChatRoomAndUser(chatRoomId, userId);
@@ -473,5 +484,6 @@ public class ChatRoomService {
 
         removeUserFromChatRoomCommon(chatRoomId, userIdToRemove);
         sendExportChatRoom(chatRoomId, userIdToRemove, userId);
+        removeChatRoomRead(chatRoomId, userIdToRemove);
     }
 }
