@@ -1,8 +1,10 @@
-package com.ovengers.calendarservice.entity;
+package com.ovengers.etcservice.entity;
 
 
+import com.ovengers.etcservice.dto.NotificationResDto;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -18,9 +20,17 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @Column(name = "title", nullable = false, length = 255) // 메시지 매핑
+    private String title; // 알림 제목
+
     @Column(name = "message", nullable = false, length = 255) // 메시지 매핑
     private String message; // 알림 메시지
 
+    // 채팅 서비스에서 맨션 기능을 만들게 된다면 활성화.
+//    @Column(name = "url", nullable = false, length = 255) // 메시지 매핑
+//    private String url;
+
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false) // 생성 시간
     private LocalDateTime createdAt;
 
@@ -30,20 +40,14 @@ public class Notification {
     @Column(name = "user_id", nullable = false) // 대상 사용자 ID
     private String userId; // 알림 대상 사용자 (외부 서비스와 연계)
 
-    @Column(nullable = false, length = 255)
-    private String title;
+    public NotificationResDto toDto(Notification notification){
+        return NotificationResDto.builder()
+                    .title(notification.getTitle())
+                    .message(notification.getMessage())
+                    .userId(notification.getUserId())
+                    .isRead(notification.isRead).build();
 
-    // Schedule 과 연관 관계 설정 (Optional)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "schedule_id", nullable = false)
-    private Schedule schedule;
-
-
-    // 기본값 설정
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now(); // 현재 시간으로 설정
-        this.isRead = false; // 기본 읽음 상태는 false
     }
+
 
 }

@@ -62,7 +62,7 @@ public class AdminController {
 
 
     //사용자 조회
-    @Operation(summary = "사용자 조회(페이지)(오버라이딩)", description = "사용자 조회할 때 사용하는 api")
+    @Operation(summary = "사용자 조회(페이지)", description = "사용자 조회할 때 사용하는 api")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "사용자 조회 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청"),

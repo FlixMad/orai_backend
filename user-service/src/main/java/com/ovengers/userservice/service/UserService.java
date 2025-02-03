@@ -116,7 +116,7 @@ public class UserService {
         return user.getUserSecret();
     }
 
-    // 중복체크
+//    // 중복체크
     public boolean isEmailDuplicate(String email) {
         return userRepository.findByEmail(email).isPresent();
     }

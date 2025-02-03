@@ -1,15 +1,12 @@
 package com.ovengers.calendarservice.repository;
 
-import com.ovengers.calendarservice.dto.response.ScheduleResponseDto;
 import com.ovengers.calendarservice.entity.Schedule;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Calendar;
 import java.util.List;
-import java.util.UUID;
 
 public interface CalendarRepository extends JpaRepository<Schedule, String> {
 
@@ -28,5 +25,9 @@ public interface CalendarRepository extends JpaRepository<Schedule, String> {
 
     @Query("SELECT s FROM Schedule s WHERE DATE(s.startTime) = :date")
     List<Schedule> findByDate(LocalDate date);
+
+    List<Schedule> findByDepartment_DepartmentIdIn(List<String> departmentIds);
+
+    List<Schedule> findByStartTime(LocalDate startTime);
 
 }
