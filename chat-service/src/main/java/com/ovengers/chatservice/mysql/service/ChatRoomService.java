@@ -64,50 +64,48 @@ public class ChatRoomService {
         }
     }
 
-/*    // 생성자에게 채팅방 생성 알림
-    private void sendChatRoomCreatedNotification(String userId, ChatRoom chatRoom) {
-        // STOMP 메시지를 생성자에게 전송
-        simpMessagingTemplate.convertAndSendToUser(
-                userId,                // 대상 사용자
-                "/queue/chat-room",    // 개인 큐 경로
-                ChatRoomNotificationDto.builder()
-                        .chatRoomId(chatRoom.getChatRoomId())
-                        .name(chatRoom.getName())
-                        .message(chatRoom.getName() + "채팅방이 생성되었습니다.")
-                        .build()
-        );
-    }*/
+    // 채팅방 존재 여부 및 사용자 구독 확인을 위한 공통 메서드
+    private ChatRoom validateChatRoomAndUser(Long chatRoomId, String userId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new EntityNotFoundException(chatRoomId + "번 채팅방은 존재하지 않습니다."));
 
-/*    // 초대 유저들에게 알림을 보내는 메서드
-    private void sendInvitationsToUsers(List<String> userIds, ChatRoom chatRoom, String inviterId) {
-        // 초대한 사람의 정보를 가져옴
-        UserResponseDto inviterInfo = getUserInfo(inviterId);
-        String inviterName = inviterInfo.getName(); // 초대한 사람의 이름 추출
+        if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userId)) {
+            throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
+        }
 
-        // 초대받은 사용자들에게 초대 메시지 전송
-        userIds.forEach(userId -> simpMessagingTemplate.convertAndSendToUser(
-                userId,                // 대상 사용자
-                "/queue/invitations",  // 개인 큐 경로
-                ChatRoomInvitationDto.builder()
-                        .chatRoomId(chatRoom.getChatRoomId())
-                        .name(chatRoom.getName())
-                        .message(inviterName + "님이 " + chatRoom.getName() + " 채팅방에 초대했습니다.")
-                        .build()
-        ));
-    }*/
+        return chatRoom;
+    }
 
-    // 채팅방 입장 알림(채팅방 생성 시(생성자))
-    private void sendEnterChatRoom(Long chatRoomId, String userId) {
-        UserResponseDto userInfo = getUserInfo(userId);
-        ChatRoomDto chatRoomInfo = chatRoomRepository.findByChatRoomId(chatRoomId).toDto();
+    // 채팅방 생성자 권한 확인을 위한 공통 메서드
+    private void validateCreatorPermission(ChatRoom chatRoom, String userId) {
+        if (!chatRoom.getCreatorId().equals(userId)) {
+            throw new SecurityException("채팅방 생성자만 이 작업을 수행할 수 있습니다.");
+        }
+    }
 
+    private void removeUserFromChatRoomCommon(Long chatRoomId, String userIdToRemove) {
+        userChatRoomRepository.deleteByChatRoomIdAndUserId(chatRoomId, userIdToRemove);
+        invitationRepository.findByChatRoomIdAndUserId(chatRoomId, userIdToRemove)
+                .ifPresent(invitationRepository::delete);
+    }
+
+    private void validateCreatorOperation(ChatRoom chatRoom, String targetUserId, boolean isRemoval) {
+        if (chatRoom.getCreatorId().equals(targetUserId)) {
+            String errorMessage = isRemoval ?
+                    "채팅방 생성자는 내보낼 수 없습니다." :
+                    "채팅방 생성자는 채팅방을 나갈 수 없습니다.";
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    // 시스템 메시지 생성 및 전송을 위한 공통 메서드
+    private void sendSystemMessage(Long chatRoomId, String content) {
         Message systemMessage = Message.builder()
                 .chatRoomId(chatRoomId)
                 .type("SYSTEM")
-                .content(userInfo.getName() + "님이 " + chatRoomInfo.getName() + " 채팅방에 입장했습니다.")
+                .content(content)
                 .build();
 
-        // 메시지 저장
         messageRepository.save(systemMessage)
                 .subscribe(savedMessage -> {
                     simpMessagingTemplate.convertAndSend(
@@ -115,69 +113,38 @@ public class ChatRoomService {
                             savedMessage.toDto()
                     );
                 });
+    }
+
+    // 채팅방 입장 알림(채팅방 생성 시(생성자))
+    private void sendEnterChatRoom(Long chatRoomId, String userId) {
+        UserResponseDto userInfo = getUserInfo(userId);
+        ChatRoomDto chatRoomInfo = chatRoomRepository.findByChatRoomId(chatRoomId).toDto();
+        String content = userInfo.getName() + "님이 " + chatRoomInfo.getName() + " 채팅방에 입장했습니다.";
+        sendSystemMessage(chatRoomId, content);
     }
 
     // 채팅방 입장 알림(채팅방 생성 또는 초대 시(유저들))
     private void sendEnterUsers(Long chatRoomId, List<String> userIds) {
         ChatRoomDto chatRoomInfo = chatRoomRepository.findByChatRoomId(chatRoomId).toDto();
         List<UserResponseDto> userInfos = getAllUsers(userIds);
-
         String userNames = userInfos.stream()
                 .map(UserResponseDto::getName)
                 .collect(Collectors.joining(", "));
-
-        Message systemMessage = Message.builder()
-                .chatRoomId(chatRoomId)
-                .type("SYSTEM")
-                .content(userNames + "님이 " + chatRoomInfo.getName() + " 채팅방에 입장했습니다.")
-                .build();
-
-        messageRepository.save(systemMessage)
-                .subscribe(savedMessage -> {
-                    simpMessagingTemplate.convertAndSend(
-                            "/sub/" + chatRoomId + "/chat",
-                            savedMessage.toDto()
-                    );
-                });
+        String content = userNames + "님이 " + chatRoomInfo.getName() + " 채팅방에 입장했습니다.";
+        sendSystemMessage(chatRoomId, content);
     }
 
     // 채팅방 수정 알림
     private void sendChatRoomUpdatedNotification(Long chatRoomId) {
-        Message systemMessage = Message.builder()
-                .chatRoomId(chatRoomId)
-                .type("SYSTEM")
-                .content("채팅방 정보가 수정되었습니다.")
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        messageRepository.save(systemMessage)
-                .subscribe(savedMessage -> {
-                    simpMessagingTemplate.convertAndSend(
-                            "/sub/" + chatRoomId + "/chat",
-                            savedMessage.toDto()
-                    );
-                });
+        sendSystemMessage(chatRoomId, "채팅방 정보가 수정되었습니다.");
     }
 
     // 채팅방 퇴장 알림(채팅방 나가기)
     private void sendExitChatRoom(Long chatRoomId, String userId) {
         UserResponseDto userInfo = getUserInfo(userId);
         ChatRoomDto chatRoomInfo = chatRoomRepository.findByChatRoomId(chatRoomId).toDto();
-
-        Message systemMessage = Message.builder()
-                .chatRoomId(chatRoomId)
-                .type("SYSTEM")
-                .content(userInfo.getName() + "님이 " + chatRoomInfo.getName() + " 채팅방에서 퇴장했습니다.")
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        messageRepository.save(systemMessage)
-                .subscribe(savedMessage -> {
-                    simpMessagingTemplate.convertAndSend(
-                            "/sub/" + chatRoomId + "/chat",
-                            savedMessage.toDto()
-                    );
-                });
+        String content = userInfo.getName() + "님이 " + chatRoomInfo.getName() + " 채팅방에서 퇴장했습니다.";
+        sendSystemMessage(chatRoomId, content);
     }
 
     // 채팅방 강퇴 알림(채팅방 내보내기)
@@ -185,22 +152,9 @@ public class ChatRoomService {
         UserResponseDto userInfo = getUserInfo(userId);
         UserResponseDto creatorInfo = getUserInfo(creatorId);
         ChatRoomDto chatRoomInfo = chatRoomRepository.findByChatRoomId(chatRoomId).toDto();
-
-        Message systemMessage = Message.builder()
-                .chatRoomId(chatRoomId)
-                .type("SYSTEM")
-                .content(creatorInfo.getName() + "님이 " + userInfo.getName() + "님을 " +
-                        chatRoomInfo.getName() + " 채팅방에서 내보냈습니다.")
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        messageRepository.save(systemMessage)
-                .subscribe(savedMessage -> {
-                    simpMessagingTemplate.convertAndSend(
-                            "/sub/" + chatRoomId + "/chat",
-                            savedMessage.toDto()
-                    );
-                });
+        String content = creatorInfo.getName() + "님이 " + userInfo.getName() + "님을 " +
+                chatRoomInfo.getName() + " 채팅방에서 내보냈습니다.";
+        sendSystemMessage(chatRoomId, content);
     }
 
     // 구독 유저들에게 채팅방 삭제 알림을 보내는 메서드
@@ -274,10 +228,6 @@ public class ChatRoomService {
                 .toList();
         userChatRoomRepository.saveAll(users);
 
-/*        // **WebSocket 알림 처리 추가**
-        sendChatRoomCreatedNotification(userId, savedChatRoom); // 생성자에게 알림
-        sendInvitationsToUsers(inviteeIds, chatRoom, userId); // 초대 유저들에게 알림*/
-
         // 생성자가 채팅방에 입장했을 때 입장 메시지 전송
         sendEnterChatRoom(savedChatRoom.getChatRoomId(), userId);  // 생성자가 입장했음을 알림
         sendEnterUsers(savedChatRoom.getChatRoomId(), inviteeIds);
@@ -309,52 +259,35 @@ public class ChatRoomService {
     }
 
     public ChatRoomDto getChatRoom(Long chatRoomId, String userId) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new EntityNotFoundException(chatRoomId + "번 채팅방은 존재하지 않습니다."));
-
-        if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userId)) {
-            throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
-        }
-
+        ChatRoom chatRoom = validateChatRoomAndUser(chatRoomId, userId);
         return chatRoom.toDto();
     }
 
-    // chatRoomId 별 userList 조회
     public List<UserResponseDto> getSubUsers(Long chatRoomId, String userId) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new EntityNotFoundException(chatRoomId + "번 채팅방은 존재하지 않습니다."));
+        validateChatRoomAndUser(chatRoomId, userId);
 
-        if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userId)) {
-            throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
-        }
-
-        // UserChatRoom에서 해당 chatRoomId의 유저 리스트 가져오기
-        List<String> userIds = userChatRoomRepository.findAllByChatRoomId(chatRoom.getChatRoomId())
+        List<String> userIds = userChatRoomRepository.findAllByChatRoomId(chatRoomId)
                 .stream()
-                .map(UserChatRoom::getUserId) // userId 추출
+                .map(UserChatRoom::getUserId)
                 .toList();
 
         return userIds.stream()
-                .map(userServiceClient::getUserById) // UserClient 호출
+                .map(userServiceClient::getUserById)
                 .collect(Collectors.toList());
     }
 
     // 채팅방에 초대
     @Transactional
     public void inviteUsers(Long chatRoomId, String inviterId, List<String> inviteUserIds) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new EntityNotFoundException(chatRoomId + "번 채팅방은 존재하지 않습니다."));
 
-        if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, inviterId)) {
-            throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
-        }
+        validateChatRoomAndUser(chatRoomId, inviterId);
 
         if (inviteUserIds == null || inviteUserIds.isEmpty()) {
             throw new IllegalArgumentException("초대할 사용자 목록이 비어있습니다.");
         }
 
         // 기존 채팅방 유저 목록 조회
-        List<String> existingUserIds = userChatRoomRepository.findAllByChatRoomId(chatRoom.getChatRoomId())
+        List<String> existingUserIds = userChatRoomRepository.findAllByChatRoomId(chatRoomId)
                 .stream()
                 .map(UserChatRoom::getUserId)
                 .toList();
@@ -393,7 +326,7 @@ public class ChatRoomService {
                 })
                 .map(inviteeId -> Invitation.builder()
                         .inviterId(inviterId)
-                        .chatRoomId(chatRoom.getChatRoomId())
+                        .chatRoomId(chatRoomId)
                         .userId(inviteeId)
                         .accepted(true)
                         .build())
@@ -401,7 +334,7 @@ public class ChatRoomService {
 
         List<UserChatRoom> users = validUserIds.stream()
                 .map(getUserId -> UserChatRoom.builder()
-                        .chatRoomId(chatRoom.getChatRoomId())
+                        .chatRoomId(chatRoomId)
                         .userId(getUserId)
                         .build())
                 .toList();
@@ -477,118 +410,68 @@ public class ChatRoomService {
     }*/
 
     // 채팅방 생성자만 채팅방 이미지 및 이름 수정
+    @Transactional
     public ChatRoomDto updateChatRoom(Long chatRoomId, String newImage, String newName, String userId) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new EntityNotFoundException(chatRoomId + "번 채팅방은 존재하지 않습니다."));
-
-        // 채팅방 생성자만 수정 가능하도록 검증
-        if (!chatRoom.getCreatorId().equals(userId)) {
-            throw new SecurityException("채팅방 수정 권한이 없습니다.");
-        }
+        ChatRoom chatRoom = validateChatRoomAndUser(chatRoomId, userId);
+        validateCreatorPermission(chatRoom, userId);
 
         boolean isUpdated = false;
 
-        // 채팅방이미지가 있을 경우 수정
         if (!newImage.trim().isEmpty() && !newImage.equals(chatRoom.getImage())) {
             chatRoom.setImage(newImage);
             isUpdated = true;
         }
 
-        log.info("\n\n\n{}\n\n\n", newImage);
-
-        // 이름이 null이 아니고 공백이 아닌 경우 수정
         if (newName != null && !newName.trim().isEmpty() && !newName.equals(chatRoom.getName())) {
             validateChatRoomName(newName.trim());
             chatRoom.setName(newName);
             isUpdated = true;
         }
 
-        log.info("\n\n\n{}\n\n\n", newName);
-
-        // 둘 다 수정되지 않은 경우 예외 발생
         if (!isUpdated) {
             throw new IllegalArgumentException("변경된 이미지나 이름이 없습니다.");
         }
 
-        // 수정된 내용에 대해 해당 채팅방에 알림 보내기
         sendChatRoomUpdatedNotification(chatRoomId);
-
         return chatRoom.toDto();
     }
 
     // 채팅방 생성자만 채팅방 삭제 및 해당 채팅방 구독자 전체 삭제
     public void deleteChatRoom(Long chatRoomId, String userId) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new EntityNotFoundException(chatRoomId + "번 채팅방은 존재하지 않습니다."));
-
-        if (!chatRoom.getCreatorId().equals(userId)) {
-            throw new SecurityException("채팅방 삭제 권한이 없습니다.");
-        }
+        ChatRoom chatRoom = validateChatRoomAndUser(chatRoomId, userId);
+        validateCreatorPermission(chatRoom, userId);
 
         List<String> existingUserIds = userChatRoomRepository.findAllByChatRoomId(chatRoom.getChatRoomId())
                 .stream()
                 .map(UserChatRoom::getUserId)
                 .toList();
 
-        // 채팅방 삭제 전 구독자에게 알림 전송
         sendChatRoomDeletedNotification(existingUserIds, chatRoom, userId);
 
         chatRoomRepository.delete(chatRoom);
         userChatRoomRepository.deleteByChatRoomId(chatRoom.getChatRoomId());
-        // 초대 기록 삭제
         invitationRepository.deleteByChatRoomId(chatRoom.getChatRoomId());
     }
 
-    // 채팅방 나가기(채팅방 생성자는 불가능)
     public void disconnectChatRoom(Long chatRoomId, String userId) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new EntityNotFoundException(chatRoomId + "번 채팅방은 존재하지 않습니다."));
+        ChatRoom chatRoom = validateChatRoomAndUser(chatRoomId, userId);
+        validateCreatorOperation(chatRoom, userId, false);
 
-        if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userId)) {
-            throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
-        }
-
-        if (chatRoom.getCreatorId().equals(userId)) {
-            throw new SecurityException("채팅방 생성자는 채팅방을 나갈 수 없습니다.");
-        }
-
-        userChatRoomRepository.deleteByChatRoomIdAndUserId(chatRoomId, userId);
-
-        // 초대 기록 삭제
-        invitationRepository.findByChatRoomIdAndUserId(chatRoomId, userId)
-                .ifPresent(invitationRepository::delete);
-
-        sendExitChatRoom(chatRoomId, userId);  // 유저가 퇴장했음을 알림
+        removeUserFromChatRoomCommon(chatRoomId, userId);
+        sendExitChatRoom(chatRoomId, userId);
     }
 
-    // 유저 내보내기(강퇴)
     @Transactional
     public void removeUserFromChatRoom(Long chatRoomId, String userIdToRemove, String userId) {
-        // 채팅방 존재 여부 확인
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new EntityNotFoundException(chatRoomId + "번 채팅방은 존재하지 않습니다."));
+        ChatRoom chatRoom = validateChatRoomAndUser(chatRoomId, userId);
+        validateCreatorPermission(chatRoom, userId);
+        validateCreatorOperation(chatRoom, userIdToRemove, true);
 
-        // 요청자가 채팅방 생성자인지 확인
-        if (!chatRoom.getCreatorId().equals(userId)) {
-            throw new IllegalArgumentException("채팅방 생성자만 사용자를 내보낼 수 있습니다.");
+        if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userIdToRemove)) {
+            throw new IllegalArgumentException("해당 유저는 채팅방에 속해 있지 않습니다.");
         }
 
-        // 내보낼 유저가 채팅방에 속해 있는지 확인
-        UserChatRoom userChatRoom = userChatRoomRepository.findByChatRoomIdAndUserId(chatRoomId, userIdToRemove)
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저는 채팅방에 속해 있지 않습니다."));
-
-        // 생성자를 내보내려고 하는 경우 예외 처리
-        if (chatRoom.getCreatorId().equals(userIdToRemove)) {
-            throw new IllegalArgumentException("채팅방 생성자는 내보낼 수 없습니다.");
-        }
-
-        // 유저 내보내기 (UserChatRoom 삭제)
-        userChatRoomRepository.delete(userChatRoom);
-
-        // 초대 기록 삭제
-        invitationRepository.findByChatRoomIdAndUserId(chatRoomId, userIdToRemove)
-                .ifPresent(invitationRepository::delete);
-
+        removeUserFromChatRoomCommon(chatRoomId, userIdToRemove);
         sendExportChatRoom(chatRoomId, userIdToRemove, userId);
     }
 }
