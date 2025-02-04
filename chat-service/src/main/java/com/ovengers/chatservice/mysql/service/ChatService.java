@@ -36,7 +36,7 @@ public class ChatService {
             return Mono.empty();
         }
 
-        // 각 채팅방별 정보와 읽지 않은 메시지 수 조회
+        // 각 채팅방별 마지막 메시지와 읽지 않은 메시지 수 조회
         return Flux.fromIterable(userChatRooms)
                 .flatMap(userChatRoom -> {
                     Long chatRoomId = userChatRoom.getChatRoomId();
@@ -48,8 +48,8 @@ public class ChatService {
                             .findByChatRoomIdOrderByCreatedAtAsc(chatRoomId)
                             .last();
 
-                    // 읽지 않은 메시지 수 조회
-                    Mono<Long> unreadCountMono = getUnreadCount(chatRoomId, userId);
+                    // 읽지 않은 메시지 수 조회("SYSTEM"타입 제외)
+                    Mono<Long> unreadCountMono = getUnreadCountExcludingSystem(chatRoomId, userId);
 
                     return Mono.zip(lastMessageMono, unreadCountMono)
                             .map(tuple -> {
@@ -105,18 +105,18 @@ public class ChatService {
                 });
     }
 
-    private Mono<Long> getUnreadCount(Long chatRoomId, String userId) {
+    private Mono<Long> getUnreadCountExcludingSystem(Long chatRoomId, String userId) {
         ChatRoomRead chatRoomRead = chatRoomReadRepository
                 .findByChatRoomIdAndUserId(chatRoomId, userId)
                 .orElse(null);
 
         if (chatRoomRead == null || chatRoomRead.getLastReadMessageId() == null) {
-            return messageRepository.findByChatRoomIdOrderByCreatedAtAsc(chatRoomId).count();
+            return messageRepository.findByChatRoomIdAndTypeNotOrderByCreatedAtAsc(chatRoomId, "SYSTEM").count();
         }
 
         return messageRepository.findByMessageId(chatRoomRead.getLastReadMessageId())
                 .flatMap(lastReadMessage ->
-                        messageRepository.findByChatRoomIdOrderByCreatedAtAsc(chatRoomId)
+                        messageRepository.findByChatRoomIdAndTypeNotOrderByCreatedAtAsc(chatRoomId, "SYSTEM")
                                 .filter(message -> message.getCreatedAt().isAfter(lastReadMessage.getCreatedAt()))
                                 .count()
                 );
