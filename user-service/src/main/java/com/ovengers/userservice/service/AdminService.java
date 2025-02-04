@@ -1,6 +1,7 @@
 package com.ovengers.userservice.service;
 
 import com.ovengers.userservice.common.configs.AwsS3Config;
+import com.ovengers.userservice.common.util.MfaSecretGenerator;
 import com.ovengers.userservice.common.util.SmsUtil;
 import com.ovengers.userservice.dto.AttitudeResponseDto;
 import com.ovengers.userservice.dto.SignUpRequestDto;
@@ -14,6 +15,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAUpdateClause;
+import com.warrenstrange.googleauth.GoogleAuthenticator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +53,17 @@ public class AdminService{
     private final JPAQueryFactory queryFactory;
     private final SmsUtil smsUtil;
     private final AwsS3Config s3Config;
+    private final GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator();
 
+    public SignUpRequestDto setMfaSecretKey(SignUpRequestDto dto) {
+        // 1. MFA 시크릿 키 생성
+        String mfaSecret = MfaSecretGenerator.generateSecret();
+
+        // 2. SignUpRequestDto에 MFA 시크릿 키 설정
+        dto.setMfaSecret(mfaSecret);
+        return dto;
+
+    }
 
     // 유저 생성 쿼리
     public User createUser(@Valid SignUpRequestDto dto, String uniqueFileName) {
@@ -217,7 +231,6 @@ public class AdminService{
                 .sorted((user1, user2) -> {
                     for (Sort.Order order : pageable.getSort()) {
                         int comparisonResult = 0;
-                        // 정렬 기준 필드에 따라 비교
                         switch (order.getProperty()) {
                             case "name":
                                 comparisonResult = user1.getName().compareTo(user2.getName());

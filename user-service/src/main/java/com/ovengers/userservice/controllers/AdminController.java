@@ -110,6 +110,8 @@ public class AdminController {
                 .departmentId(departmentId)
                 .position(position)
                 .build();
+        //Mfa 세팅
+        dto = adminService.setMfaSecretKey(dto);
 
         log.info("user-service/admins/users: POST, dto: {}", dto);
 
