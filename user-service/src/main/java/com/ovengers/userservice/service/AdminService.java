@@ -53,17 +53,6 @@ public class AdminService{
     private final JPAQueryFactory queryFactory;
     private final SmsUtil smsUtil;
     private final AwsS3Config s3Config;
-    private final GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator();
-
-    public SignUpRequestDto setMfaSecretKey(SignUpRequestDto dto) {
-        // 1. MFA 시크릿 키 생성
-        String mfaSecret = MfaSecretGenerator.generateSecret();
-
-        // 2. SignUpRequestDto에 MFA 시크릿 키 설정
-        dto.setMfaSecret(mfaSecret);
-        return dto;
-
-    }
 
     // 유저 생성 쿼리
     public User createUser(@Valid SignUpRequestDto dto, String uniqueFileName) {

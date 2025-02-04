@@ -59,6 +59,7 @@ public class SignUpRequestDto {
                 .phoneNum(phoneNum)
                 .position(position)
                 .state(IDLE)
+                .mfaSecret(mfaSecret)
                 .departmentId(departmentId)
                 .build();
     }

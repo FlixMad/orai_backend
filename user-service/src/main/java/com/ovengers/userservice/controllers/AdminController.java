@@ -2,12 +2,14 @@ package com.ovengers.userservice.controllers;
 import com.ovengers.userservice.client.CalendarServiceClient;
 import com.ovengers.userservice.common.configs.AwsS3Config;
 import com.ovengers.userservice.common.dto.CommonResDto;
+import com.ovengers.userservice.common.util.MfaSecretGenerator;
 import com.ovengers.userservice.dto.AttitudeResponseDto;
 import com.ovengers.userservice.dto.SignUpRequestDto;
 import com.ovengers.userservice.dto.UserResponseDto;
 import com.ovengers.userservice.entity.Position;
 import com.ovengers.userservice.entity.User;
 import com.ovengers.userservice.service.AdminService;
+import com.warrenstrange.googleauth.GoogleAuthenticator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -42,6 +44,7 @@ public class AdminController {
     private final AdminService adminService;
     private final AwsS3Config s3Config;
     private final CalendarServiceClient calendarServiceClient;
+    private final GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator();
 
     @Operation(summary = "사용자 조회(리스트)", description = "사용자 조회할 때 사용하는 api")
     @ApiResponses({
@@ -109,9 +112,8 @@ public class AdminController {
                 .phoneNum(phoneNum)
                 .departmentId(departmentId)
                 .position(position)
+                .mfaSecret(MfaSecretGenerator.generateSecret())
                 .build();
-        //Mfa 세팅
-        dto = adminService.setMfaSecretKey(dto);
 
         log.info("user-service/admins/users: POST, dto: {}", dto);
 
