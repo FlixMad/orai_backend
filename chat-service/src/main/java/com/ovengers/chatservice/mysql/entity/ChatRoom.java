@@ -33,9 +33,6 @@ public class ChatRoom {
     @Column(name = "creator_id", nullable = false)
     private String creatorId;
 
-//    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<UserChatRoom> userChatRooms = new ArrayList<>();
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -51,12 +48,8 @@ public class ChatRoom {
                 .image(image)
                 .name(name)
                 .creatorId(creatorId)
-//                .userIds(userChatRooms.stream()
-//                        .map(UserChatRoom::getUserId)
-//                        .collect(Collectors.toList()))
                 .createdAt(createdAt !=null ? createdAt.format(formatter):"채팅방생성시간없음")
                 .updatedAt(updatedAt !=null ? updatedAt.format(formatter):"채팅방수정시간없음")
                 .build();
     }
-
 }
