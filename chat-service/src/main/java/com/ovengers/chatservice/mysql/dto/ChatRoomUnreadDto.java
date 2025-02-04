@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ChatRoomUnreadDto {
     private Long chatRoomId;
+    private String creatorId;
     private String name;
     private String image;
     private Long unreadCount;
