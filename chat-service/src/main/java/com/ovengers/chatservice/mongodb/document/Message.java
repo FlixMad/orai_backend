@@ -28,6 +28,9 @@ public class Message {
     private String senderId;
 
     @Setter
+    private String senderImage;
+
+    @Setter
     private String senderName;
 
     @Setter
@@ -51,6 +54,7 @@ public class Message {
                 .messageId(messageId)
                 .chatRoomId(chatRoomId)
                 .senderId(senderId)
+                .senderImage(senderImage)
                 .senderName(senderName)
                 .type(type)
                 .content(content)
