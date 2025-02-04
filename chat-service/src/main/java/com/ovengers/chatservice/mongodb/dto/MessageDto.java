@@ -11,6 +11,7 @@ public class MessageDto {
     private String messageId;
     private Long chatRoomId;
     private String senderId;
+    private String senderImage;
     private String senderName;
     private String type;
     private String content;

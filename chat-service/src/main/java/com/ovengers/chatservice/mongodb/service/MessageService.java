@@ -57,10 +57,13 @@ public class MessageService {
         validateChatRoomAndUser(chatRoomId, userId);
         validateMessageContent(content.trim());
 
+        UserResponseDto userInfo = getUserInfo(userId);
+
         Message message = Message.builder()
                 .chatRoomId(chatRoomId)
                 .content(content)
                 .senderId(userId)
+                .senderImage(userInfo.getProfileImage())
                 .senderName(userName)
                 .build();
 
