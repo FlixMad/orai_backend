@@ -9,4 +9,6 @@ public interface MessageRepository extends ReactiveMongoRepository<Message, Stri
     Flux<Message> findByChatRoomIdOrderByCreatedAtAsc(Long chatRoomId/*, Pageable pageable*/);
     /*Mono<Long> countByChatRoomId(Long chatRoomId);*/
     Mono<Message> findByMessageId(String messageId);
+
+    Flux<Message> findByChatRoomIdAndTypeNotOrderByCreatedAtAsc(Long chatRoomId, String type);
 }
