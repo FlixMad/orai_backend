@@ -25,7 +25,7 @@ public class ApprovalController {
         return ResponseEntity.ok(responseDtos); // 데이터가 있을 경우 200 반환
     }
 
-    // 승인 처리 (승인 또는 거절)
+    // 승인 처리 (승인 또는
     @PostMapping("/approve/{vacationId}")
     public ResponseEntity<ApprovalResponseDto> approveVacation(
             @PathVariable String vacationId,
