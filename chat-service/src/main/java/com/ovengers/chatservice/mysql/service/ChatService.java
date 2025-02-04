@@ -16,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -29,26 +31,28 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
 
     public Mono<List<ChatRoomUnreadDto>> getChatRoomsWithUnreadCount(String userId) {
-        // 사용자가 구독한 채팅방 목록 조회
         List<UserChatRoom> userChatRooms = userChatRoomRepository.findAllByUserId(userId);
 
         if (userChatRooms.isEmpty()) {
-            return Mono.empty();
+            return Mono.just(Collections.emptyList()); // empty() 대신 빈 리스트 반환
         }
 
-        // 각 채팅방별 마지막 메시지와 읽지 않은 메시지 수 조회
         return Flux.fromIterable(userChatRooms)
                 .flatMap(userChatRoom -> {
                     Long chatRoomId = userChatRoom.getChatRoomId();
                     ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                             .orElseThrow(() -> new RuntimeException("채팅방을 찾을 수 없습니다."));
 
-                    // 마지막 메시지 조회
+                    // 마지막 메시지 조회 수정
                     Mono<Message> lastMessageMono = messageRepository
-                            .findByChatRoomIdOrderByCreatedAtAsc(chatRoomId)
-                            .last();
+                            .findByChatRoomIdOrderByCreatedAtDesc(chatRoomId) // Asc -> Desc로 변경
+                            .next() // last() -> next()로 변경
+                            .defaultIfEmpty(Message.builder() // 기본값 설정
+                                    .content("")
+                                    .createdAt(LocalDateTime.now())
+                                    .build());
 
-                    // 읽지 않은 메시지 수 조회("SYSTEM"타입 제외)
+                    // 읽지 않은 메시지 수 조회
                     Mono<Long> unreadCountMono = getUnreadCountExcludingSystem(chatRoomId, userId);
 
                     return Mono.zip(lastMessageMono, unreadCountMono)
@@ -60,14 +64,20 @@ public class ChatService {
                                         .chatRoomId(chatRoomId)
                                         .name(chatRoom.getName())
                                         .image(chatRoom.getImage())
+                                        .creatorId(chatRoom.getCreatorId()) // 방장 ID 추가
                                         .unreadCount(unreadCount)
                                         .lastMessage(lastMessage.getContent())
-                                        .lastMessageTime(lastMessage.getCreatedAt()
-                                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                                        .lastMessageTime(lastMessage.getCreatedAt() != null
+                                                ? lastMessage.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                                                : null)
                                         .build();
                             });
                 })
-                .collectList();
+                .collectList()
+                .onErrorMap(e -> {
+                    log.error("채팅방 목록 조회 중 오류 발생: {}", e.getMessage());
+                    return new RuntimeException("채팅방 목록을 불러오는데 실패했습니다.", e);
+                });
     }
 
     @Transactional
