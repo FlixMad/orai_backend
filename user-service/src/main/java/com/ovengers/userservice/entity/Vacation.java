@@ -3,6 +3,8 @@ package com.ovengers.userservice.entity;
 import com.ovengers.userservice.entity.Approval;
 import com.ovengers.userservice.entity.VacationState;
 import com.ovengers.userservice.entity.VacationType;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
@@ -30,10 +32,10 @@ public class Vacation {
     private VacationType type; // 휴가 유형 (예: 연차, 병가 등)
 
     @Column(nullable = false)
-    private LocalDateTime startDate; // 휴가 시작일
+    private LocalDate startDate; // 휴가 시작일
 
     @Column(nullable = false)
-    private LocalDateTime endDate; // 휴가 종료일
+    private LocalDate endDate; // 휴가 종료일
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

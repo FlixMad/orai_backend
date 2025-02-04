@@ -8,4 +8,5 @@ public interface ApprovalRepository extends JpaRepository<Approval, String> {
 
     // approvalUserId로 승인 목록을 찾는 쿼리 메서드
     List<Approval> findAllByApprovalUserId(String approvalUserId);
+    Approval findByVacation_VacationId(String vacationId);
 }
