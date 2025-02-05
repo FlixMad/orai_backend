@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/vacations")
@@ -21,5 +23,12 @@ public class VacationController {
         log.info("/api/vacations/apply: POST, dto: {}", requestDto);
         VacationResponseDto responseDto = vacationService.applyForVacation(requestDto);
         return ResponseEntity.ok(responseDto);
+    }
+    // 특정 사용자의 휴가 내역 조회 엔드포인트 추가
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<VacationResponseDto>> getUserVacations(@PathVariable String userId) {
+        log.info("/api/vacations/{}: GET", userId);
+        List<VacationResponseDto> vacations = vacationService.findVacationsByUserId(userId);
+        return ResponseEntity.ok(vacations);
     }
 }

@@ -10,6 +10,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @AllArgsConstructor
 @Transactional
 @Service
@@ -41,6 +44,23 @@ public class VacationService {
                 .approvalId(approval.getApprovalId())
                 .build();
     }
+
+    public List<VacationResponseDto> findVacationsByUserId(String userId) {
+        return vacationRepository.findByUserId(userId)
+                .stream()
+                .map(vacation -> VacationResponseDto.builder()
+                        .vacationId(vacation.getVacationId())
+                        .type(vacation.getType())
+                        .startDate(vacation.getStartDate())
+                        .endDate(vacation.getEndDate())
+                        .vacationState(vacation.getVacationState())
+                        .userId(vacation.getUserId())
+                        .approvalId(null) // Approval 정보가 없으면 null
+                        .build()
+                )
+                .collect(Collectors.toList());
+    }
+
 
     private Vacation createVacation(VacationRequestDto requestDto) {
         return Vacation.builder()
