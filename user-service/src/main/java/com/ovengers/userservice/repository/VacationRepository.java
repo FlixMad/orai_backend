@@ -9,5 +9,7 @@ import java.util.List;
 
 @Repository
 public interface VacationRepository extends JpaRepository<Vacation, String> {
+
     List<Vacation> findByVacationState(VacationState vacationState);  // PENDING 상태의 휴가를 조회
+ List<Vacation>findByUserId(String userId);
 }
