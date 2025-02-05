@@ -21,9 +21,6 @@ public class ChatRoomRead {
     @Column(name = "chat_room_id", nullable = false)
     private Long chatRoomId;
 
-    @Column(name = "creator_id", nullable = false)
-    private String creatorId;
-
     @Column(name = "user_id", nullable = false)
     private String userId;
 
