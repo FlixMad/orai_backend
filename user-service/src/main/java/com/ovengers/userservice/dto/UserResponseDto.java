@@ -30,7 +30,8 @@ public class UserResponseDto {
         this.position = user.getPosition();
         this.phoneNum = user.getPhoneNum();
         this.accountActive = user.isAccountActive();
-        this.departmentId = map.get(user.getDepartmentId());
+        this.departmentName = map.get(user.getDepartmentId());
+        this.departmentId = user.getDepartmentId();
     }
     public UserResponseDto(User user) {
         this.userId = user.getUserId();

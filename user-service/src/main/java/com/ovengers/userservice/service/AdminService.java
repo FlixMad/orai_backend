@@ -1,5 +1,6 @@
 package com.ovengers.userservice.service;
 
+import com.ovengers.userservice.client.CalendarServiceClient;
 import com.ovengers.userservice.common.configs.AwsS3Config;
 import com.ovengers.userservice.common.util.MfaSecretGenerator;
 import com.ovengers.userservice.common.util.SmsUtil;
@@ -53,6 +54,7 @@ public class AdminService{
     private final JPAQueryFactory queryFactory;
     private final SmsUtil smsUtil;
     private final AwsS3Config s3Config;
+    private final CalendarServiceClient calendarServiceClient;
 
     // 유저 생성 쿼리
     public User createUser(@Valid SignUpRequestDto dto, String uniqueFileName) {
@@ -70,7 +72,7 @@ public class AdminService{
     }
     //유저 정보 업데이트
     @Transactional
-    public long patchUsers(final String userId, final Map<String, Object> updateFields) throws IOException {
+    public long patchUsers(final String userId, final Map<String, Object> updateFields) throws Exception {
         // 조건 생성
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(user.userId.eq(userId)); // 유저 ID로 조건 설정
@@ -80,6 +82,8 @@ public class AdminService{
                 .update(user)
                 .where(builder);
 
+        //department맵찾기
+        Map<String,String> map = calendarServiceClient.getDepartmentMap();
         // 업데이트 필드 적용
         if (updateFields.containsKey("email")) {
             updateQuery.set(user.email, (String) updateFields.get("email"));
@@ -100,6 +104,9 @@ public class AdminService{
             updateQuery.set(user.accountActive, (Boolean) updateFields.get("accountActive"));
         }
         if (updateFields.containsKey("departmentId")) {
+            if(!map.containsKey(updateFields.get("departmentId"))){
+                throw new Exception("그런 부서는 없습니다.");
+            }
             updateQuery.set(user.departmentId, (String) updateFields.get("departmentId"));
         }
         if (updateFields.containsKey("profileImage")) {
