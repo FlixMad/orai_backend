@@ -116,7 +116,7 @@ public class UserService {
         return user.getUserSecret();
     }
 
-    // 중복체크
+//    // 중복체크
     public boolean isEmailDuplicate(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
@@ -170,17 +170,11 @@ public class UserService {
         userRepository.save(user);
     }
 
-//    /**
-//     * 사용자 이메일 중복 체크
-//     */
-//    public boolean isEmailDuplicate(String email) {
-//        return userRepository.findByEmail(email).isPresent();
-//    }
-//
-//    public List<UserResponseDto> getUsersByIds(List<String> userIds) {
-//        List<User> users = userRepository.findAllById(userIds);
-//        return users.stream()
-//                .map(UserResponseDto::new)
-//                .collect(Collectors.toList());
-//    }
+
+    public List<UserResponseDto> getUsersByIds(List<String> userIds) {
+        List<User> users = userRepository.findAllById(userIds);
+        return users.stream()
+                .map(UserResponseDto::new)
+                .collect(Collectors.toList());
+    }
 }

@@ -9,8 +9,6 @@ import com.ovengers.chatservice.mysql.repository.ChatRoomRepository;
 import com.ovengers.chatservice.mysql.repository.UserChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -40,8 +38,7 @@ public class MessageService {
         }
     }
 
-    // 메시지 전송
-    public Mono<MessageDto> sendMessage(Long chatRoomId, String content, String userId) {
+    private void validateChatRoomAndUser(Long chatRoomId, String userId) {
         if (!chatRoomRepository.existsById(chatRoomId)) {
             throw new IllegalArgumentException(chatRoomId + "번 채팅방은 존재하지 않습니다.");
         }
@@ -49,103 +46,78 @@ public class MessageService {
         if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userId)) {
             throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
         }
+    }
+
+    private Mono<Void> validateChatRoomAndUserReactive(Long chatRoomId, String userId) {
+        return Mono.fromRunnable(() -> validateChatRoomAndUser(chatRoomId, userId));
+    }
+
+    // 메시지 전송
+    public Mono<MessageDto> sendMessage(Long chatRoomId, String content, String userId, String userName) {
+        validateChatRoomAndUser(chatRoomId, userId);
+        validateMessageContent(content.trim());
 
         UserResponseDto userInfo = getUserInfo(userId);
-
-        validateMessageContent(content.trim());
 
         Message message = Message.builder()
                 .chatRoomId(chatRoomId)
                 .content(content)
-                .senderId(userInfo.getUserId())
-                .senderName(userInfo.getName())
+                .senderId(userId)
+                .senderImage(userInfo.getProfileImage())
+                .senderName(userName)
                 .build();
 
+        message.setType("CHAT");
         log.debug("\n\n\n chatRoomId: {}, content: {}, senderId: {}\n\n\n", chatRoomId, content, userId);
 
-        // 메시지 저장 및 DTO로 변환 후 반환
         return messageRepository.save(message).map(Message::toDto);
     }
 
     // 메시지 조회
-    public Flux<MessageDto> getMessages(Long chatRoomId, String userId, Integer page, int size) {
+    public Flux<MessageDto> getMessages(Long chatRoomId, String userId) {
         UserResponseDto userInfo = getUserInfo(userId);
 
-        if (!chatRoomRepository.existsById(chatRoomId)) {
-            throw new IllegalArgumentException(chatRoomId + "번 채팅방은 존재하지 않습니다.");
-        }
-
-        if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userInfo.getUserId())) {
-            throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
-        }
-
-        return messageRepository.countByChatRoomId(chatRoomId)
-                .flatMapMany(totalMessages -> {
-                    int totalPages = (int) Math.ceil((double) totalMessages / size);
-                    int targetPage = (page == null) ? totalPages - 1 : page;
-                    Pageable pageable = PageRequest.of(targetPage, size);
-
-                    return messageRepository.findAllByChatRoomId(chatRoomId, pageable)
-                            .map(Message::toDto);
-                });
+        return validateChatRoomAndUserReactive(chatRoomId, userInfo.getUserId())
+                .thenMany(messageRepository.findByChatRoomIdOrderByCreatedAtAsc(chatRoomId)
+                        .map(Message::toDto));
     }
 
     // 메시지 수정
     public Mono<MessageDto> updateMessage(Long chatRoomId, String messageId, String newContent, String userId) {
-        // 채팅방 존재 여부 확인
-        if (!chatRoomRepository.existsById(chatRoomId)) {
-            throw new IllegalArgumentException(chatRoomId + "번 채팅방은 존재하지 않습니다.");
-        }
-
-        // 유저가 채팅방에 속해 있는지 확인
-        if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userId)) {
-            throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
-        }
-
+        validateChatRoomAndUser(chatRoomId, userId);
         UserResponseDto userInfo = getUserInfo(userId);
 
         return messageRepository.findByMessageId(messageId)
                 .flatMap(existingMessage -> {
-                    // 메시지 작성자가 아닌 경우 권한 에러 반환
                     if (!existingMessage.getSenderId().equals(userInfo.getUserId())) {
                         return Mono.error(new IllegalAccessException("메시지를 수정할 권한이 없습니다."));
                     }
 
-                    // 수정 사항이 없는 경우 에러 반환
                     if (existingMessage.getContent().equals(newContent.trim())) {
                         return Mono.error(new IllegalArgumentException("메시지에 수정 사항이 없습니다."));
                     }
 
-                    // 새로운 메시지 내용 유효성 검사
                     validateMessageContent(newContent.trim());
-
-                    // 메시지 수정
                     existingMessage.setContent(newContent.trim());
+                    existingMessage.setType("EDIT");
 
-                    return messageRepository.save(existingMessage)
-                            .map(Message::toDto);
+                    return messageRepository.save(existingMessage).map(Message::toDto);
                 })
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("메시지가 존재하지 않습니다.")));
     }
 
     // 메시지 삭제
-    public Mono<Void> deleteMessage(Long chatRoomId, String messageId, String userId) {
-        if (!chatRoomRepository.existsById(chatRoomId)) {
-            throw new IllegalArgumentException(chatRoomId + "번 채팅방은 존재하지 않습니다.");
-        }
-
-        if (!userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userId)) {
-            throw new IllegalArgumentException(chatRoomId + "번 채팅방에 구독되어 있지 않습니다.");
-        }
-
-        UserResponseDto userInfo = getUserInfo(userId);
+    public Mono<MessageDto> deleteMessage(Long chatRoomId, String messageId, String userId) {
+        validateChatRoomAndUser(chatRoomId, userId);
 
         return messageRepository.findByMessageId(messageId)
-                .flatMap(delete -> {
-                    if (!delete.getSenderId().equals(userInfo.getUserId())) {
+                .flatMap(message -> {
+                    if (!message.getSenderId().equals(userId)) {
                         return Mono.error(new IllegalAccessException("메시지를 삭제할 권한이 없습니다."));
                     }
-                    return messageRepository.delete(delete);
+                    message.setContent("메시지가 삭제되었습니다.");
+                    message.setType("DELETE");
+                    return messageRepository.save(message).map(Message::toDto);
                 });
     }
 }
