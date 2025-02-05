@@ -45,6 +45,9 @@ public class SignUpRequestDto {
     @Schema(description = "프로필 이미지")
     private MultipartFile profileImage;
 
+    @Schema(description = "mfaSecret")
+    private String mfaSecret;
+
 
     public User toEntity(PasswordEncoder encoder, String uniqueFileName) {
         return User.builder()
@@ -56,6 +59,7 @@ public class SignUpRequestDto {
                 .phoneNum(phoneNum)
                 .position(position)
                 .state(IDLE)
+                .mfaSecret(mfaSecret)
                 .departmentId(departmentId)
                 .build();
     }

@@ -64,6 +64,12 @@ dependencies {
 
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
     implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+
+    // Spring Boot Starter Cache
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+
+    // Caffeine Cache
+    implementation 'com.github.ben-manes.caffeine:caffeine'
 }
 
 dependencyManagement {

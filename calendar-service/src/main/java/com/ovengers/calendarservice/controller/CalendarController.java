@@ -1,24 +1,20 @@
 package com.ovengers.calendarservice.controller;
 
-import com.ovengers.calendarservice.common.CommonResDto;
 import com.ovengers.calendarservice.common.auth.TokenUserInfo;
 import com.ovengers.calendarservice.dto.request.ScheduleRequestDto;
 import com.ovengers.calendarservice.dto.response.ScheduleResponseDto;
-import com.ovengers.calendarservice.entity.Schedule;
 import com.ovengers.calendarservice.service.CalendarService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springdoc.core.service.SecurityService;
-import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/schedules")
@@ -31,32 +27,39 @@ public class CalendarController {
     // 전체 일정 조회
     @GetMapping("")
     public ResponseEntity<List<ScheduleResponseDto>> getAllSchedules(@AuthenticationPrincipal TokenUserInfo info) {
-        String departmentId = info.getDepartmentId(); // NullPointerException 방지
+        if (info == null || info.getDepartmentId() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유효하지 않은 사용자입니다.");
+        }
 
+        String departmentId = info.getDepartmentId();
         log.info("TokenUserInfo: {}", info);
 
         List<ScheduleResponseDto> schedules;
-        if ("team9".equals(departmentId)) {
-            try {
+
+        try {
+            if ("team9".equals(departmentId)) {
+                // 'team9'이면 전체 일정 조회
                 schedules = calendarService.getAllSchedules();
-            } catch (Exception e) {
-                log.error("Error fetching schedules", e);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
+            } else {
+                // 사용자의 팀 및 상위 부서 일정 조회
+                schedules = calendarService.getSchedulesForUser(departmentId);
             }
-        } else {
-            schedules = calendarService.getScheduleByDepartment(departmentId);
+        } catch (Exception e) {
+            log.error("Error fetching schedules for department: {}", departmentId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
         }
 
-        log.info("schedules: {}", schedules);
+        log.info("Fetched schedules: {}", schedules.size());
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(schedules);
     }
-    // 특정 일정 조회
-    @GetMapping("/{id}")
-    public ResponseEntity<ScheduleResponseDto> getScheduleById(@PathVariable("id") String scheduleId) {
-        ScheduleResponseDto schedule = calendarService.getScheduleById(scheduleId);
-        return ResponseEntity.ok(schedule);
-    }
+
+//    // 특정 일정 조회
+//    @GetMapping("/{id}")
+//    public ResponseEntity<ScheduleResponseDto> getScheduleById(@PathVariable("id") String scheduleId) {
+//        ScheduleResponseDto schedule = calendarService.getScheduleById(scheduleId);
+//        return ResponseEntity.ok(schedule);
+//    }
 
 
     // 일정 생성
@@ -93,4 +96,27 @@ public class CalendarController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+/*
+    // 첨부파일 관련 메서드
+
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadAttachment(@RequestParam("file") MultipartFile file) {
+        try {
+//            String fileUrl = calendarService.(file);
+            return ResponseEntity.ok(fileUrl);
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("파일 업로드 실패: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteAttachment(@RequestParam("fileUrl") String fileUrl) {
+        try {
+//            calendarService.(fileUrl);
+            return ResponseEntity.ok("파일 삭제 성공");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("파일 삭제 실패: " + e.getMessage());
+        }
+    }
+*/
 }

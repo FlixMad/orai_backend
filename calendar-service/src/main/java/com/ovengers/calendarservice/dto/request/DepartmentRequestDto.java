@@ -1,12 +1,9 @@
 package com.ovengers.calendarservice.dto.request;
 
 
-import com.ovengers.calendarservice.entity.Department;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.util.List;
 
 @Getter
 @Setter

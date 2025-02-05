@@ -9,6 +9,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -26,8 +28,9 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())  // CSRF 비활성화
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // 상태 비저장
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/**", "api/admin/**","/v3/api-docs/**","/api/users/create", "/api/users/login", "/refresh", "/", "/findByEmail", "/users/email" ,
-                                "/api/attitude/*")  // 인증 없이 접근할 수 있는 URL들
+                        .requestMatchers("/v3/api-docs/**","/api/users/create", "/api/users/login", "/refresh","/health-check", "/actuator/**", "/findByEmail", "/users/email",
+                                         "/api/users/**","/api/users/validate-mfa", "/api/users/mfa/validate-code/**","/api/admin/users/list/**","/api/attitude/*"
+                                )  // 인증 없이 접근할 수 있는 URL들
                         .permitAll()  // 해당 URL들은 인증 없이 접근 가능
                         .anyRequest().authenticated())  // 나머지 요청은 인증 필요
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);  // JWT 필터 추가
