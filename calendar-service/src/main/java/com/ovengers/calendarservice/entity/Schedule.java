@@ -52,15 +52,18 @@ public class Schedule {
     private LocalDate endTime;
     @JoinColumn(name = "user_id", nullable = false)
     private String userId;
+
     @Enumerated(EnumType.STRING)
     @NotNull
     @Column(name = "schedule_status")
     @Builder.Default
     private ScheduleStatus scheduleStatus = ScheduleStatus.UPCOMING;
+
     @Enumerated(EnumType.STRING)
     @NotNull
     @Builder.Default
     private Type type = Type.TEAM;
+
     @ManyToOne(fetch = FetchType.LAZY) // 부서와 다대일 관계
     @JoinColumn(name = "department_id", nullable = false) // 부서 ID와 조인
     private Department department; // 해당 일정과 연관된 부서

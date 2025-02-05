@@ -148,7 +148,7 @@ public class AdminController {
     )
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping(value = "admin/users/actives")
-    public ResponseEntity<?> activateUser(@RequestBody Map<String, Object> params) throws IOException {
+    public ResponseEntity<?> activateUser(@RequestBody Map<String, Object> params) throws Exception {
         if(!params.containsKey("accountActive")) {
             CommonResDto resDto = new CommonResDto(HttpStatus.BAD_REQUEST,"잘못된 요청입니다.","");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resDto);
@@ -169,7 +169,7 @@ public class AdminController {
             @Parameter(description = "전화번호", example = "010-1234-5678", required = true) @RequestParam(required = false) String phoneNum,
             @Parameter(description = "부서 ID", example = "AFF123",required = true) @RequestParam(required = false) String departmentId,
             @Parameter(description = "직급", example = "MANAGER") @RequestParam(required = false) String position,
-            @Parameter(description = "프로필 이미지 파일") @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) throws IOException {
+            @Parameter(description = "프로필 이미지 파일") @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) throws Exception {
         Map<String,Object> params = new HashMap<>();
         params.put("email", email);
         params.put("name", name);
@@ -198,7 +198,7 @@ public class AdminController {
     )
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping(value = "admin/users/position")
-    public ResponseEntity<?> updateUserPosition(@RequestBody Map<String, Object> params) throws IOException {
+    public ResponseEntity<?> updateUserPosition(@RequestBody Map<String, Object> params) throws Exception {
         if(!params.containsKey("position")) {
             CommonResDto resDto = new CommonResDto(HttpStatus.BAD_REQUEST,"잘못된 요청입니다.","");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resDto);
