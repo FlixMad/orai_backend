@@ -93,9 +93,13 @@ Orai 프로젝트는 **마이크로서비스 아키텍처(MSA)**를 기반으로
 
 **주요 서비스 구성:**
 - **User Service**: 사용자 관리 및 인증 (JWT 기반)
+![Image](https://github.com/user-attachments/assets/0fcb3038-6a55-485e-ad9d-c56e170341da)
 - **Chat Service**: 실시간 채팅 기능 (WebSocket 기반)
+![Image](https://github.com/user-attachments/assets/e94524ad-05ce-411e-9e77-2005cd6032d1)
 - **Calendar Service**: 일정 관리 및 알림 기능
+![Image](https://github.com/user-attachments/assets/92203217-b43f-4f51-8b38-70c05f358c4d)
 - **Admin Service**: 관리자 기능 (권한 및 사용자 관리)
+![Image](https://github.com/user-attachments/assets/e7f79a8c-3889-41fe-8ad8-39d5cfcc7888)
 - **Etc Service**: 푸시 알림 및 기타 기능
 
 ## 🔍 테스트 및 품질 관리
