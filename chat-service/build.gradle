@@ -70,6 +70,13 @@ dependencies {
 
     // Caffeine Cache
     implementation 'com.github.ben-manes.caffeine:caffeine'
+
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.assertj:assertj-core'
+
 }
 
 dependencyManagement {
