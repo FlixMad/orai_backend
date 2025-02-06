@@ -34,11 +34,7 @@ class ChatRoomServiceTest {
     @Mock
     private UserChatRoomRepository userChatRoomRepository;
     @Mock
-    private InvitationRepository invitationRepository;
-    @Mock
     private UserServiceClient userServiceClient;
-    @Mock
-    private SimpMessagingTemplate simpMessagingTemplate;
     @Mock
     private MessageRepository messageRepository;
     @Mock
@@ -148,6 +144,22 @@ class ChatRoomServiceTest {
         assertThrows(IllegalArgumentException.class, () ->
                 chatRoomService.disconnectChatRoom(chatRoomId, creatorId)
         );
+    }
+
+    public UserResponseDto getTestUser1() {
+        return testUser1;
+    }
+
+    public void setTestUser1(UserResponseDto testUser1) {
+        this.testUser1 = testUser1;
+    }
+
+    public UserResponseDto getTestUser3() {
+        return testUser3;
+    }
+
+    public void setTestUser3(UserResponseDto testUser3) {
+        this.testUser3 = testUser3;
     }
 }
 

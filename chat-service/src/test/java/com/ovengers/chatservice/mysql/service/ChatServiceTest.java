@@ -84,7 +84,7 @@ class ChatServiceTest {
     void getChatRoomsWithUnreadCountSuccess() {
         // given
         String userId = "user1";
-        List<UserChatRoom> userChatRooms = Arrays.asList(testUserChatRoom);
+        List<UserChatRoom> userChatRooms = Collections.singletonList(testUserChatRoom);
 
         when(userChatRoomRepository.findAllByUserId(userId)).thenReturn(userChatRooms);
         when(chatRoomRepository.findById(anyLong())).thenReturn(Optional.of(testChatRoom));
