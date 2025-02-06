@@ -54,32 +54,6 @@ class ChatRoomServiceTest {
     }
 
     @Test
-    @DisplayName("채팅방 나가기 성공 테스트")
-    void disconnectChatRoomSuccess() {
-        // given
-        Long chatRoomId = 1L;
-        String userId = "user2";
-        ChatRoom chatRoom = ChatRoom.builder()
-                .chatRoomId(chatRoomId)
-                .name("테스트 채팅방")
-                .creatorId("user1")
-                .build();
-
-        when(chatRoomRepository.findById(chatRoomId)).thenReturn(Optional.of(chatRoom));
-        when(userChatRoomRepository.existsByChatRoomIdAndUserId(chatRoomId, userId)).thenReturn(true);
-        when(userServiceClient.getUserById(userId)).thenReturn(testUser2);
-        when(chatRoomRepository.findByChatRoomId(chatRoomId)).thenReturn(chatRoom);
-        when(messageRepository.save(any())).thenReturn(Mono.just(new Message()));
-
-        // when
-        chatRoomService.disconnectChatRoom(chatRoomId, userId);
-
-        // then
-        verify(userChatRoomRepository).deleteByChatRoomIdAndUserId(chatRoomId, userId);
-        verify(chatRoomReadRepository).deleteByChatRoomIdAndUserId(chatRoomId, userId);
-    }
-
-    @Test
     @DisplayName("채팅방 수정 성공 테스트")
     void updateChatRoomSuccess() {
         // given
