@@ -15,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
@@ -144,22 +143,6 @@ class ChatRoomServiceTest {
         assertThrows(IllegalArgumentException.class, () ->
                 chatRoomService.disconnectChatRoom(chatRoomId, creatorId)
         );
-    }
-
-    public UserResponseDto getTestUser1() {
-        return testUser1;
-    }
-
-    public void setTestUser1(UserResponseDto testUser1) {
-        this.testUser1 = testUser1;
-    }
-
-    public UserResponseDto getTestUser3() {
-        return testUser3;
-    }
-
-    public void setTestUser3(UserResponseDto testUser3) {
-        this.testUser3 = testUser3;
     }
 }
 
