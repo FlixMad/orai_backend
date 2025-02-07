@@ -94,11 +94,8 @@ public class UserController {
             UserResponseDto user = userService.getUserBySecret(secret);
             String token = jwtTokenProvider.createToken(user.getUserId(), user.getEmail(), user.getDepartmentId());
 
-            Map<String, Object> result = new HashMap<>();
-            result.put("accessToken", token);
-
             return new ResponseEntity<>(
-                    new CommonResDto<>(HttpStatus.OK, "Mfa validated successfully.", result),
+                    new CommonResDto<>(HttpStatus.OK, "Mfa validated successfully.", user),
                     HttpStatus.OK
             );
         } else {
