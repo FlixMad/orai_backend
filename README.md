@@ -127,6 +127,10 @@ Orai 프로젝트는 **마이크로서비스 아키텍처(MSA)**를 기반으로
 | 배포 및 안정화  | 2.5 ~ 2.7  | AWS 인프라 배포, 최종 점검  |
 
 ## :calendar: WBS
+![Image](https://github.com/user-attachments/assets/0267a3ac-27ef-4349-bbbc-6c6cbd81fa1d)
+![Image](https://github.com/user-attachments/assets/4e88bf5d-60aa-4ebf-b0df-596813840d85)
+![Image](https://github.com/user-attachments/assets/a04f9d78-9618-46ed-9d51-881a6738e2f1)
+![Image](https://github.com/user-attachments/assets/135d5ca4-82fe-4e72-a071-2595a9833a96)
 
 ## 🤝 기여 방법
 1. 이슈를 확인하고 원하는 작업을 선택합니다.
