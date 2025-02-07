@@ -93,6 +93,7 @@ public class UserController {
             // secret으로 사용자 조회
             UserResponseDto user = userService.getUserBySecret(secret);
             String token = jwtTokenProvider.createToken(user.getUserId(), user.getEmail(), user.getDepartmentId());
+            user.setToken(token);
 
             return new ResponseEntity<>(
                     new CommonResDto<>(HttpStatus.OK, "Mfa validated successfully.", user),
