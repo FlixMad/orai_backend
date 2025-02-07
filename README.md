@@ -10,6 +10,12 @@
 - **보안 및 접근 제어 강화**: 인증 및 권한 관리 시스템 적용
 - **사용자 친화적인 UI/UX 설계**: 직관적이고 효율적인 디자인 제공
 
+## :floppy_disk: 요구 사항 명세서
+요구 사항 명세서는 https://pebble-mahogany-f56.notion.site/162398dd18748059b821df4866cb5f6c?v=162398dd18748019945c000c10819fdf 를 참고해주세요
+
+## :pencil2: 와이어 프레임 및 스토리 보드
+와이어 프레임 및 스토리 보드는 https://www.figma.com/design/dnxyVcV1NJuFEvqYvEg9lc/ORAI?node-id=0-1&p=f&t=fBthErmLA8ic0UpZ-0 를 참고 해주세요
+
 ## 🛠 기술 스택
 ### **백엔드**
 - Java, Spring Boot, Spring Cloud, Spring Scheduler
@@ -19,11 +25,11 @@
 
 ### **프론트엔드**
 - React, Node.js, JavaScript
-- HTML (Bootstrap), CSS (Font-Awesome, Cursor)
+- CSS (Font-Awesome, Cursor), Styled-Component
 - WebSocket 기반 실시간 데이터 처리
 
 ### **데이터베이스**
-- MySQL, Redis, JPA, MongoDB
+- MySQL, Redis, JPA, MongoDB, QuertDSL
 
 ### **협업 도구**
 - Git, GitHub, Jira, Discord, Swagger, Figma
@@ -31,7 +37,7 @@
 ## 📂 프로젝트 구조
 ```
 Orai/
-├── backend/                  # 백엔드 소스 코드
+├── Orai_backend/                  # 백엔드 소스 코드
 │   ├── user-service/          # 사용자 관리 서비스
 │   ├── chat-service/          # 채팅 서비스
 │   ├── calendar-service/      # 캘린더 서비스
@@ -39,8 +45,8 @@ Orai/
 │   ├── etc-service/           # 기타 기능 (푸시 알림 등)
 │   ├── config/                # 공통 설정 파일
 │   └── gateway/               # API Gateway
-│
-├── frontend/                 # 프론트엔드 소스 코드
+
+├── ORAI_frontend/                 # 프론트엔드 소스 코드
 │   ├── public/                # 정적 파일
 │   ├── src/
 │   │   ├── components/        # 재사용 가능한 컴포넌트
@@ -50,15 +56,14 @@ Orai/
 │   │   ├── utils/             # 유틸리티 함수 모음
 │   │   └── App.js             # 루트 컴포넌트
 │   └── package.json           # 프로젝트 종속성 목록
-│
-├── docs/                     # 문서 및 설계 자료
+
+├── Notion/docs/                     # 문서 및 설계 자료
 │   ├── 요구사항 정의서.pdf
 │   ├── 프로젝트 기획서.pdf
 │   ├── 시스템 아키텍처.pdf
 │   ├── 단위 테스트 결과서.pdf
 │   └── 통합 테스트 결과서.pdf
 │
-├── docker-compose.yml         # 로컬 개발 환경 구성
 ├── README.md                  # 프로젝트 소개 및 실행 방법
 └── .gitignore                 # Git 관리 제외 파일
 ```
@@ -86,7 +91,7 @@ npm start
 ## 📊 시스템 아키텍처
 Orai 프로젝트는 **마이크로서비스 아키텍처(MSA)**를 기반으로 설계되었습니다. 주요 서비스는 독립적으로 배포되며, API Gateway를 통해 통합됩니다.
 
-![Image](https://github.com/user-attachments/assets/f3c9faa3-75ec-4a1a-9486-b5ebaa78d5ea)
+![Image](https://github.com/user-attachments/assets/a6e9e9a8-aae1-45ae-be71-04c6d7d9d4b9)
 
 ## ERD
 ![Image](https://github.com/user-attachments/assets/cfb490f3-766b-4117-a536-9a77cece9b5d)
@@ -105,7 +110,7 @@ Orai 프로젝트는 **마이크로서비스 아키텍처(MSA)**를 기반으로
 ## 🔍 테스트 및 품질 관리
 본 프로젝트는 단위 테스트 및 통합 테스트를 통해 품질을 보장합니다.
 - **단위 테스트**: JUnit, Mockito 활용
-- **통합 테스트**: REST Assured, Postman 활용
+- **통합 테스트**: Swagger, Postman 활용
 - **CI/CD**: GitHub Actions, Jenkins,  사용하여 자동 배포
 
 테스트 결과는 https://pebble-mahogany-f56.notion.site/162398dd18748059b821df4866cb5f6c?v=162398dd18748019945c000c10819fdf 를 참고하세요.
@@ -121,9 +126,11 @@ Orai 프로젝트는 **마이크로서비스 아키텍처(MSA)**를 기반으로
 | 통합 테스트 및 수정  | 1.29 ~ 2.4  | 기능 테스트 및 디버깅  |
 | 배포 및 안정화  | 2.5 ~ 2.7  | AWS 인프라 배포, 최종 점검  |
 
+## :calendar: WBS
+
 ## 🤝 기여 방법
 1. 이슈를 확인하고 원하는 작업을 선택합니다.
-2. 새로운 브랜치를 생성합니다. (`feature/기능명`)
+2. 새로운 브랜치를 생성합니다. (`FLIX--oo-기능명`)
 3. 변경 사항을 반영한 후 커밋합니다. (`git commit -m '기능 추가'`)
 4. Pull Request(PR)을 생성하고 리뷰를 요청합니다.
 
